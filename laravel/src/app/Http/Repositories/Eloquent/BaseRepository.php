@@ -49,7 +49,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
     /**
      * Find
      */
-    public function find(int $id): Model
+    public function find(int $id): ?Model
     {
         return $this->model->find($id);
     }
