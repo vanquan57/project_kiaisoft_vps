@@ -11,7 +11,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
     /**
      * @var Model
      */
-    protected $_model;
+    protected $model;
 
     /**
      * BaseRepository constructor.
@@ -33,7 +33,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
      */
     public function setModel(): void
     {
-        $this->_model = app()->make(
+        $this->model = app()->make(
             $this->getModel()
         );
     }
@@ -43,7 +43,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
      */
     public function getAll(): Collection
     {
-        return $this->_model->all();
+        return $this->model->all();
     }
 
     /**
@@ -51,7 +51,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
      */
     public function find(int $id): Model
     {
-        return $this->_model->find($id);
+        return $this->model->find($id);
     }
 
     /**
@@ -61,7 +61,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
      */
     public function store(array $attributes): Model
     {
-        return $this->_model->create($attributes);
+        return $this->model->create($attributes);
     }
 
     /**
@@ -69,7 +69,7 @@ abstract class BaseRepository implements BaseRepositoryInterface
      */
     public function update(int $id, array $attributes): bool
     {
-        return $this->_model->find($id)->update($attributes);
+        return $this->model->find($id)->update($attributes);
     }
 
     /**
@@ -77,6 +77,6 @@ abstract class BaseRepository implements BaseRepositoryInterface
      */
     public function destroy(int $id): bool
     {
-        return $this->_model->find($id)->delete();
+        return $this->model->find($id)->delete();
     }
 }
