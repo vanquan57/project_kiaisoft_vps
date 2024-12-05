@@ -36,6 +36,7 @@ interface BaseRepositoryInterface
      * Update
      *
      * @param $id
+     *
      * @param array $attributes
      *
      * @return bool
