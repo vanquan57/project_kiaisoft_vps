@@ -15,14 +15,14 @@ class OrderDetailSeeder extends Seeder
      */
     public function run(): void
     {
-        Order::factory()
-            ->count(10)
-            ->create();
+        Order::factory()->count(10)->create();
 
-        $orders = Order::all();
-        $bookIds = Book::all()->pluck('id')->toArray();
+        $bookIds = Book::pluck('id')->toArray();
 
-        foreach ($orders as $order) {
+        $orderDetails = [];
+
+        foreach (Order::all() as $order) {
+
             $booksForOrder = array_rand($bookIds, rand(1, 2));
 
             if (!is_array($booksForOrder)) {
@@ -30,7 +30,7 @@ class OrderDetailSeeder extends Seeder
             }
 
             foreach ($booksForOrder as $key) {
-                OrderDetail::create([
+                $orderDetails[] = [
                     'order_id' => $order->id,
                     'book_id' => $bookIds[$key],
                     'borrow_date' => Carbon::now()->subDays(rand(1, 30)),
@@ -38,8 +38,12 @@ class OrderDetailSeeder extends Seeder
                     'quantity' => rand(1, 3),
                     'note' => 'This is a note for testing.',
                     'status' => rand(1, 4),
-                ]);
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
             }
         }
+
+        OrderDetail::insert($orderDetails);
     }
 }

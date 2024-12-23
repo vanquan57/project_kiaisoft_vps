@@ -3,12 +3,12 @@
 namespace Database\Seeders;
 
 use App\Models\Book;
-use App\Models\BookCategory;
-use App\Models\Category;
+use App\Models\User;
+use App\Models\WishList;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
-class BookCategorySeeder extends Seeder
+class WishListSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -16,23 +16,23 @@ class BookCategorySeeder extends Seeder
     public function run(): void
     {
         $books = Book::all('id');
-        $categories = Category::pluck('id');
+        $users = User::pluck('id');
 
-        $bookCategoryData = [];
+        $wishListsData = [];
 
         foreach ($books as $book) {
-            $randomCategories = $categories->random(rand(1, 3));
+            $randomUsers = $users->random(rand(1, 3));
 
-            foreach ($randomCategories as $categoryId) {
-                $bookCategoryData[] = [
+            foreach ($randomUsers as $userId) {
+                $wishListsData[] = [
+                    'user_id' => $userId,
                     'book_id' => $book->id,
-                    'category_id' => $categoryId,
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now(),
                 ];
             }
         }
 
-        BookCategory::insert($bookCategoryData);
+        WishList::insert($wishListsData);
     }
 }

@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 
 class UserSeeder extends Seeder
 {
@@ -13,6 +14,8 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        $currentTimestamp = Carbon::now();
+
         $users = [
             [
                 'code' => 'K00232',
@@ -21,6 +24,8 @@ class UserSeeder extends Seeder
                 'password' => Hash::make(env('PASS_ADMIN')),
                 'role' => User::ROLE_ADMIN,
                 'status' => User::IS_ACTIVE,
+                'created_at' => $currentTimestamp,
+                'updated_at' => $currentTimestamp,
             ],
             [
                 'code' => 'K00233',
@@ -28,6 +33,9 @@ class UserSeeder extends Seeder
                 'email' => 'user1@kiaisoft.com',
                 'password' => Hash::make(env('PASS_USER')),
                 'role' => User::ROLE_USER,
+                'status' => User::IS_WAITING_ACTIVE,
+                'created_at' => $currentTimestamp,
+                'updated_at' => $currentTimestamp,
             ],
             [
                 'code' => 'K00234',
@@ -35,11 +43,12 @@ class UserSeeder extends Seeder
                 'email' => 'user2@kiaisoft.com',
                 'password' => Hash::make(env('PASS_USER')),
                 'role' => User::ROLE_USER,
+                'status' => User::IS_WAITING_ACTIVE,
+                'created_at' => $currentTimestamp,
+                'updated_at' => $currentTimestamp,
             ],
         ];
 
-        foreach ($users as $user) {
-            User::create($user);
-        }
+        User::insert($users);
     }
 }
