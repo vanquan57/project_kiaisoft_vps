@@ -15,17 +15,17 @@ class WishListSeeder extends Seeder
      */
     public function run(): void
     {
-        $books = Book::all('id');
-        $users = User::pluck('id');
+        $books = Book::all();
+        $users = User::all();
 
         $wishListsData = [];
 
         foreach ($books as $book) {
             $randomUsers = $users->random(rand(1, 3));
 
-            foreach ($randomUsers as $userId) {
+            foreach ($randomUsers as $user) {
                 $wishListsData[] = [
-                    'user_id' => $userId,
+                    'user_id' => $user->id,
                     'book_id' => $book->id,
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now(),

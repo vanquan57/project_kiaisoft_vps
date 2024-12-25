@@ -15,18 +15,18 @@ class BookCategorySeeder extends Seeder
      */
     public function run(): void
     {
-        $books = Book::all('id');
-        $categories = Category::pluck('id');
+        $books = Book::all();
+        $categories = Category::all();
 
         $bookCategoryData = [];
 
         foreach ($books as $book) {
             $randomCategories = $categories->random(rand(1, 3));
 
-            foreach ($randomCategories as $categoryId) {
+            foreach ($randomCategories as $category) {
                 $bookCategoryData[] = [
                     'book_id' => $book->id,
-                    'category_id' => $categoryId,
+                    'category_id' => $category->id,
                     'created_at' => Carbon::now(),
                     'updated_at' => Carbon::now(),
                 ];

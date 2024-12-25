@@ -17,22 +17,18 @@ class OrderDetailSeeder extends Seeder
     {
         Order::factory()->count(10)->create();
 
-        $bookIds = Book::pluck('id')->toArray();
+        $books = Book::all();
 
         $orderDetails = [];
 
         foreach (Order::all() as $order) {
 
-            $booksForOrder = array_rand($bookIds, rand(1, 2));
+            $booksForOrder = $books->random(rand(1, 3));
 
-            if (!is_array($booksForOrder)) {
-                $booksForOrder = [$booksForOrder];
-            }
-
-            foreach ($booksForOrder as $key) {
+            foreach ($booksForOrder as $book) {
                 $orderDetails[] = [
                     'order_id' => $order->id,
-                    'book_id' => $bookIds[$key],
+                    'book_id' => $book->id,
                     'borrow_date' => Carbon::now()->subDays(rand(1, 30)),
                     'return_date' => Carbon::now()->addDays(rand(1, 15)),
                     'quantity' => rand(1, 3),

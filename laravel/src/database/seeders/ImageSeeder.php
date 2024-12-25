@@ -20,15 +20,15 @@ class ImageSeeder extends Seeder
             'https://newshop.vn/public/uploads/products/58662/200-bi-an-thu-vi-ve-vu-tru_L.jpg',
         ];
     
-        $books = Book::pluck('id');
+        $books = Book::all();
         $imagesData = [];
     
-        foreach ($books as $bookId) {
+        foreach ($books as $book) {
             $randomUrls = array_map(fn() => $urls[array_rand($urls)], range(1, 4));
     
             foreach ($randomUrls as $url) {
                 $imagesData[] = [
-                    'book_id' => $bookId,
+                    'book_id' => $book->id,
                     'url' => $url,
                     'created_at' => now(),
                     'updated_at' => now(),
