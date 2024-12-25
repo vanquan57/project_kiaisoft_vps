@@ -25,6 +25,13 @@ class Order extends Model
 
     const STATUS_RETURNED = 4;
 
+    const GROUP_STATUS = [
+        self::STATUS_OVERDUE,
+        self::STATUS_BORROWING,
+        self::STATUS_MISSING,
+        self::STATUS_RETURNED,
+    ];
+
     /**
      * The attributes that are mass assignable.
      *
