@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\Admin\AuthorController;
 use App\Http\Controllers\Api\V1\Admin\PublisherController;
 use App\Http\Controllers\Api\V1\Admin\BookController;
 use App\Http\Controllers\Api\V1\Admin\OrderController;
+use App\Http\Controllers\Api\V1\Admin\FeedbackController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'v1'], function () {
@@ -44,6 +45,11 @@ Route::group(['prefix' => 'v1'], function () {
                 Route::get('/{id}', [OrderController::class, 'show']);
                 Route::put('/{id}', [OrderController::class, 'update']);
             });
+            Route::resource('/feedback', FeedbackController::class)->only([
+                'index',
+                'update',
+                'destroy'
+            ]);
         });
     });
 });
