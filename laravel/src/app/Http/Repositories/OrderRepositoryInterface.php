@@ -58,4 +58,11 @@ interface OrderRepositoryInterface extends BaseRepositoryInterface
      * @return bool
     */
     public function updateStatusBookInOrder(Book $book, array $data): bool;
+
+    /**
+     * Progress check and update order status
+     *
+     * @return void
+     */
+    public function progressCheckAndUpdateOrderStatus(): void;
 }
