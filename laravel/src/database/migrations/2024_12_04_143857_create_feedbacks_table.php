@@ -19,7 +19,6 @@ return new class extends Migration
             $table->text('content');
             $table->tinyInteger('star')->default(0);
             $table->tinyInteger('status')->default(0)->comment('0: Chờ phê duyệt, 1: Phê duyệt');
-            $table->softDeletes();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');

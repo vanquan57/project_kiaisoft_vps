@@ -22,7 +22,6 @@ return new class extends Migration
             $table->unsignedBigInteger('ward_id');
             $table->string('address', 255);
             $table->tinyInteger('status')->unsigned()->default(1)->comment('1: Đang mượn, 2: Đã trả, 3: Quá hạn, 4: Mất');
-            $table->softDeletes();
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
