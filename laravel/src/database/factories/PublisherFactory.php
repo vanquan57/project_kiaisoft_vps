@@ -21,7 +21,7 @@ class PublisherFactory extends Factory
 
         return [
             'name' => $name,
-            'slug' => Str::slug($this->faker->name),
+            'slug' => Str::slug($name),
             'description' => $this->faker->sentence,
         ];
     }

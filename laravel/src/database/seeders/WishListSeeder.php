@@ -15,15 +15,12 @@ class WishListSeeder extends Seeder
      */
     public function run(): void
     {
-        $books = Book::all();
-        $users = User::all();
-
         $wishListsData = [];
 
-        foreach ($books as $book) {
-            $randomUsers = $users->random(rand(1, 3));
+        foreach (User::all() as $user) {
+            $randomBooks = Book::all()->random(rand(1, 3));
 
-            foreach ($randomUsers as $user) {
+            foreach ($randomBooks as $book) {
                 $wishListsData[] = [
                     'user_id' => $user->id,
                     'book_id' => $book->id,

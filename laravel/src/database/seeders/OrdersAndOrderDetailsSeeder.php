@@ -8,7 +8,7 @@ use App\Models\OrderDetail;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
-class OrderDetailSeeder extends Seeder
+class OrdersAndOrderDetailsSeeder  extends Seeder
 {
     /**
      * Run the database seeds.
@@ -21,6 +21,7 @@ class OrderDetailSeeder extends Seeder
 
         $orderDetails = [];
 
+
         foreach (Order::all() as $order) {
 
             $booksForOrder = $books->random(rand(1, 3));
@@ -29,11 +30,11 @@ class OrderDetailSeeder extends Seeder
                 $orderDetails[] = [
                     'order_id' => $order->id,
                     'book_id' => $book->id,
-                    'borrow_date' => Carbon::now()->subDays(rand(1, 30)),
-                    'return_date' => Carbon::now()->addDays(rand(1, 15)),
+                    'borrow_date' => Carbon::now()->addDays($daysBorrowed = rand(1, 10)),
+                    'return_date' => Carbon::now()->addDays($daysBorrowed)->addDays(rand(1, 5)),
                     'quantity' => rand(1, 3),
                     'note' => 'This is a note for testing.',
-                    'status' => rand(1, 4),
+                    'status' => OrderDetail::STATUS_BORROWING,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];

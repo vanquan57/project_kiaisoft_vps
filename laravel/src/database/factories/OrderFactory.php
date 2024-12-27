@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\District;
+use App\Models\Order;
 use App\Models\Province;
 use App\Models\User;
 use App\Models\Ward;
@@ -35,7 +36,7 @@ class OrderFactory extends Factory
             'district_id' => $this->faker->randomElement($districtId),
             'ward_id' => $this->faker->randomElement($wardId),
             'address' => $this->faker->address,
-            'status' => $this->faker->randomElement([1, 2, 3, 4]),
+            'status' => Order::STATUS_BORROWING,
         ];
     }
 }

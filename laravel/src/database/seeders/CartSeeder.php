@@ -27,7 +27,7 @@ class CartSeeder extends Seeder
                 'quantity' => 1,
                 'created_at' => Carbon::now(),
                 'updated_at' => Carbon::now(),
-            ]
+            ],
         ];
 
         Cart::insert($carts);
