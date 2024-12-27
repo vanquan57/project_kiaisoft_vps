@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
             BookCategorySeeder::class,
             ImageSeeder::class,
             CartSeeder::class,
-            OrdersAndOrderDetailsSeeder::class,
+            OrderSeeder::class,
             FeedbackSeeder::class,
             WishListSeeder::class,
         ]);

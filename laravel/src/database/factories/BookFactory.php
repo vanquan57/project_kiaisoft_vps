@@ -2,9 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Author;
-use App\Models\Publisher;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 /**
@@ -26,13 +25,9 @@ class BookFactory extends Factory
             'sach4.jpg',
         ];
 
-        $authorId = Author::all()->pluck('id')->toArray();
-        $publisherId = Publisher::all()->pluck('id')->toArray();
         $name = $this->faker->unique()->name;
 
         return [
-            'author_id' => $this->faker->randomElement($authorId),
-            'publisher_id' => $this->faker->randomElement($publisherId),
             'name' => $name,
             'slug' => Str::slug($name),
             'mini_description' => $this->faker->sentence(10),
@@ -46,5 +41,15 @@ class BookFactory extends Factory
             'borrowing_number' => $this->faker->numberBetween(0, 5000),
             'image' => $urls[$this->faker->numberBetween(0, 3)],
         ];
+    }
+
+    public function withRandomData($authorIds, $publisherIds)
+    {
+        return $this->state(function (array $attributes) use ($authorIds, $publisherIds) {
+            return [
+                'author_id' => Arr::random($authorIds),
+                'publisher_id' => Arr::random($publisherIds),
+            ];
+        });
     }
 }

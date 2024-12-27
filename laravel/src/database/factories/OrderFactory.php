@@ -2,12 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Models\District;
 use App\Models\Order;
-use App\Models\Province;
-use App\Models\User;
-use App\Models\Ward;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 
 /**
@@ -16,27 +13,32 @@ use Illuminate\Support\Str;
 class OrderFactory extends Factory
 {
     /**
-     * Define the model's default state.
+     * The name of the factory's corresponding model.
      *
-     * @return array<string, mixed>
+     * @var string
      */
+    protected $model = Order::class;
+
     public function definition(): array
     {
-        $userId = User::all()->pluck('id')->toArray();
-        $provinceId = Province::all()->pluck('id')->toArray();
-        $districtId = District::all()->pluck('id')->toArray();
-        $wardId = Ward::all()->pluck('id')->toArray();
-
         return [
-            'user_id' => $this->faker->randomElement($userId),
             'code' => Str::uuid(),
             'phone' => $this->faker->numerify('09#########'),
             'email' => $this->faker->unique()->safeEmail,
-            'province_id' => $this->faker->randomElement($provinceId),
-            'district_id' => $this->faker->randomElement($districtId),
-            'ward_id' => $this->faker->randomElement($wardId),
             'address' => $this->faker->address,
             'status' => Order::STATUS_BORROWING,
         ];
+    }
+
+    public function withRandomData($userIds, $provinceIds, $districtIds, $wardIds)
+    {
+        return $this->state(function (array $attributes) use ($userIds, $provinceIds, $districtIds, $wardIds) {
+            return [
+                'user_id' => Arr::random($userIds),
+                'province_id' => Arr::random($provinceIds),
+                'district_id' => Arr::random($districtIds),
+                'ward_id' => Arr::random($wardIds),
+            ];
+        });
     }
 }

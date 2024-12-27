@@ -3,27 +3,35 @@
 namespace Database\Seeders;
 
 use App\Models\Book;
+use App\Models\District;
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\Province;
+use App\Models\User;
+use App\Models\Ward;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
-class OrdersAndOrderDetailsSeeder  extends Seeder
+class OrderSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        Order::factory()->count(10)->create();
+        $userIds = User::all()->pluck('id')->toArray();
+        $provinceIds = Province::all()->pluck('id')->toArray();
+        $districtIds = District::all()->pluck('id')->toArray();
+        $wardIds = Ward::all()->pluck('id')->toArray();
+
+        // send data to OrderFactory
+        Order::factory()->count(10)->withRandomData($userIds, $provinceIds, $districtIds, $wardIds)->create();
 
         $books = Book::all();
 
         $orderDetails = [];
 
-
         foreach (Order::all() as $order) {
-
             $booksForOrder = $books->random(rand(1, 3));
 
             foreach ($booksForOrder as $book) {
