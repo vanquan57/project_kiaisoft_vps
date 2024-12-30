@@ -1,0 +1,148 @@
+<template>
+    <div class="list-user-container">
+        <el-table
+            class="table-user"
+            :data="tableDataWithFullAddress"
+            :scrolling="true"
+        >
+            <el-table-column
+                prop="id"
+                label="ID"
+                width="50"
+                fixed
+            />
+            <el-table-column
+                prop="code"
+                label="Mã nhân viên"
+                width="130"
+                fixed
+            />
+            <el-table-column
+                prop="name"
+                label="Tên người dùng"
+                fixed
+                width="160"
+            />
+            <el-table-column
+                prop="email"
+                label="Email"
+                width="180"
+            />
+            <el-table-column
+                prop="fullAddress"
+                label="Địa chỉ"
+                width="280"
+            />
+            <el-table-column
+                fixed="right"
+                label="Cập nhật trạng thái"
+                min-width="160"
+            >
+                <template #default="{ row }">
+                    <el-select
+                        clearable
+                        placeholder="Chọn trạng thái"
+                        style="width: 120px"
+                        :model-value="row.status"
+                    >
+                        <el-option
+                            v-for="item in options"
+                            :key="item.value"
+                            :label="item.label"
+                            :value="item.value"
+                            :disabled="row.status === item.value"
+                            @click="handleUpdateStatus(row.id, row.status, item.value)"
+                        />
+                    </el-select>
+                </template>
+            </el-table-column>
+        </el-table>
+    </div>
+</template>
+
+<script setup>
+import STATUS_CODE_USER from '@/config/statusUser';
+import { computed } from 'vue';
+
+
+const emit = defineEmits(['handleUpdateStatus']);
+const props = defineProps({
+    tableData: {
+        type: Array,
+        default: () => []
+    }
+});
+
+/**
+ * The method get table data with full address
+ *
+ * @returns {Array} - The table data with full address
+ */
+const tableDataWithFullAddress = computed(() => {
+    return props.tableData.map((item) => {
+        return {
+            ...item,
+            fullAddress: `${item.province?.name || ''}, ${item.district?.name || ''}, ${item.ward?.name || ''}, ${item.address || ''}`
+        };
+    });
+});
+
+/**
+ * The method get options
+ *
+ * @returns {Array} - The options
+ */
+const options = [
+    {
+        value: STATUS_CODE_USER.WAITING,
+        label: 'Chờ kích hoạt'
+    },
+    {
+        value: STATUS_CODE_USER.ACTIVATED,
+        label: 'Đã kích hoạt'
+    },
+    {
+        value: STATUS_CODE_USER.LOCKED,
+        label: 'Đã khóa'
+    }
+];
+
+/**
+ * The method handle update status
+ *
+ * @param {number} id - The id of user
+ * @param {number} status - The status of user
+ *
+ * @returns {Promise<void>}
+ */
+const handleUpdateStatus = (id, currentStatus, status) => {
+    if (currentStatus === status) {
+        return;
+    }
+    emit('handleUpdateStatus', id, status);
+};
+
+</script>
+
+<style lang="scss" scoped>
+.list-user-container {
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+.status-active {
+    color: green;
+    font-weight: bold;
+}
+
+.status-inactive {
+    color: gray;
+    font-weight: bold;
+}
+
+.status-locked {
+    color: red;
+    font-weight: bold;
+}
+</style>
