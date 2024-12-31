@@ -7,8 +7,6 @@ use App\Models\User;
 use App\Models\WishList;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class WishListSeeder extends Seeder
 {

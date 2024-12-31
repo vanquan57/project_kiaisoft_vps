@@ -24,7 +24,7 @@ class OrderSeeder extends Seeder
         $districtIds = District::all()->pluck('id')->toArray();
         $wardIds = Ward::all()->pluck('id')->toArray();
 
-        // send data to OrderFactory
+        // Send data to OrderFactory
         Order::factory()->count(10)->withRandomData($userIds, $provinceIds, $districtIds, $wardIds)->create();
 
         $books = Book::all();
@@ -35,11 +35,11 @@ class OrderSeeder extends Seeder
             $booksForOrder = $books->random(rand(1, 3));
             $orderStatus = $order->status;
 
-            //default borrow_date and return date
+            //Default borrow_date and return date
             $borrowDate = Carbon::now()->addDays($daysBorrowed = rand(1, 10));
             $returnDate = Carbon::now()->addDays($daysBorrowed)->addDays(rand(1, 5));
 
-            // if order status is overdue
+            // If order status is overdue
             if ($orderStatus == Order::STATUS_OVERDUE) {
                 $borrowDate = Carbon::now()->subDays($daysBorrowed = rand(5, 10));
                 $returnDate = Carbon::now()->subDays($daysBorrowed)->addDays(rand(1, 5));
