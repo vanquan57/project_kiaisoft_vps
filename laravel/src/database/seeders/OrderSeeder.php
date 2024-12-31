@@ -33,16 +33,27 @@ class OrderSeeder extends Seeder
 
         foreach (Order::all() as $order) {
             $booksForOrder = $books->random(rand(1, 3));
+            $orderStatus = $order->status;
+
+            //default borrow_date and return date
+            $borrowDate = Carbon::now()->addDays($daysBorrowed = rand(1, 10));
+            $returnDate = Carbon::now()->addDays($daysBorrowed)->addDays(rand(1, 5));
+
+            // if order status is overdue
+            if ($orderStatus == Order::STATUS_OVERDUE) {
+                $borrowDate = Carbon::now()->subDays($daysBorrowed = rand(5, 10));
+                $returnDate = Carbon::now()->subDays($daysBorrowed)->addDays(rand(1, 5));
+            }
 
             foreach ($booksForOrder as $book) {
                 $orderDetails[] = [
                     'order_id' => $order->id,
                     'book_id' => $book->id,
-                    'borrow_date' => Carbon::now()->addDays($daysBorrowed = rand(1, 10)),
-                    'return_date' => Carbon::now()->addDays($daysBorrowed)->addDays(rand(1, 5)),
+                    'borrow_date' => $borrowDate,
+                    'return_date' => $returnDate,
                     'quantity' => rand(1, 3),
                     'note' => 'This is a note for testing.',
-                    'status' => OrderDetail::STATUS_BORROWING,
+                    'status' => $orderStatus,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];

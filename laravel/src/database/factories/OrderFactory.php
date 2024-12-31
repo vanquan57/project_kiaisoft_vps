@@ -21,12 +21,14 @@ class OrderFactory extends Factory
 
     public function definition(): array
     {
+        $listStatus = [Order::STATUS_OVERDUE, Order::STATUS_BORROWING, Order::STATUS_MISSING, Order::STATUS_RETURNED];
+
         return [
             'code' => Str::uuid(),
             'phone' => $this->faker->numerify('09#########'),
             'email' => $this->faker->unique()->safeEmail,
             'address' => $this->faker->address,
-            'status' => Order::STATUS_BORROWING,
+            'status' => Arr::random($listStatus),
         ];
     }
 

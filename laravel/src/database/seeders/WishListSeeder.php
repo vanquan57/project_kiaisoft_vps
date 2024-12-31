@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Models\WishList;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class WishListSeeder extends Seeder
 {
@@ -16,9 +18,10 @@ class WishListSeeder extends Seeder
     public function run(): void
     {
         $wishListsData = [];
+        $books = Book::all();
 
         foreach (User::all() as $user) {
-            $randomBooks = Book::all()->random(rand(1, 3));
+            $randomBooks = $books->random(rand(1, 3));
 
             foreach ($randomBooks as $book) {
                 $wishListsData[] = [
@@ -29,7 +32,7 @@ class WishListSeeder extends Seeder
                 ];
             }
         }
-
+        
         WishList::insert($wishListsData);
     }
 }
