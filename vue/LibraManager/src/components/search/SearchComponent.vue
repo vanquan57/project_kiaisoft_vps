@@ -7,7 +7,29 @@
             :style="`grid-template-columns: ${styleSearch}; display: ${displaySearch}`"
             @submit.prevent="handleSearch"
         >
-            <el-form-item prop="search">
+            <el-form-item
+                v-if="props.dataBook"
+                class="form-item"
+            >
+                <el-select
+                    v-model="searchForm.book_id"
+                    placeholder="Chọn sách"
+                    filterable
+                    allow-create
+                    :reserve-keyword="false"
+                >
+                    <el-option
+                        v-for="item in props.dataBook"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id"
+                    />
+                </el-select>
+            </el-form-item>
+            <el-form-item
+                v-else
+                prop="search"
+            >
                 <el-input
                     :style="styleInput"
                     v-model="searchForm.search"
@@ -145,6 +167,10 @@ const props = defineProps({
     statusOptions: {
         type: Array,
         default: () => []
+    },
+    dataBook: {
+        type: Array,
+        default: () => []
     }
 });
 const styleSearch = ref('');
@@ -156,6 +182,7 @@ const searchForm = ref({
     category_id: '',
     author_id: '',
     publisher_id: '',
+    book_id: '',
     startDate: '',
     endDate: '',
     status: ''
@@ -167,6 +194,9 @@ watchEffect(() => {
         displaySearch.value = 'grid';
     } else if (route.path === '/order') {
         styleSearch.value = '3fr 2fr 2fr 2fr 1fr';
+        displaySearch.value = 'grid';
+    } else if (route.path === '/feedback') {
+        styleSearch.value = '4fr 2fr 2fr 1fr';
         displaySearch.value = 'grid';
     } else {
         styleSearch.value = '7fr 3fr';
@@ -188,6 +218,15 @@ const handleSearch = async () => {
                 delete searchForm.value.category_id;
                 delete searchForm.value.author_id;
                 delete searchForm.value.publisher_id;
+                delete searchForm.value.book_id;
+                emit('search', searchForm.value);
+            } else if (route.path === '/feedback') {
+                delete searchForm.value.search;
+                delete searchForm.value.category_id;
+                delete searchForm.value.author_id;
+                delete searchForm.value.publisher_id;
+                delete searchForm.value.status;
+                console.log(searchForm.value);
                 emit('search', searchForm.value);
             } else {
                 emit('search', searchForm.value.search);
