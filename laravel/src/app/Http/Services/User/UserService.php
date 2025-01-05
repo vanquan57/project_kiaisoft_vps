@@ -3,12 +3,17 @@
 namespace App\Http\Services\User;
 
 use App\Http\Repositories\EmployeeCodeRepositoryInterface;
+use App\Http\Repositories\PasswordResetRepositoryInterface;
 use App\Http\Repositories\UserRepositoryInterface;
+use App\Mail\SendTokenResetPassword;
 use App\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
+
 
 class UserService
 {
@@ -21,7 +26,8 @@ class UserService
      */
     public function __construct(
         protected UserRepositoryInterface $userRepository,
-        protected EmployeeCodeRepositoryInterface $employeeCodeRepository
+        protected EmployeeCodeRepositoryInterface $employeeCodeRepository,
+        protected PasswordResetRepositoryInterface $passwordResetRepository
     ) {}
 
 
@@ -143,6 +149,107 @@ class UserService
             Log::error($e->getMessage());
 
             return null;
+        }
+    }
+
+    /**
+     * The create token request and send to email address
+     *
+     * @param array $data
+     *
+     * @return bool
+     */
+    public function sendEmail(array $data): bool
+    {
+        try {
+            $user = $this->userRepository->findByEmail($data['email']);
+
+            if (!$user) {
+                return false;
+            }
+
+            $token = Str::random(60);
+
+            if (!$this->passwordResetRepository->store([
+                'email' => $data['email'],
+                'token' => $token,
+                'created_at' => now(),
+            ])) {
+                return false;
+            }
+
+            // Send email with token
+            Mail::to($user->email)->send(new SendTokenResetPassword($token));
+
+            return true;
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+
+            return false;
+        }
+    }
+
+    /**
+     * The method reset password
+     *
+     * @param array $data
+     *
+     * @return bool
+     */
+    public function resetPassword(array $data): bool
+    {
+        try {
+            $user = $this->userRepository->findByEmail($data['email']);
+
+            if (!$user) {
+                return false;
+            }
+
+            $token = $this->passwordResetRepository->getPasswordResetToken($data['email'], $data['token']);
+
+            if (!$token) {
+                return false;
+            }
+
+            $tokenCreatedTime = Carbon::parse($token->created_at);
+
+            if ($tokenCreatedTime->diffInMinutes(now()) > 30) {
+                $this->passwordResetRepository->destroyByEmail($token->email);
+                
+                return false;
+            }
+
+            if (!$this->userRepository->update($user->id, ['password' => bcrypt($data['password'])])) {
+                return false;
+            }
+
+            $this->passwordResetRepository->destroyByEmail($token->email);
+
+            return  true;
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+
+            return false;
+        }
+    }
+
+    /**
+     * The change password
+     * 
+     * @param array $data
+     * 
+     * @return bool
+     */
+    public function changePassword(array $data): bool
+    {
+        try {
+            $user = auth('api')->user();
+
+            return $this->userRepository->update($user->id, ['password' => bcrypt($data['password'])]);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+
+            return false;
         }
     }
 }

@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Api\V1\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\User\ChangePasswordRequest;
+use App\Http\Requests\User\EmailRequest;
 use App\Http\Requests\User\RegisterGoogleRequest;
 use App\Http\Requests\User\RegisterRequest;
+use App\Http\Requests\User\ResetPasswordRequest;
 use App\Http\Services\User\UserService;
 use App\Models\User;
 use Google_Client;
@@ -14,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -161,6 +165,86 @@ class AuthController extends Controller
         return responseOkAPI([
             'message' => 'Đăng xuất thành công.'
         ]);
+    }
+
+    /**
+     * Reset password send email notification with token.
+     *
+     * @param EmailRequest $request
+     *
+     * @return JsonResponse
+     */
+    public function sendEmail(EmailRequest $request): JsonResponse
+    {
+        if ($this->userService->sendEmail($request->validated())) {
+            return response()->json(
+                [
+                    'message' => 'Email sent successfully',
+                ]
+            );
+        }
+
+        return response()->json(
+            [
+                'error' => 'The request could not be processed.',
+            ],
+            Response::HTTP_BAD_REQUEST
+        );
+    }
+
+    /**
+     * Reset password with token.
+     *
+     * @param ResetPasswordRequest $request
+     *
+     * @return JsonResponse
+     */
+    public function resetPassword(ResetPasswordRequest $request): JsonResponse
+    {
+        if ($this->userService->resetPassword($request->validated())) {
+            return response()->json(
+                [
+                    'message' => 'Password reset successfully',
+                ]
+            );
+        }
+
+        return response()->json(
+            [
+                'error' => 'The request could not be processed.',
+            ],
+            Response::HTTP_BAD_REQUEST
+        );
+    }
+
+    /**
+     * Change password.
+     *
+     * @param ChangePasswordRequest $request
+     *
+     * @return JsonResponse
+     */
+    public function changePassword(ChangePasswordRequest $request): JsonResponse
+    {
+        $user = auth('api')->user();
+
+        if (
+            Hash::check($request->current_password, $user->password) &&
+            $this->userService->changePassword($request->validated(), $user->id)
+        ) {
+            return response()->json(
+                [
+                    'message' => 'Password changed successfully',
+                ]
+            );
+        }
+
+        return response()->json(
+            [
+                'error' => 'The request could not be processed.',
+            ],
+            Response::HTTP_BAD_REQUEST
+        );
     }
 
     /**

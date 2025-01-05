@@ -10,6 +10,7 @@ return [
     App\Providers\ImageServiceProvider::class,
     App\Providers\OrderServiceProvider::class,
     App\Providers\FeedbackServiceProvider::class,
+    App\Providers\PasswordResetServiceProvider::class,
     App\Providers\UserServiceProvider::class,
     App\Providers\OrderDetailsServiceProvider::class,
 ];

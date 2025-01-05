@@ -11,6 +11,11 @@ Route::group(['prefix' => 'v1'], function () {
             Route::post('/register', [AuthController::class, 'register']);
             Route::post('/google/callback', [AuthController::class, 'loginGoogle']);
             Route::post('/google/callback/register', [AuthController::class, 'registerGoogle']);
+            Route::post('/verify-email', [AuthController::class, 'sendEmail']);
+            Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+            Route::group(['middleware' => 'authentication.user'], function () {
+                Route::put('/change-password', [AuthController::class, 'changePassword']);
+            });
         });
     });
 });

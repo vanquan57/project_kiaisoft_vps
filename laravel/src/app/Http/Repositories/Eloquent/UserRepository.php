@@ -189,4 +189,18 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
             'google_id' => $userGoogle->user['sub'],
         ]);
     }
+
+    /**
+     * Find the user with email
+     *
+     * @param string $email
+     *
+     * @return User|null
+     */
+    public function findByEmail(string $email): ?User
+    {
+        return $this->model->where('email', $email)
+            ->where('role', User::ROLE_USER)
+            ->first();
+    }
 }
