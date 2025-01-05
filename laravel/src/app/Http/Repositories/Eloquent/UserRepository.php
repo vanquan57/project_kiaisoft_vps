@@ -76,4 +76,47 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
             ->take($data['limit'])
             ->get();
     }
+
+    /**
+     * Find the user with google id
+     *
+     * @param string $googleId
+     *
+     * @return User|null
+     */
+    public function findByGoogleId(string $googleId): ?User
+    {
+        return $this->model->where('google_id', $googleId)
+            ->where('status', User::STATUS_ACTIVE)->first();
+    }
+
+    /**
+     * get registered google account
+     *
+     * @param string $code
+     *
+     * @param string $email
+     * 
+     * @return User|null
+     */
+    public function getRegisteredAccount(string $code, string $email): ?User
+    {
+        return $this->model->where('code', $code)
+            ->where('email', $email)->first();
+    }
+
+    /**
+     * Check exists account register
+     * 
+     * @param string $code
+     * 
+     * @param string $email
+     * 
+     * @return bool
+     */
+    public function checkExistsAccountRegister(string $code, string $email): bool
+    {
+        return $this->model->where('code', $code)
+            ->orWhere('email', $email)->exists();
+    }
 }
