@@ -2,6 +2,7 @@
 
 namespace App\Http\Repositories;
 
+use App\Models\Book;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 interface FeedbackRepositoryInterface extends BaseRepositoryInterface
@@ -23,4 +24,15 @@ interface FeedbackRepositoryInterface extends BaseRepositoryInterface
      * @return bool
      */
     public function updateStatus(int $id): bool;
+
+    /**
+     * Get feedbacks by book id.
+     *
+     * @param Book $book
+     * 
+     * @param array $data
+     * 
+     * @return LengthAwarePaginator|null
+     */
+    public function getFeedbacksByBookId(Book $book, array $data): ?LengthAwarePaginator;
 }
