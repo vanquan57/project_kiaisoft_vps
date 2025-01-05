@@ -135,4 +135,13 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
      * @return void
      */
     public function commitChanges(User $user): void;
+
+    /**
+     * Show details information of user
+     *
+     * @param int $id
+     *
+     * @return Model|null
+     */
+    public function showDetails(int $id): ?Model;
 }

@@ -83,6 +83,8 @@ class UserService
         }
     }
 
+    
+
     /**
      * Find the user with google id
      *
@@ -279,6 +281,42 @@ class UserService
                 },
                 'code' => $e->getCode(),
             ];
+        }
+    }
+
+    /**
+     * Show details information of user
+     *
+     * @param int $id
+     *
+     * @return Model|null
+     */
+    public function show(int $id): ?Model
+    {
+        try {
+            return $this->userRepository->showDetails($id);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+
+            return null;
+        }
+    }
+
+    /**
+     * The create token request and send to email address
+     *
+     * @param array $data
+     *
+     * @return bool
+     */
+    public function update(array $data, int $id): bool
+    {
+        try {
+            return $this->userRepository->update($id, $data);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+
+            return false;
         }
     }
 }
