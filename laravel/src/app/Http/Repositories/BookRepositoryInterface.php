@@ -17,6 +17,15 @@ interface BookRepositoryInterface extends BaseRepositoryInterface
     public function getAllByPagination(array $data): ?LengthAwarePaginator;
 
     /**
+     * Get all books by paginate for site user
+     *
+     * @param array $data
+     *
+     * @return LengthAwarePaginator|null
+     */
+    public function getAllByPaginationForSiteUser(array $data): ?LengthAwarePaginator;
+    
+    /**
      * Add a book to category
      *
      * @param int $bookId

@@ -147,4 +147,12 @@ class Book extends Model
             'status'
         )->withTimestamps();
     }
+
+    /**
+     * The method averages the star and returns it as an integer
+     */
+    public function averageStar()
+    {
+        return (int) round($this->feedbacks()->avg('star'));
+    }
 }

@@ -73,6 +73,72 @@ class BookRepository extends BaseRepository implements BookRepositoryInterface
     }
 
     /**
+     * Get all books by paginate for site user
+     *
+     * @param array $data
+     *
+     * @return LengthAwarePaginator|null
+     */
+    public function getAllByPaginationForSiteUser(array $data): ?LengthAwarePaginator
+    {
+        $query = $this->model->query()->select(
+            'id',
+            'author_id',
+            'name',
+            'image'
+        )
+            ->with([
+                'author:id,name',
+            ]);
+
+        if (!empty($data['name'])) {
+            $query->where('name', 'like', '%' . $data['name'] . '%');
+        }
+
+        if (!empty($data['author_id']) && !empty($data['publisher_id'])) {
+            $query->where(function ($q) use ($data) {
+                $q->whereIn('author_id', $data['author_id'])
+                  ->orWhereIn('publisher_id', $data['publisher_id']);
+            });
+        } else if (!empty($data['author_id'])) {
+            $query->whereIn('author_id', $data['author_id']);
+        } else if (!empty($data['publisher_id'])) {
+            $query->whereIn('publisher_id', $data['publisher_id']);
+        }
+
+        if (!empty($data['category_id'])) {
+            $categoryId = $data['category_id'];
+            $query->whereHas('categories', function ($q) use ($categoryId) {
+                $q->where('category_id', $categoryId);
+            });
+        }
+
+        if($data['most_viewed']) {
+            $query->orderBy('views', $data['order']);
+        }
+
+        if($data['most_borrowed']) {
+            $query->orderBy('borrowing_number', $data['order']);
+        }
+
+        if($data['latest']) {
+            $query->orderBy('created_at', $data['order']);
+        }
+
+        if($data['most_loved']) {
+            $query->withCount('wishLists')->orderBy('wish_lists_count', $data['order']);
+        }
+
+        $books = $query->withCount('feedbacks')->paginate($data['limit']);
+        
+        foreach ($books as $book) {
+            $book->average_star = $book->averageStar();
+        }
+
+        return $books;
+    }
+
+    /**
      * The method find a book by id
      *
      * @param int $id
@@ -81,12 +147,18 @@ class BookRepository extends BaseRepository implements BookRepositoryInterface
      */
     public function find(int $id): ?Book
     {
-        return $this->model->with([
+        $book = $this->model->with([
             'author',
             'publisher',
             'categories',
             'images',
         ])->find($id);
+
+        if ($book) {
+            $book->average_star = $book->averageStar();
+        }
+
+        return $book;
     }
 
     /**

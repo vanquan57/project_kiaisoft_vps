@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\User\FeedbackController;
 use App\Http\Controllers\Api\V1\User\AuthorController;
 use App\Http\Controllers\Api\V1\User\CategoryController;
 use App\Http\Controllers\Api\V1\User\PublisherController;
+use App\Http\Controllers\Api\V1\User\BookController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'v1'], function () {
@@ -31,5 +32,8 @@ Route::group(['prefix' => 'v1'], function () {
         Route::get('categories', [CategoryController::class, 'index']);
         Route::get('publishers', [PublisherController::class, 'index']);
         Route::get('authors', [AuthorController::class, 'index']);
+        Route::get('book', [BookController::class, 'index']);
+        Route::get('book/{id}', [BookController::class, 'show']);
+        Route::put('book/{id}', [BookController::class, 'updateBookViewCount']);
     });
 });
