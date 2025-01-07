@@ -29,7 +29,12 @@ class OrderRepository extends BaseRepository implements OrderRepositoryInterface
      */
     public function getAllByPaginate($data): LengthAwarePaginator
     {
+        logger($data);
         $query = $this->model->query();
+
+        if (!empty($data['user_id'])) {
+            $query->where('user_id', $data['user_id']);
+        }
 
         if (!empty($data['key_word'])) {
             $query->where(function ($query) use ($data) {
@@ -193,5 +198,41 @@ class OrderRepository extends BaseRepository implements OrderRepositoryInterface
         ->get()
         ->pluck('total_orders', 'month_year')
         ->toArray();
+    }
+
+    /**
+     * The method add book to order
+     * 
+     * @param Order $order
+     * 
+     * @param array $orderDetails
+     * 
+     * @return bool
+     */
+    public function addBookToOrder(Order $order, array $orderDetails): bool
+    {
+        if(count($orderDetails) > 0) {
+            foreach ($orderDetails as $orderDetail) {
+                $order->orderDetails()->attach($orderDetail['book_id'], [
+                    'borrow_date' => Carbon::now(),
+                    'return_date' => $orderDetail['return_date'],
+                    'quantity' => $orderDetail['quantity'],
+                ]);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * The method count total order in table
+     * 
+     * @return int
+     */
+    public function countOrders(): int
+    {
+        return $this->model->count();
     }
 }

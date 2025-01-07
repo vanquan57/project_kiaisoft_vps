@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\User\BookController;
 use App\Http\Controllers\Api\V1\User\WishListController;
 use App\Http\Controllers\Api\V1\User\CartController;
 use App\Http\Controllers\Api\V1\User\LocationController;
+use App\Http\Controllers\Api\V1\User\OrderController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'v1'], function () {
@@ -40,6 +41,10 @@ Route::group(['prefix' => 'v1'], function () {
             Route::get('/provinces', [LocationController::class, 'getAllProvinces']);
             Route::get('/districts/{provinceId}', [LocationController::class, 'getDistrictsByProvinceId']);
             Route::get('/wards/{districtId}', [LocationController::class, 'getWardsByDistrictId']);
+            Route::get('/order', [OrderController::class, 'index']);
+            Route::get('/order/{id}', [OrderController::class, 'show']);
+            Route::post('/order', [OrderController::class, 'store']);
+            Route::put('/order/{id}', [OrderController::class, 'update']);
         });
         Route::get('/feedbacks', [FeedbackController::class, 'getFeedbacksByBookId']);
         Route::get('categories', [CategoryController::class, 'index']);

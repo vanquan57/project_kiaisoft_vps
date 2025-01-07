@@ -97,4 +97,22 @@ interface OrderRepositoryInterface extends BaseRepositoryInterface
      * @return array|null
      */
     public function getTotalOrdersByMonthAndYear(Carbon $startMonth, Carbon $currentMonth): ?array;
+
+    /**
+     * The method add boook to order
+     * 
+     * @param Order $order
+     * 
+     * @param array $orderDetails
+     * 
+     * @return bool
+    */
+    public function addBookToOrder(Order $order, array $orderDetails): bool;
+
+    /**
+     * The method count total order in table
+     * 
+     * @return int
+     */
+    public function countOrders(): int;
 }
