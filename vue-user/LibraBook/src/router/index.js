@@ -13,7 +13,7 @@ import AboutView from '@/views/AboutView.vue';
 import ContactView from '@/views/ContactView.vue';
 import DetailsView from '@/views/DetailsView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
-
+import { useAuthStore } from '@/stores/auth';
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
@@ -35,7 +35,10 @@ const router = createRouter({
                 {
                     path: 'auth/register',
                     name: 'auth-register',
-                    component: RegisterView
+                    component: RegisterView,
+                    meta: {
+                        isLogin: true
+                    }
                 },
                 {
                     path: 'auth/verify-email',
@@ -93,6 +96,16 @@ const router = createRouter({
             ]
         }
     ]
+});
+
+router.beforeEach((to, from, next) => {
+    const authStore = useAuthStore();
+
+    if (to.meta.isLogin && authStore.checkTokenValidity()) {
+        next('/');
+    } else {
+        next();
+    }
 });
 
 export default router;
