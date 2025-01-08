@@ -47,12 +47,19 @@ const router = createRouter({
                 {
                     path: 'auth/verify-email',
                     name: 'auth-verify-email',
-                    component: VerifyEmail
+                    component: VerifyEmail,
+                    meta: {
+                        isLogin: true
+                    }
                 },
                 {
                     path: 'auth/password/reset/',
                     name: 'reset-password',
-                    component: ResetPassword
+                    component: ResetPassword,
+                    props: true,
+                    meta: {
+                        isLogin: true
+                    }
                 },
                 {
                     path: 'wishlist',
