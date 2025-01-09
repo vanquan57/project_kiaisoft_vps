@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\V1\Admin\PublisherController;
 use App\Http\Controllers\Api\V1\Admin\BookController;
 use App\Http\Controllers\Api\V1\Admin\OrderController;
 use App\Http\Controllers\Api\V1\Admin\FeedbackController;
+use App\Http\Controllers\Api\V1\Admin\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'v1'], function () {
@@ -50,6 +51,7 @@ Route::group(['prefix' => 'v1'], function () {
                 'update',
                 'destroy'
             ]);
+            Route::get('dashboard', [DashboardController::class, 'getDataDashboard']);
         });
     });
 });

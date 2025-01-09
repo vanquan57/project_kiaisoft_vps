@@ -74,4 +74,11 @@ interface OrderRepositoryInterface extends BaseRepositoryInterface
      * @return bool
      */
     public function updateStatusMultipleOrderIsOverdue(array $idsOrder): bool;
+
+    /**
+     * Get data total orders by month
+     * 
+     * @return array|null
+     */
+    public function getTotalOrdersByMonth(): ?array;
 }

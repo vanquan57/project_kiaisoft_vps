@@ -2,6 +2,7 @@
 
 namespace App\Http\Repositories;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 interface BookRepositoryInterface extends BaseRepositoryInterface
@@ -45,4 +46,22 @@ interface BookRepositoryInterface extends BaseRepositoryInterface
      * @return array
     */
     public function getIdsByName(string $name): array;
+
+    /**
+     * Get top books most popular
+     * 
+     * @param array $data
+     *
+     * @return Collection|null
+     */
+    public function getTopBooksMostPopular(array $data): ?Collection;
+
+     /**
+     * Get data for line chart top books most likely
+     * 
+     * @param array $data
+     * 
+     * @return Collection|null
+     */
+    public function getTopMostLikesBook(array $data): ?Collection;
 }

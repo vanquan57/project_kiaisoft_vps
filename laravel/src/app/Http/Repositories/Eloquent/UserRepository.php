@@ -4,6 +4,7 @@ namespace App\Http\Repositories\Eloquent;
 
 use App\Http\Repositories\UserRepositoryInterface;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class UserRepository extends BaseRepository implements UserRepositoryInterface
@@ -58,5 +59,21 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
             ->where('code', $code)
             ->where('status', User::STATUS_ACTIVE)
             ->exists();
+    }
+
+    /**
+     * Get top user most orders
+     * 
+     * @param array $data
+     * 
+     * @return Collection|null
+     */
+    public function getTopUsersMostOder(array $data): ?Collection
+    {
+        return $this->model->select('name')->where('role', User::ROLE_USER)
+            ->withCount('orders')
+            ->orderBy('orders_count', $data['order_by_type'])
+            ->take($data['limit'])
+            ->get();
     }
 }
