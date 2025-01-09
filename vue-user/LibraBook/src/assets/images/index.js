@@ -19,6 +19,7 @@ import viralLeft from '@/assets/images/viralLeft.png';
 import viralRightTop from '@/assets/images/viralRightTop.png';
 import viralBottomLeft from '@/assets/images/viralBottomLeft.png';
 import viralBottomRight from '@/assets/images/viralBottomRight.png';
+import sideImageAbout from '@/assets/images/sideImageAbout.jpeg';
 
 const images = {
     appStore,
@@ -41,7 +42,8 @@ const images = {
     viralLeft,
     viralRightTop,
     viralBottomLeft,
-    viralBottomRight
+    viralBottomRight,
+    sideImageAbout
 };
 
 export default images;
