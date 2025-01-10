@@ -73,12 +73,27 @@
                         <router-link to="/wishlist">
                             <IconHeart />
                         </router-link>
+                        <span
+                            v-if="counterCartAndWishList.wishList > 0"
+                            class="action-item__counter"
+                        >
+                            {{ counterCartAndWishList.wishList }}
+                        </span>
                     </div>
+
                     <div class="action-item">
                         <router-link to="/cart">
                             <IconCart />
                         </router-link>
+                        <span
+                            v-if="counterCartAndWishList.cart > 0"
+                            class="action-item__counter"
+                        >
+                            {{ counterCartAndWishList.cart }}
+                        </span>
                     </div>
+
+
                     <div class="action-item">
                         <span
                             class="action-item__user"
@@ -155,11 +170,14 @@ import { ref, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router';
 import axiosInstance from '@/config/axios';
+import { useCounterCartAndWishList } from '@/stores/counterCartAndWishList';
 
 const router = useRouter();
 const route = useRoute();
 const isShowAction = ref(false);
 const isShowGroupAction = ref(true);
+const counterCartAndWishList = useCounterCartAndWishList();
+
 
 watchEffect(() => {
     if (
