@@ -73,7 +73,10 @@ const router = createRouter({
                 {
                     path: 'cart',
                     name: 'cart',
-                    component: CartView
+                    component: CartView,
+                    meta: {
+                        requireAuth: true
+                    }
                 },
                 {
                     path: 'checkout',
