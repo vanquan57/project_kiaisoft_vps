@@ -10,6 +10,7 @@
             </router-link>
             <div class="book-card__image__action">
                 <div
+                    v-if="!isWishlist && !isNewBook"
                     class="book-card__image__action__item"
                     :class="{'active disabled': wishListStore.wishList.includes(book.id)}"
                     @click="!wishListStore.wishList.includes(book.id) && handleAddBookToWishlist(book.id)"
@@ -17,6 +18,14 @@
                     <IconWishlist />
                 </div>
                 <div
+                    v-if="isWishlist"
+                    class="book-card__image__action__item"
+                    @click="handleRemoveBookFromWishlist(book.id)"
+                >
+                    <IconDelete />
+                </div>
+                <div
+                    v-if="!isWishlist"
                     class="book-card__image__action__item"
                     @click="handleQuickView(book.id)"
                 >
@@ -56,8 +65,9 @@
 
 <script setup>
 import IconStar from '@/components/icons/IconStar.vue';
-import IconWishlist from '@/components/icons/IconWishlist.vue';
 import IconQuickView from '@/components/icons/IconQuickView.vue';
+import IconDelete from '@/components/icons/IconDelete.vue';
+import IconWishlist from '@/components/icons/IconWishlist.vue';
 import { useWishListStore } from '@/stores/wishList';
 
 const wishListStore = useWishListStore();
@@ -65,10 +75,18 @@ const props = defineProps({
     book: {
         type: Object,
         required: true
+    },
+    isWishlist: {
+        type: Boolean,
+        default: false
+    },
+    isNewBook: {
+        type: Boolean,
+        default: false
     }
 });
 
-const emit = defineEmits(['quickView', 'addBookToCart', 'addBookToWishlist']);
+const emit = defineEmits(['quickView', 'addBookToCart', 'addBookToWishlist', 'removeBookFromWishlist']);
 
 const urlImage = (url) => {
     return import.meta.env.VITE_URL_IMAGE + url;
@@ -84,6 +102,10 @@ const handleAddBookToCart = (id) => {
 
 const handleAddBookToWishlist = (id) => {
     emit('addBookToWishlist', id);
+};
+
+const handleRemoveBookFromWishlist = (id) => {
+    emit('removeBookFromWishlist', id);
 };
 </script>
 
