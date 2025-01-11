@@ -13,4 +13,6 @@ return [
     App\Providers\OrderServiceProvider::class,
     App\Providers\PublisherServiceProvider::class,
     App\Providers\UserServiceProvider::class,
+    App\Providers\DistrictServiceProvider::class,
+    App\Providers\ProvinceServiceProvider::class,
 ];
