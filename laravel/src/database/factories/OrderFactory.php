@@ -22,9 +22,12 @@ class OrderFactory extends Factory
     public function definition(): array
     {
         $listStatus = [Order::STATUS_OVERDUE, Order::STATUS_BORROWING, Order::STATUS_MISSING, Order::STATUS_RETURNED];
+        static $counter = 1;
+        $orderCode = 'HD' . str_pad($counter, 5, '0', STR_PAD_LEFT);
+        $counter++;
 
         return [
-            'code' => Str::uuid(),
+            'code' => $orderCode,
             'phone' => $this->faker->numerify('09#########'),
             'email' => $this->faker->unique()->safeEmail,
             'address' => $this->faker->address,
