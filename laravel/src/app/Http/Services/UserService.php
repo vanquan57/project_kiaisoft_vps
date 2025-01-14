@@ -6,6 +6,7 @@ use App\Http\Repositories\EmployeeCodeRepositoryInterface;
 use App\Http\Repositories\UserRepositoryInterface;
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class UserService
@@ -102,6 +103,97 @@ class UserService
             return false;
         } catch (\Exception $e) {
             Log::error($e->getMessage());
+
+            return false;
+        }
+    }
+
+    /**
+     * Public function get all employees codes
+     * 
+     * @param array $data
+     *
+     * @return LengthAwarePaginator|null
+     */
+    public function getAllEmployeesCodes(array $data): ?LengthAwarePaginator
+    {
+        try {
+            $data = [
+                'limit' => $data['limit'] ?? config('constants.DEFAULT_LIMIT'),
+            ];
+
+            return $this->employeeCodeRepository->getAllEmployeesCodes($data);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+
+            return null;
+        }
+    }
+
+    /**
+     * Public function store employee code
+     *
+     * @param array $data
+     *
+     * @return bool
+     */
+    public function storeEmployeeCode(array $data): bool
+    {
+        try {
+            DB::beginTransaction();
+
+            if (isset($data['file']) && $data['file']->isValid()) {
+                $file = $data['file'];
+                $handle = fopen($file->getRealPath(), 'r');
+                $row = 0;
+                $employeeCodes = [];
+
+                while (($line = fgetcsv($handle, 1000, ',')) !== false) {
+                    $row++;
+
+                    if ($row === 1) {
+                        continue;
+                    }
+
+                    if(empty($line[0]) || empty($line[1]) || empty($line[2])) {
+                        continue;
+                    }
+
+                    if(count($line) > 3 || count($line) < 3){
+                        return false;
+                    }
+                    // Check if code is not Kxxxxx or kiaisoft then skip
+                    if (!preg_match('/^K\d{5}$/', $line[0]) && !str_contains($line[0], config('constants.FORMAT_EMAIL_EMPLOYEE'))) {
+                        return false;
+                    }
+                    // Check if account is registered and active then skip
+                    if($this->userRepository->checkAccountRegisteredAndActive($line[0], $line[1])){
+                        continue;
+                    }
+
+                    $employeeCodes[] = [
+                        'code' => $line[0],
+                        'email' => $line[1],
+                        'name' => $line[2],
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ];
+                }
+                
+                if (!empty($employeeCodes)) {
+                    foreach ($employeeCodes as $employee) {
+                        $this->employeeCodeRepository->updateOrCreate($employee);
+                    }
+                    DB::commit();
+                    
+                    return true;
+                }
+
+                return false;
+            }
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            DB::rollBack();
 
             return false;
         }
