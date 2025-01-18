@@ -54,10 +54,11 @@
                 </ul>
             </div>
             <div class="search">
-                <form action="">
+                <form @submit.prevent="handleSearch">
                     <div class="search-group">
                         <input
                             type="text"
+                            v-model="searchQuery"
                             placeholder="Tìm kiếm sách"
                         >
                         <button type="submit">
@@ -177,7 +178,7 @@ const route = useRoute();
 const isShowAction = ref(false);
 const isShowGroupAction = ref(true);
 const counterCartAndWishList = useCounterCartAndWishList();
-
+const searchQuery = ref('');
 
 watchEffect(() => {
     if (
@@ -202,6 +203,19 @@ const logout = async () => {
         }
     } catch (error) {
     }
+};
+
+const handleSearch = () => {
+    let query = searchQuery.value.trim();
+    let currentQuery = new URLSearchParams(route.query);
+    if (query) {
+        currentQuery.set('search', query);
+    }
+
+    router.push({
+        path: '/list-book',
+        query: Object.fromEntries(currentQuery)
+    });
 };
 </script>
 
