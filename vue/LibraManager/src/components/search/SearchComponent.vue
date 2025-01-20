@@ -8,7 +8,7 @@
             @submit.prevent="handleSearch"
         >
             <el-form-item
-                v-if="props.dataBook"
+                v-if="props.dataBook && props.dataBook.length > 0"
                 class="form-item"
             >
                 <el-select
