@@ -3,7 +3,6 @@
         <el-form
             ref="searchFormRef"
             :model="searchForm"
-            :rules="rules"
             class="search-form"
             :style="`grid-template-columns: ${styleSearch}; display: ${displaySearch}`"
             @submit.prevent="handleSearch"
@@ -54,6 +53,47 @@
                     />
                 </el-select>
             </el-form-item>
+            <el-form-item
+                v-if="props.isHasDate"
+                prop="dateRange"
+            >
+                <el-date-picker
+                    v-model="searchForm.startDate"
+                    type="date"
+                    :placeholder="`Chọn ngày bắt đầu`"
+                    format="DD/MM/YYYY"
+                    value-format="YYYY-MM-DD"
+                />
+            </el-form-item>
+            <el-form-item
+                v-if="props.isHasDate"
+                prop="dateRange"
+            >
+                <el-date-picker
+                    v-model="searchForm.endDate"
+                    type="date"
+                    :placeholder="`Chọn ngày kết thúc`"
+                    format="DD/MM/YYYY"
+                    value-format="YYYY-MM-DD"
+                />
+            </el-form-item>
+            <el-form-item
+                v-if="props.statusOptions.length > 0"
+                prop="status"
+            >
+                <el-select
+                    v-model="searchForm.status"
+                    :placeholder="`Chọn trạng thái`"
+                    :options="props.statusOptions"
+                >
+                    <el-option
+                        v-for="item in props.statusOptions"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value"
+                    />
+                </el-select>
+            </el-form-item>
             <el-form-item justify="center">
                 <el-button
                     type="primary"
@@ -98,33 +138,41 @@ const props = defineProps({
         type: Array,
         default: () => []
     },
+    isHasDate: {
+        type: Boolean,
+        default: false
+    },
+    statusOptions: {
+        type: Array,
+        default: () => []
+    }
 });
+const styleSearch = ref('');
+
 const emit = defineEmits(['search']);
 const searchFormRef = ref(null);
 const searchForm = ref({
     search: '',
     category_id: '',
     author_id: '',
-    publisher_id: ''
+    publisher_id: '',
+    startDate: '',
+    endDate: '',
+    status: ''
 });
-
-const styleSearch = ref('');
 
 watchEffect(() => {
     if (route.path === '/book') {
         styleSearch.value = '3fr 2fr 2fr 2fr 1fr';
         displaySearch.value = 'grid';
-    }
-
-    if (props.resetSearch) {
-        searchForm.value = {
-            search: '',
-            category_id: '',
-            author_id: '',
-            publisher_id: ''
-        };
+    } else if (route.path === '/order') {
+        styleSearch.value = '3fr 2fr 2fr 2fr 1fr';
+        displaySearch.value = 'grid';
+    } else {
+        styleSearch.value = '7fr 3fr';
     }
 });
+
 
 const handleSearch = async () => {
     await searchFormRef.value.validate((valid) => {
@@ -136,10 +184,14 @@ const handleSearch = async () => {
                     author_id: searchForm.value.author_id,
                     publisher_id: searchForm.value.publisher_id
                 });
+            } else if (route.path === '/order') {
+                delete searchForm.value.category_id;
+                delete searchForm.value.author_id;
+                delete searchForm.value.publisher_id;
+                emit('search', searchForm.value);
             } else {
                 emit('search', searchForm.value.search);
             }
-
         }
     });
 };
