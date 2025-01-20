@@ -45,6 +45,23 @@ const router = createRouter({
                     component: CategoryView
                 },
                 {
+                    path: 'category/create',
+                    name: 'category.create',
+                    component: CategoryView,
+                    props: {
+                        site: 'create'
+                    }
+                },
+                {
+                    path: 'category/edit/:id',
+                    name: 'category.edit',
+                    component: CategoryView,
+                    props: (route) => ({
+                        site: 'edit',
+                        id: Number(route.params.id)
+                    })
+                },
+                {
                     path: 'author',
                     name: 'author',
                     component: AuthorView
