@@ -26,7 +26,18 @@ const router = createRouter({
                 {
                     path: 'user',
                     name: 'user',
-                    component: UserView
+                    component: UserView,
+                    props: {
+                        site: 'user'
+                    }
+                },
+                {
+                    path: 'user/information',
+                    name: 'user-information',
+                    component: UserView,
+                    props: {
+                        site: 'information'
+                    }
                 },
                 {
                     path: 'category',
@@ -112,6 +123,7 @@ function checkTokenValidity(token) {
         if (payload.exp*1000 < Date.now()) {
             return false;
         }
+
         return true;
     } catch (error) {
         return false;
