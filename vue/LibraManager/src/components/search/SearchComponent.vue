@@ -3,8 +3,9 @@
         <el-form
             ref="searchFormRef"
             :model="searchForm"
-            class="search-form"
             :rules="rules"
+            class="search-form"
+            :style="`grid-template-columns: ${styleSearch}; display: ${displaySearch}`"
             @submit.prevent="handleSearch"
         >
             <el-form-item prop="search">
@@ -14,7 +15,45 @@
                     :placeholder="props.placeholder"
                 />
             </el-form-item>
-
+            <el-form-item v-if="props.isSearchBook">
+                <el-select
+                    v-model="searchForm.category_id"
+                    placeholder="Chọn danh mục"
+                >
+                    <el-option
+                        v-for="item in props.categoryData"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id"
+                    />
+                </el-select>
+            </el-form-item>
+            <el-form-item v-if="props.isSearchBook">
+                <el-select
+                    v-model="searchForm.author_id"
+                    placeholder="Chọn tác giả"
+                >
+                    <el-option
+                        v-for="item in props.authorData"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id"
+                    />
+                </el-select>
+            </el-form-item>
+            <el-form-item v-if="props.isSearchBook">
+                <el-select
+                    v-model="searchForm.publisher_id"
+                    placeholder="Chọn nhà xuất bản"
+                >
+                    <el-option
+                        v-for="item in props.publisherData"
+                        :key="item.id"
+                        :label="item.name"
+                        :value="item.id"
+                    />
+                </el-select>
+            </el-form-item>
             <el-form-item justify="center">
                 <el-button
                     type="primary"
@@ -29,8 +68,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watchEffect } from 'vue';
+import { useRoute } from 'vue-router';
 
+const route = useRoute();
+const displaySearch = ref('flex');
 const props = defineProps({
     placeholder: {
         type: String,
@@ -39,22 +81,68 @@ const props = defineProps({
     styleInput: {
         type: String,
         default: ''
-    }
+    },
+    isSearchBook: {
+        type: Boolean,
+        default: false
+    },
+    categoryData: {
+        type: Array,
+        default: () => []
+    },
+    authorData: {
+        type: Array,
+        default: () => []
+    },
+    publisherData: {
+        type: Array,
+        default: () => []
+    },
 });
 const emit = defineEmits(['search']);
 const searchFormRef = ref(null);
 const searchForm = ref({
-    search: ''
+    search: '',
+    category_id: '',
+    author_id: '',
+    publisher_id: ''
+});
+
+const styleSearch = ref('');
+
+watchEffect(() => {
+    if (route.path === '/book') {
+        styleSearch.value = '3fr 2fr 2fr 2fr 1fr';
+        displaySearch.value = 'grid';
+    }
+
+    if (props.resetSearch) {
+        searchForm.value = {
+            search: '',
+            category_id: '',
+            author_id: '',
+            publisher_id: ''
+        };
+    }
 });
 
 const handleSearch = async () => {
     await searchFormRef.value.validate((valid) => {
         if (valid) {
-            emit('search', searchForm.value.search);
+            if (props.isSearchBook) {
+                emit('search', {
+                    search: searchForm.value.search,
+                    category_id: searchForm.value.category_id,
+                    author_id: searchForm.value.author_id,
+                    publisher_id: searchForm.value.publisher_id
+                });
+            } else {
+                emit('search', searchForm.value.search);
+            }
+
         }
     });
 };
-
 </script>
 
 <style lang="scss" scoped>

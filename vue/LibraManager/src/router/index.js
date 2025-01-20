@@ -111,6 +111,23 @@ const router = createRouter({
                     component: BookView
                 },
                 {
+                    path: 'book/create',
+                    name: 'book.create',
+                    component: BookView,
+                    props: {
+                        site: 'create'
+                    }
+                },
+                {
+                    path: 'book/edit/:id',
+                    name: 'book.edit',
+                    component: BookView,
+                    props: (route) => ({
+                        site: 'edit',
+                        id: Number(route.params.id)
+                    })
+                },
+                {
                     path: 'order',
                     name: 'order',
                     component: OrderView
