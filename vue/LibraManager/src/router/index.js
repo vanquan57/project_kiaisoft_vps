@@ -89,6 +89,23 @@ const router = createRouter({
                     component: PublisherView
                 },
                 {
+                    path: 'publisher/create',
+                    name: 'publisher.create',
+                    component: PublisherView,
+                    props: {
+                        site: 'create'
+                    }
+                },
+                {
+                    path: 'publisher/edit/:id',
+                    name: 'publisher.edit',
+                    component: PublisherView,
+                    props: (route) => ({
+                        site: 'edit',
+                        id: Number(route.params.id)
+                    })
+                },
+                {
                     path: 'book',
                     name: 'book',
                     component: BookView
