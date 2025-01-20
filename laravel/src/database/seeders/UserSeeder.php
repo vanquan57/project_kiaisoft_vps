@@ -28,7 +28,7 @@ class UserSeeder extends Seeder
                 'updated_at' => $currentTimestamp,
             ],
             [
-                'code' => 'K00233',
+                'code' => 'K00001',
                 'name' => 'User One',
                 'email' => 'user1@kiaisoft.com',
                 'password' => Hash::make('Levanquan123456@'),
@@ -38,7 +38,7 @@ class UserSeeder extends Seeder
                 'updated_at' => $currentTimestamp,
             ],
             [
-                'code' => 'K00234',
+                'code' => 'K00002',
                 'name' => 'User Two',
                 'email' => 'user2@kiaisoft.com',
                 'password' => Hash::make('Levanquan123456@'),

@@ -14,7 +14,7 @@ class FeedbackSeeder extends Seeder
      */
     public function run(): void
     {
-        $users = User::all();
+        $users = User::where('role', User::ROLE_USER)->get();
         $books = Book::all();
 
         $feedbackData = [];
@@ -24,7 +24,7 @@ class FeedbackSeeder extends Seeder
                 $feedbackData[] = [
                     'user_id' => $user->id,
                     'book_id' => $book->id,
-                    'content' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla facilisi. Donec auctor orci vel neque semper, in fermentum odio ultricies. Nullam tincidunt, risus in posuere gravida, arcu justo pulvinar orci, non placerat velit metus a justo.',
+                    'content' => 'Sách rất hay, tôi rất thích!',
                     'star' => rand(1, 5),
                     'status' => rand(0, 1),
                     'created_at' => now(),

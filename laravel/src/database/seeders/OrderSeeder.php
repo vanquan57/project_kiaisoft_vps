@@ -19,7 +19,7 @@ class OrderSeeder extends Seeder
      */
     public function run(): void
     {
-        $userIds = User::all()->pluck('id')->toArray();
+        $userIds = User::where('role', User::ROLE_USER)->pluck('id')->toArray();
         $provinceIds = Province::all()->pluck('id')->toArray();
         $districtIds = District::all()->pluck('id')->toArray();
         $wardIds = Ward::all()->pluck('id')->toArray();
@@ -52,7 +52,7 @@ class OrderSeeder extends Seeder
                     'borrow_date' => $borrowDate,
                     'return_date' => $returnDate,
                     'quantity' => rand(1, 3),
-                    'note' => 'This is a note for testing.',
+                    'note' => $orderStatus == Order::STATUS_MISSING ? 'Sách mất' : null,
                     'status' => $orderStatus,
                     'created_at' => now(),
                     'updated_at' => now(),
