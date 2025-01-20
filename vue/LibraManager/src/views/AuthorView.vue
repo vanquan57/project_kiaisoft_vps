@@ -1,13 +1,339 @@
 <template>
     <div>
-        <h1>Author</h1>
+        <div
+            v-if="props.site === 'list'"
+            class="author-management-container"
+        >
+            <div class="author-management-breadcrumb-container">
+                <BreadcrumbComponent
+                    class="author-management-breadcrumb"
+                    :breadcrumb-list="breadcrumbList"
+                />
+                <router-link
+                    to="/author/create"
+                    class="author-button"
+                >
+                    <el-button type="primary">
+                        Thêm mới tác giả
+                    </el-button>
+                </router-link>
+            </div>
+            <div class="author-management-header-container">
+                <div class="author-management-search">
+                    <h1>Danh sách tác giả</h1>
+                    <SearchForm
+                        placeholder="Nhập tên tác giả ..."
+                        :style-input="styleInput"
+                        @search="handleSearch"
+                    />
+                </div>
+            </div>
+            <div class="author-management-content">
+                <ListAuthor
+                    :table-data="tableData"
+                    @handle-option-delete="handleOptionDelete"
+                />
+            </div>
+            <div
+                v-if="tableData.length > 0"
+                class="author-management-pagination"
+            >
+                <PaginationComponent
+                    :total="dataPagination.total"
+                    :current-page="dataPagination.currentPage"
+                    :page-size="dataPagination.limit"
+                    @current-page="handlePageChange"
+                />
+            </div>
+        </div>
+        <div
+            v-else-if="props.site === 'create'"
+            class="author-management-container"
+        >
+            <div class="author-management-breadcrumb-container">
+                <h1>Thêm tác giả</h1>
+                <BreadcrumbComponent
+                    class="author-management-breadcrumb"
+                    :breadcrumb-list="breadcrumbList"
+                />
+            </div>
+            <div class="author-management-content">
+                <CreateAuthor @get-authors="getAuthors" />
+            </div>
+        </div>
+        <div
+            v-else
+            class="author-management-container"
+        >
+            <div class="author-management-breadcrumb-container">
+                <h1>Cập nhật tác giả</h1>
+                <BreadcrumbComponent
+                    class="author-management-breadcrumb"
+                    :breadcrumb-list="breadcrumbList"
+                />
+            </div>
+            <div class="author-management-content">
+                <EditAuthor
+                    :id="props.id"
+                    :current-page="dataPagination.currentPage"
+                    @get-authors="getAuthors"
+                />
+            </div>
+        </div>
     </div>
 </template>
 
 <script setup>
+import BreadcrumbComponent from '@/components/breadcrumb/BreadcrumbComponent.vue';
+import SearchForm from '@/components/search/SearchComponent.vue';
+import ListAuthor from '@/components/author/ListAuthor.vue';
+import { ref, onMounted, watchEffect } from 'vue';
+import { useRoute } from 'vue-router';
+import PaginationComponent from '@/components/pagination/PaginationComponent.vue';
+import CreateAuthor from '@/components/author/CreateAuthor.vue';
+import EditAuthor from '@/components/author/EditAuthor.vue';
+import axiosInstance from '@/config/axios';
+import HTTP_STATUS_CODE from '@/config/statusCode';
+import { useRouter } from 'vue-router';
+import { ElNotification, ElMessageBox } from 'element-plus';
 
+const router = useRouter();
+const route = useRoute();
+const props = defineProps({
+    site: {
+        type: String,
+        default: 'list'
+    },
+    id: {
+        type: Number,
+        required: false,
+        default: null
+    }
+});
+
+const breadcrumbList = ref([
+    {
+        name: 'Trang chủ',
+        path: '/'
+    },
+    {
+        name: 'Tác giả',
+        path: '/author'
+    }
+]);
+const styleInput = ref('width: 400px');
+const dataPagination = ref({
+    limit: 10,
+    total: 0,
+    currentPage: 1
+});
+
+const tableData = ref([]);
+
+watchEffect(() => {
+    if (props.site === 'create') {
+        breadcrumbList.value = [
+            {
+                name: 'Trang chủ',
+                path: '/'
+            },
+            {
+                name: 'Tác giả',
+                path: '/author'
+            },
+            {
+                name: 'Thêm tác giả',
+                path: '/author/create'
+            }
+        ];
+    } else if (props.site === 'edit') {
+        breadcrumbList.value = [
+            {
+                name: 'Trang chủ',
+                path: '/'
+            },
+            {
+                name: 'Tác giả',
+                path: '/author'
+            },
+            {
+                name: 'Cập nhật tác giả',
+                path: `/author/edit/${props.id}`
+            }
+        ];
+    } else {
+        breadcrumbList.value = [
+            {
+                name: 'Trang chủ',
+                path: '/'
+            },
+            {
+                name: 'Tác giả',
+                path: '/author'
+            }
+        ];
+    }
+});
+
+/**
+ * Get authors
+ *
+ * @returns {Promise<void>}
+ */
+const getAuthors = async (page = 1, column = null, order = null) => {
+    try {
+        console.log(page, column, order);
+        const response = await axiosInstance.get('/author', {
+            params: {
+                page,
+                limit: dataPagination.value.limit,
+                column,
+                order
+            }
+        });
+        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+            tableData.value = response.data.data;
+            dataPagination.value.total = response.data.total;
+            dataPagination.value.currentPage = response.data.current_page;
+        }
+    } catch (error) {}
+};
+
+/**
+ * The method handle mount
+ *
+ * @returns {Promise<void>}
+ */
+onMounted(async () => {
+    await getAuthors();
+});
+
+/**
+ * The method handle search
+ *
+ * @param {string} search - The search
+ *
+ * @returns {Promise<void>}
+ */
+const handleSearch = async (search) => {
+    const query = search === '' ? {} : { search: search.trim() };
+
+    router.push({
+        path: route.path,
+        query
+    });
+
+    if (search !== '') {
+        const response = await axiosInstance.get('/author', {
+            params: {
+                name: search.trim()
+            }
+        });
+        tableData.value = response.data.data;
+        dataPagination.value.total = response.data.total;
+        dataPagination.value.currentPage = response.data.current_page;
+        dataPagination.value.limit = response.data.limit;
+    } else {
+        await getAuthors();
+    }
+};
+
+/**
+ * The method handle page change
+ *
+ * @param {number} page - The page number
+ *
+ * @returns {Promise<void>}
+ */
+const handlePageChange = (page) => {
+    dataPagination.value.currentPage = page;
+    getAuthors(page);
+};
+
+/**
+ * The method handle option delete
+ *
+ * @param {number} id - The id
+ *
+ * @returns {Promise<void>}
+ */
+const handleOptionDelete = async (id) => {
+    try {
+        await ElMessageBox.confirm(
+            'Bạn có chắc chắn muốn xóa tác giả này không?',
+            'Xác nhận',
+            {
+                confirmButtonText: 'Xóa',
+                cancelButtonText: 'Hủy',
+                type: 'warning'
+            }
+        );
+
+        const response = await axiosInstance.delete(`/author/${id}`);
+
+        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+            ElNotification.success({
+                title: 'Thành công',
+                message: 'Xóa tác giả thành công',
+                type: 'success'
+            });
+
+            getAuthors(dataPagination.value.currentPage);
+        }
+    } catch (error) {
+        ElNotification.error({
+            title: 'Lỗi',
+            message: 'Tác giả có sách đang đăng ký, không thể xóa',
+            type: 'error'
+        });
+    }
+};
 </script>
 
 <style lang="scss" scoped>
+.author-management-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    padding-bottom: 15px;
+    .author-management-breadcrumb-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        margin: 10px 0;
+        padding: 0 10px;
+        h1 {
+            font-size: 24px;
+            font-weight: bold;
+        }
+    }
+    .author-management-header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        h1 {
+            margin-left: 10px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+    }
+
+    .author-button {
+        align-self: flex-start;
+    }
+    .author-management-search {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+    .author-management-content {
+        width: 100%;
+    }
+}
 
 </style>
