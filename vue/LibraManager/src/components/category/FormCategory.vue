@@ -118,15 +118,6 @@ const handleSubmit = async () => {
     if (valid) {
         if (categoryForm.description === '') {
             try {
-                await ElMessageBox.alert(
-                    'Bạn chắc chắn không muốn thêm mô tả?',
-                    'Warning',
-                    {
-                        confirmButtonText: 'OK',
-                        type: 'warning'
-                    }
-                );
-
                 emit('submit', categoryForm);
             } catch (error) {}
         } else {

@@ -2,7 +2,7 @@
     <div>
         <el-dialog
             v-model="outerVisible"
-            :title="`Chi tiết đơn hàng: ${orderDetails.code}`"
+            :title="`Chi tiết đơn mượn: ${orderDetails.code}`"
             append-to-body
             class="book-detail-dialog"
         >
@@ -37,7 +37,7 @@
                                 <span>{{ book.pivot.note || "Không có" }}</span>
                             </div>
                             <div class="info-row">
-                                <span class="label">Cập nhật trạng thái {{ book.pivot.status }}</span>
+                                <span class="label">Cập nhật trạng thái</span>
                                 <el-select
                                     :model-value="book.pivot.status"
                                     class="status-select"

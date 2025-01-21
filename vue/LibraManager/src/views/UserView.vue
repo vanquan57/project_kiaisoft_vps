@@ -11,7 +11,7 @@
                 to="/user/information"
             >
                 <el-button type="primary">
-                    Import thông tin người dùng
+                    Import
                 </el-button>
             </router-link>
         </div>
@@ -23,7 +23,7 @@
                 <h1>Quản lý người dùng</h1>
                 <div class="user-management-search">
                     <SearchComponent
-                        placeholder="Nhập mã nhân viên, tên người dùng, email . . ."
+                        placeholder="Nhập mã nhân viên, tên người dùng, email"
                         :style-input="styleInput"
                         @search="handleSearch"
                     />
@@ -107,7 +107,7 @@
 </template>
 
 <script setup>
-import BreadcrumbComponent from '@/components/Breadcrumb/BreadcrumbComponent.vue';
+import BreadcrumbComponent from '@/components/breadcrumb/BreadcrumbComponent.vue';
 import SearchComponent from '@/components/search/SearchComponent.vue';
 import ListUsers from '@/components/user/ListUsers.vue';
 import ListFormation from '@/components/user/ListFormation.vue';
@@ -118,6 +118,7 @@ import axiosInstance from '@/config/axios';
 import HTTP_STATUS_CODE from '@/config/statusCode';
 import { ElNotification } from 'element-plus';
 import { useRouter } from 'vue-router';
+import DEFAULT_CONSTANTS from '@/config/constants';
 
 const props = defineProps({
     site: {
@@ -127,7 +128,7 @@ const props = defineProps({
 });
 const breadcrumbList = ref([
     { name: 'Trang chủ', path: '/' },
-    { name: 'Người dùng', path: '/user' }
+    { name: 'Danh sách', path: '/user' }
 ]);
 const fileUpload = ref();
 const fileName = ref('');
@@ -178,12 +179,14 @@ watch(
  *
  * @returns {Promise<void>}
  */
-const getUsers = async (page = 1) => {
+const getUsers = async (page = 1, column = null, order = null) => {
     try {
         const response = await axiosInstance.get('/user', {
             params: {
                 limit: dataPagination.value.limit,
-                page: page
+                page: page,
+                column: column ?? DEFAULT_CONSTANTS.COLUMN,
+                order: order ?? DEFAULT_CONSTANTS.ORDER
             }
         });
         if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
@@ -296,6 +299,7 @@ const handleUpload = () => {
 const handleRemoveFile = () => {
     fileName.value = '';
     fileUpload.value = '';
+    fileInput.value.value = '';
 };
 
 const handleFileChange = (event) => {
@@ -334,6 +338,7 @@ const submitUpload = async () => {
                 message: 'Cập nhật thông tin người dùng thành công',
                 type: 'success'
             });
+            await getInformationEmployeeCodes(dataPagination.value.currentPage);
             fileUpload.value = '';
             fileName.value = '';
         }

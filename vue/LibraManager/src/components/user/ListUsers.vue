@@ -4,6 +4,7 @@
             class="table-user"
             :data="tableDataWithFullAddress"
             :scrolling="true"
+            :empty-text="'Không tìm thấy người dùng'"
         >
             <el-table-column
                 prop="id"
@@ -80,9 +81,16 @@ const props = defineProps({
  */
 const tableDataWithFullAddress = computed(() => {
     return props.tableData.map((item) => {
+        const province = item.province?.name || '';
+        const district = item.district?.name || '';
+        const ward = item.ward?.name || '';
+        const address = item.address || '';
+
+        const fullAddress = [province, district, ward, address].filter(Boolean).join(', ');
+
         return {
             ...item,
-            fullAddress: `${item.province?.name || ''}, ${item.district?.name || ''}, ${item.ward?.name || ''}, ${item.address || ''}`
+            fullAddress: fullAddress || 'Chưa cập nhật địa chỉ'
         };
     });
 });

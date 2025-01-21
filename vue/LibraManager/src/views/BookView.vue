@@ -14,7 +14,7 @@
                     class="book-button"
                 >
                     <el-button type="primary">
-                        Thêm mới sách
+                        Thêm mới
                     </el-button>
                 </router-link>
             </div>
@@ -23,7 +23,7 @@
             </div>
             <div class="book-management-search">
                 <SearchComponent
-                    placeholder="Nhập tên sách ..."
+                    placeholder="Nhập tên sách"
                     :is-search-book="true"
                     :author-data="authorData"
                     :publisher-data="publisherData"
@@ -77,7 +77,7 @@
             class="book-management-container"
         >
             <div class="book-management-breadcrumb-container">
-                <h1>Cập nhật sách</h1>
+                <h1>Cập nhật</h1>
                 <BreadcrumbComponent
                     class="book-management-breadcrumb"
                     :breadcrumb-list="breadcrumbList"
@@ -98,7 +98,7 @@
 </template>
 
 <script setup>
-import BreadcrumbComponent from '@/components/Breadcrumb/BreadcrumbComponent.vue';
+import BreadcrumbComponent from '@/components/breadcrumb/BreadcrumbComponent.vue';
 import SearchComponent from '@/components/search/SearchComponent.vue';
 import ListBooks from '@/components/book/ListBooks.vue';
 import { onMounted, ref, watch, watchEffect } from 'vue';
@@ -110,6 +110,7 @@ import axiosInstance from '@/config/axios';
 import HTTP_STATUS_CODE from '@/config/statusCode';
 import { ElNotification, ElMessageBox } from 'element-plus';
 import { useRouter, useRoute } from 'vue-router';
+import DEFAULT_CONSTANTS from '@/config/constants';
 
 const router = useRouter();
 const route = useRoute();
@@ -165,11 +166,11 @@ watchEffect(() => {
                 path: '/'
             },
             {
-                name: 'Sách',
+                name: 'Danh sách',
                 path: '/book'
             },
             {
-                name: 'Thêm sách',
+                name: 'Thêm mới',
                 path: '/book/create'
             }
         ];
@@ -180,11 +181,11 @@ watchEffect(() => {
                 path: '/'
             },
             {
-                name: 'Sách',
+                name: 'Danh sách',
                 path: '/book'
             },
             {
-                name: 'Cập nhật sách',
+                name: 'Cập nhật',
                 path: `/book/edit/${props.id}`
             }
         ];
@@ -195,7 +196,7 @@ watchEffect(() => {
                 path: '/'
             },
             {
-                name: 'Sách',
+                name: 'Danh sách',
                 path: '/book'
             }
         ];
@@ -215,8 +216,8 @@ const getBooks = async (page = 1, column = null, order = null) => {
             params: {
                 page,
                 limit: dataPagination.value.limit,
-                column,
-                order
+                column: column ?? DEFAULT_CONSTANTS.COLUMN,
+                order: order ?? DEFAULT_CONSTANTS.ORDER
             }
         });
 

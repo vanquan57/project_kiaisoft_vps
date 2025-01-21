@@ -112,7 +112,7 @@ const navItems = [
         icon: IconBook
     },
     {
-        name: 'Đơn hàng',
+        name: 'Đơn mượn',
         path: '/order',
         icon: IconOrderList
     },
@@ -183,6 +183,10 @@ function handleLogout() {
             justify-content: center;
             .nav-item {
                 border-left: 2px solid transparent;
+                margin-bottom: 10px;
+                &:last-child {
+                    margin-bottom: 0;
+                }
                 a {
                     padding: 13px 0px;
                     margin: 0px 20px;

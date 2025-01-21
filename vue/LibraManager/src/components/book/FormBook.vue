@@ -185,13 +185,14 @@
                     <el-form-item
                         label-position="top"
                         class="form-item"
-                        label="Hình ảnh thumbnail"
+                        label="Hình ảnh thumbnail (Tối đa 4 hình ảnh)"
                         prop="images"
                     >
                         <input
                             type="file"
                             accept="image/*"
                             class="input-image"
+                            multiple
                             :class="{
                                 'error-input': errorUploadFile.images.status,
                             }"
@@ -344,9 +345,9 @@ const bookFormRef = ref(null);
 
 const bookForm = ref({
     name: null,
-    author_id: 2,
-    publisher_id: 2,
-    category_id: 2,
+    author_id: null,
+    publisher_id: null,
+    category_id: null,
     mini_description: null,
     details_description: null,
     publication_date: null,
@@ -402,6 +403,21 @@ const rules = {
             required: true,
             message: 'Vui lòng chọn ngày xuất bản',
             trigger: 'blur'
+        },
+        {
+            validator: (rule, value, callback) => {
+                const selectedDate = new Date(value);
+                const currentDate = new Date();
+
+                currentDate.setHours(0, 0, 0, 0);
+
+                if (selectedDate > currentDate) {
+                    callback(new Error('Ngày xuất bản không hợp lệ!'));
+                } else {
+                    callback();
+                }
+            },
+            trigger: 'change'
         }
     ],
     image: [
@@ -447,21 +463,25 @@ const imageUrl = (url) => {
  * @returns {Promise<void>}
  */
 const handleChangeImage = (e, type) => {
-    const file = e.target.files[0];
-
-    if (file && !file.type.startsWith('image/')) {
-        ElNotification.error('Vui lòng chọn một tệp hình ảnh!');
-        e.target.value = '';
-        return;
-    }
 
     if (type === 'image') {
+        const file = e.target.files[0];
         bookForm.value.image = file;
         fakeImage.value = URL.createObjectURL(file);
+
+        if (file && !file.type.startsWith('image/')) {
+            ElNotification.error('Vui lòng chọn một tệp hình ảnh!');
+            e.target.value = '';
+
+            return;
+        }
     }
 
+
     if (type === 'images') {
-        if (fakeImages.value.length >= 4) {
+        const files = e.target.files;
+
+        if (files.length + fakeImages.value.length > 4) {
             errorUploadFile.value.images.status = true;
             errorUploadFile.value.images.message =
                 'Chỉ được chọn tối đa 4 hình ảnh';
@@ -469,31 +489,41 @@ const handleChangeImage = (e, type) => {
             return;
         }
 
+        const newFiles = Array.from(files).filter((file) => {
+            if (!file.type.startsWith('image/')) {
+                ElNotification.error(`Tệp "${file.name}" không phải là hình ảnh!`);
+                return false;
+            }
+            return true;
+        });
+
         errorUploadFile.value.images.status = false;
         errorUploadFile.value.images.message = '';
 
-        const newId =
-            fakeImages.value.length > 0
-                ? Math.max(...fakeImages.value.map((img) => img.id)) + 1
-                : 1;
+        newFiles.forEach((file) => {
+            const newId =
+                fakeImages.value.length > 0
+                    ? Math.max(...fakeImages.value.map((img) => img.id)) + 1
+                    : 1;
 
-        fakeImages.value.push({
-            id: newId,
-            name: file.name,
-            url: URL.createObjectURL(file)
-        });
-
-        if (route.name === 'book.edit' && idImagesDelete.value.length > 0) {
-            bookForm.value.images.push({
-                id: idImagesDelete.value.pop(),
-                file
-            });
-        } else {
-            bookForm.value.images.push({
+            fakeImages.value.push({
                 id: newId,
-                file
+                name: file.name,
+                url: URL.createObjectURL(file)
             });
-        }
+
+            if (route.name === 'book.edit' && idImagesDelete.value.length > 0) {
+                bookForm.value.images.push({
+                    id: idImagesDelete.value.pop(),
+                    file,
+                });
+            } else {
+                bookForm.value.images.push({
+                    id: newId,
+                    file,
+                });
+            }
+        });
     }
 };
 

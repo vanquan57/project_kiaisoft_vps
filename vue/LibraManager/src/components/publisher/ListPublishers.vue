@@ -4,6 +4,7 @@
             :data="props.tableData"
             class="table-publisher"
             :scrolling="true"
+            :empty-text="'Không tìm thấy nhà xuất bản'"
         >
             <el-table-column
                 prop="id"

@@ -123,8 +123,8 @@ const props = defineProps({
 const outerVisible = ref(false);
 const mainImage = ref('');
 const coverType = [
-    { id: 1, name: 'Mềm' },
-    { id: 2, name: 'Cứng' }
+    { id: 1, name: 'Cứng' },
+    { id: 2, name: 'Mềm' }
 ];
 /**
  * The method get url image

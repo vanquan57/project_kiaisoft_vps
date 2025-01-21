@@ -8,26 +8,6 @@
             @submit.prevent="handleSearch"
         >
             <el-form-item
-                v-if="props.dataBook && props.dataBook.length > 0"
-                class="form-item"
-            >
-                <el-select
-                    v-model="searchForm.book_id"
-                    placeholder="Chọn sách"
-                    filterable
-                    allow-create
-                    :reserve-keyword="false"
-                >
-                    <el-option
-                        v-for="item in props.dataBook"
-                        :key="item.id"
-                        :label="item.name"
-                        :value="item.id"
-                    />
-                </el-select>
-            </el-form-item>
-            <el-form-item
-                v-else
                 prop="search"
             >
                 <el-input
@@ -167,10 +147,6 @@ const props = defineProps({
     statusOptions: {
         type: Array,
         default: () => []
-    },
-    dataBook: {
-        type: Array,
-        default: () => []
     }
 });
 const styleSearch = ref('');
@@ -221,12 +197,10 @@ const handleSearch = async () => {
                 delete searchForm.value.book_id;
                 emit('search', searchForm.value);
             } else if (route.path === '/feedback') {
-                delete searchForm.value.search;
                 delete searchForm.value.category_id;
                 delete searchForm.value.author_id;
                 delete searchForm.value.publisher_id;
                 delete searchForm.value.status;
-                console.log(searchForm.value);
                 emit('search', searchForm.value);
             } else {
                 emit('search', searchForm.value.search);

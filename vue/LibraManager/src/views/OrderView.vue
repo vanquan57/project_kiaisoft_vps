@@ -9,7 +9,7 @@
         </div>
         <div class="order-management-search">
             <SearchComponent
-                placeholder="Nhập email hoặc tên người dùng . . ."
+                placeholder="Nhập email hoặc tên người dùng"
                 :is-has-date="true"
                 :status-options="statusOptions"
                 @search="handleSearch"
@@ -53,6 +53,7 @@ import { useRouter } from 'vue-router';
 import STATUS_CODE_ORDER from '@/config/statusOrder';
 import { ElMessage } from 'element-plus';
 import OrderDetails from '@/components/order/OrderDetails.vue';
+import DEFAULT_CONSTANTS from '@/config/constants';
 const router = useRouter();
 const route = useRoute();
 const tableData = ref([]);
@@ -88,7 +89,7 @@ const breadcrumbList = ref([
         path: '/'
     },
     {
-        name: 'Mượn sách',
+        name: 'Danh sách',
         path: '/order'
     }
 ]);
@@ -104,13 +105,14 @@ onMounted(async () => {
  *
  * @returns {Promise<void>}
  */
-const getOrders = async (page = 1) => {
+const getOrders = async (page = 1, column = null, order = null) => {
     try {
         const response = await axiosInstance.get('/order', {
             params: {
                 limit: dataPagination.value.limit,
                 page: page,
-                type: 'asc'
+                column: column ?? DEFAULT_CONSTANTS.COLUMN,
+                order: order ?? DEFAULT_CONSTANTS.ORDER
             }
         });
         if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
@@ -130,7 +132,7 @@ const getOrders = async (page = 1) => {
  */
 const handleSearch = async (search) => {
     const queryParams = {};
-    console.log(search);
+
     if (search.search) {
         queryParams.key_word = search.search;
     }
@@ -157,6 +159,8 @@ const handleSearch = async (search) => {
             params: queryParams
         });
         tableData.value = response.data.data;
+        dataPagination.value.total = response.data.total;
+        dataPagination.value.currentPage = response.data.current_page;
     } else {
         await getOrders();
     }

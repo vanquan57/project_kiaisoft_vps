@@ -4,7 +4,7 @@
             :data="props.booksData"
             class="table-author"
             :scrolling="true"
-            style="width: 100%;"
+            :empty-text="'Không tìm thấy sách'"
         >
             <el-table-column
                 type="index"

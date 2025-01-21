@@ -12,7 +12,7 @@
         </div>
         <div class="dashboard-container__month__category">
             <div class="dashboard-item">
-                <h1>Số lượng đơn hàng theo từng tháng</h1>
+                <h1>Số lượng đơn mượn theo từng tháng</h1>
                 <TotalOrdersByMonth :total-orders-by-month="totalOrdersByMonth" />
             </div>
             <div class="dashboard-item">

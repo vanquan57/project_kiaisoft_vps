@@ -3,7 +3,7 @@
         <Bar
             class="chart-left"
             :data="userChartData"
-            :options="chartOptions"
+            :options="chartOptionsUser"
         />
 
         <Bar
@@ -36,13 +36,6 @@ ChartJS.register(
     LinearScale
 );
 
-const truncateLabel = (text, maxLength) => {
-    if (text.length > maxLength) {
-        return text.substring(0, maxLength) + '...';
-    }
-    return text;
-};
-
 const props = defineProps({
     topUsers: {
         type: Array,
@@ -58,14 +51,19 @@ const props = defineProps({
 });
 
 const userChartData = computed(() => ({
-    labels: props.topUsers.map((user) => truncateLabel(user.name, 10)),
+    labels: props.topUsers.map((user) => user.name),
     datasets: [
         {
             label: 'Số lượt mượn',
             data: props.topUsers.map((user) => user.orders_count),
             backgroundColor: 'rgba(75, 192, 192, 0.5)',
             borderColor: 'rgba(75, 192, 192, 1)',
-            borderWidth: 1
+            borderWidth: 1,
+            datalabels: {
+                formatter: (value) => {
+                    return '';
+                }
+            }
         }
     ]
 }));
@@ -76,14 +74,19 @@ const userChartData = computed(() => ({
  * @returns {Object}
  */
 const bookChartData = computed(() => ({
-    labels: props.topBooks.map((book) => truncateLabel(book.name, 10)),
+    labels: props.topBooks.map((book) => book.name),
     datasets: [
         {
             label: 'Số lượt mượn',
             data: props.topBooks.map((book) => book.borrowing_number),
             backgroundColor: 'rgba(153, 102, 255, 0.5)',
             borderColor: 'rgba(153, 102, 255, 1)',
-            borderWidth: 1
+            borderWidth: 1,
+            datalabels: {
+                formatter: (value) => {
+                    return '';
+                }
+            },
         }
     ]
 }));
@@ -96,7 +99,61 @@ const chartOptions = {
         legend: { position: 'top' }
     },
     barPercentage: 0.8,
-    categoryPercentage: 0.8
+    categoryPercentage: 0.8,
+    scales: {
+        x: {
+            ticks: {
+                callback: function (value) {
+                    return Number.isInteger(value) ? value : '';
+                },
+                stepSize: 500
+            },
+            beginAtZero: true
+        },
+        y: {
+            ticks: {
+                callback: function(value) {
+                    const label = this.getLabelForValue(value);
+                    const maxLength = 10;
+                    return label.length > maxLength ? label.substring(0, maxLength) + '...' : label;
+                }
+            }
+        }
+    }
+};
+
+
+const chartOptionsUser = {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        legend: { position: 'top' }
+    },
+    barPercentage: 0.8,
+    categoryPercentage: 0.8,
+    scales: {
+        x: {
+            ticks: {
+                callback: function (value) {
+                    return Number.isInteger(value) ? value : '';
+                },
+                stepSize: 1
+            },
+            beginAtZero: true
+        },
+        y: {
+            ticks: {
+                callback: function(value) {
+                    const label = this.getLabelForValue(value);
+                    const maxLength = 10;
+
+                    return label.length > maxLength ? label.substring(0, maxLength) + '...' : label;
+                }
+            }
+        }
+    }
+
 };
 </script>
 
@@ -104,6 +161,7 @@ const chartOptions = {
 .chart-container {
     display: flex;
     gap: 20px;
+    padding: 0 20px;
     .chart-left {
         min-height: 350px;
         height: 350px;
@@ -116,7 +174,7 @@ const chartOptions = {
         min-height: 350px;
         height: 350px;
         max-height: 350px;
-        max-width: 45%;
+        max-width: 50%;
         display: block;
         width: 444px;
     }
