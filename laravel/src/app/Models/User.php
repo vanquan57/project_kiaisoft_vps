@@ -24,6 +24,12 @@ class User extends Authenticatable implements JWTSubject
 
     const STATUS_BLOCK = 3;
 
+    const GROUP_STATUS = [
+        self::STATUS_WAITING,
+        self::STATUS_ACTIVE,
+        self::STATUS_BLOCK,
+    ];
+
     /**
      * The attributes that are mass assignable.
      *

@@ -2,4 +2,18 @@
 
 namespace App\Http\Repositories;
 
-interface UserRepositoryInterface extends BaseRepositoryInterface {}
+use Illuminate\Pagination\LengthAwarePaginator;
+
+interface UserRepositoryInterface extends BaseRepositoryInterface
+{
+    /**
+     * Get all users pagination
+     *
+     * @param array $data
+     *
+     * @return LengthAwarePaginator
+     */
+    public function getAllByPagination(
+        array $data,
+    ): LengthAwarePaginator;
+}
