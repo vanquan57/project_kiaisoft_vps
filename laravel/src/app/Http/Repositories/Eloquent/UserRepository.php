@@ -42,4 +42,21 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
 
         return $query->paginate($data['limit']);
     }
+
+    /**
+     * Check account is registered and active
+     * 
+     * @param string $code
+     * 
+     * @param string $email
+     * 
+     * @return bool
+     */
+    public function checkAccountRegisteredAndActive(string $code, string $email)
+    {
+        return $this->model->where('email', $email)
+            ->where('code', $code)
+            ->where('status', User::STATUS_ACTIVE)
+            ->exists();
+    }
 }

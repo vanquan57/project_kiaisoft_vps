@@ -23,6 +23,8 @@ class EmployeeCodeFactory extends Factory
 
         return [
             'code' => $code,
+            'email' => $this->faker->unique()->userName . '@kiaisoft.com',
+            'name' => $this->faker->name,
         ];
     }
 }

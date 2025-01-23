@@ -16,4 +16,18 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
     public function getAllByPagination(
         array $data,
     ): LengthAwarePaginator;
+
+    /**
+     * Check account is registered and active
+     * 
+     * @param string $code
+     * 
+     * @param string $email
+     * 
+     * @return bool
+     */
+    public function checkAccountRegisteredAndActive(
+        string $code,
+        string $email,
+    );
 }
