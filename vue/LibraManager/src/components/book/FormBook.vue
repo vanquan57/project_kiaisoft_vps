@@ -344,18 +344,18 @@ const errorUploadFile = ref({
 const bookFormRef = ref(null);
 
 const bookForm = ref({
-    name: null,
+    name: '',
     author_id: null,
     publisher_id: null,
     category_id: null,
-    mini_description: null,
-    details_description: null,
-    publication_date: null,
-    quantity: null,
-    size: null,
-    page: null,
-    cover_type: null,
-    image: null,
+    mini_description: '',
+    details_description: '',
+    publication_date: '',
+    quantity: 0,
+    size: '',
+    page: 0,
+    cover_type: 0,
+    image: '',
     images: []
 });
 

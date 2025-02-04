@@ -66,7 +66,7 @@
                     </div>
                     <div class="info-row">
                         <span class="label">Loại bìa:</span>
-                        <span>{{ coverType.find(item => item.id === props.book.cover_type)?.name }}</span>
+                        <span>{{ coverType.find(item => item.id === props.book.cover_type)?.label }}</span>
                     </div>
                     <div class="stats">
                         <div class="stat-item">
@@ -112,7 +112,7 @@
 
 <script setup>
 import { ref, watch } from 'vue';
-
+import COVER_TYPE from '@/config/coverType';
 const props = defineProps({
     book: {
         type: Object,
@@ -122,10 +122,9 @@ const props = defineProps({
 
 const outerVisible = ref(false);
 const mainImage = ref('');
-const coverType = [
-    { id: 1, name: 'Cứng' },
-    { id: 2, name: 'Mềm' }
-];
+const coverType = Array.from(COVER_TYPE);
+
+
 /**
  * The method get url image
  *
