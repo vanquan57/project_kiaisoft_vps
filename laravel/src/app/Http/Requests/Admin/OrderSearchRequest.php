@@ -44,17 +44,17 @@ class OrderSearchRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'key_word.string' => 'The search field must be a string.',
-            'key_word.max' => 'The search field may not be greater than :max characters.',
-            'limit.integer' => 'The limit field must be an integer.',
-            'limit.min' => 'The limit field must be at least :min.',
-            'column.string' => 'The filed name field must be a string.',
-            'column.in' => 'The filed name field must be one of the following types: :values.',
-            'order.string' => 'The type field must be a string.',
-            'order.in' => 'The type field must be one of the following types: :values.',
-            'start_date.date' => 'The start date field must be a date.',
-            'end_date.date' => 'The end date field must be a date.',
-            'status.in' => 'The status field must be one of the following types: :values.',
+            'key_word.string' => 'Trường tìm kiếm phải là một chuỗi ký tự.',
+            'key_word.max' => 'Trường tìm kiếm không được vượt quá :max ký tự.',
+            'limit.integer' => 'Trường giới hạn phải là một số nguyên.',
+            'limit.min' => 'Trường giới hạn phải có giá trị tối thiểu là :min.',
+            'column.string' => 'Tên cột phải là một chuỗi ký tự.',
+            'column.in' => 'Tên cột phải là một trong các giá trị sau: :values.',
+            'order.string' => 'Loại sắp xếp phải là một chuỗi ký tự.',
+            'order.in' => 'Loại sắp xếp phải là một trong các giá trị sau: :values.',
+            'start_date.date' => 'Ngày bắt đầu phải là một ngày hợp lệ.',
+            'end_date.date' => 'Ngày kết thúc phải là một ngày hợp lệ.',
+            'status.in' => 'Trạng thái phải là một trong các giá trị sau: :values.',
         ];
     }
 }

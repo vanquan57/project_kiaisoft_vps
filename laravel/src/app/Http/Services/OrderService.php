@@ -94,6 +94,7 @@ class OrderService
             }
 
             DB::commit();
+
             return true;
         } catch (\Exception $e) {
             DB::rollBack();

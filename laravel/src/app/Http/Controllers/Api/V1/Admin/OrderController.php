@@ -23,17 +23,21 @@ class OrderController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @param OrderSearchRequest $request
+     * 
      * @return JsonResponse
      */
     public function index(OrderSearchRequest $request): JsonResponse
     {
-        if ($orders = $this->orderService->getAllByPaginate($request->validated())) {
-            return response()->json($orders);
+        if (!$orders = $this->orderService->getAllByPaginate($request->validated())) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                Response::HTTP_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+            );
         }
 
-        return response()->json([
-            'error' => 'The request could not be processed',
-        ], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI($orders);
     }
 
     /**
@@ -45,13 +49,15 @@ class OrderController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        if ($order = $this->orderService->show($id)) {
-            return response()->json($order);
+        if (!$order = $this->orderService->show($id)) {
+            return responseErrorAPI(
+                Response::HTTP_NOT_FOUND,
+                Response::HTTP_NOT_FOUND,
+                'Không tìm thấy đơn mượn sách.'
+            );
         }
 
-        return response()->json([
-            'error' => 'The request could not be processed',
-        ], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI($order);
     }
 
     /**
@@ -65,12 +71,16 @@ class OrderController extends Controller
      */
     public function update(UpdateOrderRequest $request, int $id): JsonResponse
     {
-        if ($this->orderService->update($request->validated(), $id)) {
-            return response()->json(true);
+        if (!$this->orderService->update($request->validated(), $id)) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                Response::HTTP_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+            );
         }
 
-        return response()->json([
-            'error' => 'The request could not be processed',
-        ], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI([
+            'message' => 'Cập nhật đơn mượn sách thành công.'
+        ]);
     }
 }
