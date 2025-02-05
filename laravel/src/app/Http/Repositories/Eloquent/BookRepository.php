@@ -4,6 +4,7 @@ namespace App\Http\Repositories\Eloquent;
 
 use App\Http\Repositories\BookRepositoryInterface;
 use App\Models\Book;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class BookRepository extends BaseRepository implements BookRepositoryInterface
@@ -147,5 +148,52 @@ class BookRepository extends BaseRepository implements BookRepositoryInterface
         }
 
         return false;
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param array $attributes
+     *
+     * @return Model
+     */
+    public function store(array $attributes): Model
+    {
+        return $this->model->create([
+            'author_id' => $attributes['author_id'],
+            'publisher_id' => $attributes['publisher_id'],
+            'category_id' => $attributes['category_id'],
+            'name' => $attributes['name'],
+            'slug' => $attributes['name'],
+            'mini_description' => $attributes['mini_description'],
+            'details_description' => $attributes['details_description'],
+            'publication_date' => $attributes['publication_date'],
+            'image' => $attributes['image'],
+            ... $attributes,
+        ]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param int $id
+     * 
+     * @param array $attributes
+     *
+     * @return bool
+     */
+    public function update(int $id, array $attributes): bool
+    {
+        return $this->model->find($id)->update([
+            'author_id' => $attributes['author_id'],
+            'publisher_id' => $attributes['publisher_id'],
+            'category_id' => $attributes['category_id'],
+            'name' => $attributes['name'],
+            'slug' => $attributes['name'],
+            'mini_description' => $attributes['mini_description'],
+            'details_description' => $attributes['details_description'],
+            'publication_date' => $attributes['publication_date'],
+            ... $attributes,
+        ]);
     }
 }

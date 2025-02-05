@@ -43,20 +43,20 @@ class BookSearchRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.string' => 'The search must be a string.',
-            'name.max' => 'The name may not be greater than 255 characters.',
-            'limit.integer' => 'The limit must be an integer.',
-            'limit.min' => 'The limit must be at least 1.',
-            'author_id.integer' => 'The author ID must be an integer.',
-            'author_id.exists' => 'The selected author does not exist.',
-            'publisher_id.integer' => 'The publisher ID must be an integer.',
-            'publisher_id.exists' => 'The selected publisher does not exist.',
-            'category_id.integer' => 'The category ID must be an integer.',
-            'category_id.exists' => 'The selected category does not exist.',
-            'order.string' => 'The order must be a string.',
-            'order.in' => 'The order must be asc or desc.',
-            'column.string' => 'The column must be a string.',
-            'column.in' => 'The column field invalid.',
+            'name.string' => 'Từ khóa tìm kiếm phải là một chuỗi ký tự hợp lệ.',
+            'name.max' => 'Tên không được vượt quá 255 ký tự.',
+            'limit.integer' => 'Giá trị giới hạn phải là một số nguyên.',
+            'limit.min' => 'Giá trị giới hạn phải lớn hơn hoặc bằng 1.',
+            'author_id.integer' => 'ID tác giả phải là một số nguyên.',
+            'author_id.exists' => 'Tác giả được chọn không tồn tại.',
+            'publisher_id.integer' => 'ID nhà xuất bản phải là một số nguyên.',
+            'publisher_id.exists' => 'Nhà xuất bản được chọn không tồn tại.',
+            'category_id.integer' => 'ID thể loại phải là một số nguyên.',
+            'category_id.exists' => 'Thể loại được chọn không tồn tại.',
+            'order.string' => 'Thứ tự sắp xếp phải là một chuỗi ký tự.',
+            'order.in' => 'Thứ tự sắp xếp chỉ được phép là "asc" hoặc "desc".',
+            'column.string' => 'Tên cột phải là một chuỗi ký tự hợp lệ.',
+            'column.in' => 'Tên cột không hợp lệ.',
         ];
     }
 }

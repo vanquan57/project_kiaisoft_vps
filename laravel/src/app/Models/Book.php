@@ -11,6 +11,9 @@ class Book extends Model
 {
     use HasFactory, SoftDeletes;
 
+    const HARD_COVER = 1;
+    const SOFT_COVER = 2;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -47,7 +50,27 @@ class Book extends Model
      */
     public function setSlugAttribute($value)
     {
-        $this->attributes['slug'] = Str::slug($value);
+        $this->attributes['slug'] = $this->generateUniqueSlug($value);
+    }
+
+    /**
+     * Generate a unique slug for a book based on the given title.
+     *
+     * @param string $title The title of the book.
+     * 
+     * @return string The unique slug for the book.
+     */
+    private function generateUniqueSlug($title) {
+        $slug = Str::slug($title);
+        $originalSlug = $slug;
+        $count = 1;
+
+        while (self::where('slug', $slug)->exists()) {
+            $slug = $originalSlug . '-' . $count;
+            $count++;
+        }
+
+        return $slug;
     }
 
     /**

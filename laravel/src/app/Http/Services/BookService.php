@@ -19,7 +19,8 @@ class BookService
      * @param BookRepositoryInterface $bookRepository
      *
      * @param ImageService $imageService
-     *
+     * 
+     * @param ImageRepositoryInterface $imageRepository
      */
     public function __construct(
         protected BookRepositoryInterface $bookRepository,
@@ -71,8 +72,6 @@ class BookService
 
             if (Storage::disk('public')->put('images/' . $hashedName, file_get_contents($data['image']->getRealPath()))) {
                 $data['image'] = $hashedName;
-                $data['slug'] = $data['name'];
-
                 $book = $this->bookRepository->store($data);
 
                 if (!$book) {
@@ -80,7 +79,6 @@ class BookService
                 }
 
                 $this->addBookToCategory($book->id, $data['category_id']);
-
                 $urls = $this->imageService->uploadImages($data['images']);
 
                 if (empty($urls)) {
@@ -159,7 +157,6 @@ class BookService
                 
                 if (Storage::disk('public')->put('images/' . $hashedName, file_get_contents($data['image']->getRealPath()))) {
                     $data['image'] = $hashedName;
-                    $data['slug'] = $data['name'];
 
                     $this->imageService->deleteFromStorage($book->image);
                 } else {
@@ -167,9 +164,13 @@ class BookService
                 }
             }
 
-            if (isset($data['id_images_removed']) && isset($data['images']) && count($data['images']) === count($data['id_images_removed'])) {
+            if (
+                isset($data['id_images_removed']) && isset($data['images']) &&
+                count($data['images']) === count($data['id_images_removed'])
+            ) {
                 // Memory url image removed
                 $urlOldImagesRemoved = [];
+
                 foreach ($data['id_images_removed'] as $idImage) {
                     $urlOldImagesRemoved[] = $this->imageRepository->find($idImage)->url;
                 }
@@ -179,27 +180,30 @@ class BookService
                 if (empty($urls)) {
                     throw new \Exception('Lỗi, tải lên hình ảnh thất bại');
                 }
+
                 //Combine id image removed with url image new for update
                 $dataImagesUpdate = array_combine($data['id_images_removed'], $urls);
 
                 foreach ($dataImagesUpdate as $idImage => $url) {
-                    if(!$this->imageRepository->update($idImage, ['url' => $url])){
+                    if (!$this->imageRepository->update($idImage, ['url' => $url])) {
                         throw new \Exception('Lỗi, cập nhật hình ảnh thất bại');
                     }
                 }
+
                 // Remove old image when has updated successfully
                 foreach ($urlOldImagesRemoved as $urlOldImageRemoved) {
                     $this->imageService->deleteFromStorage($urlOldImageRemoved);
                 }
             }
+
             // Update information book exepct image
             if (!$this->bookRepository->update($id, $data)) {
                 throw new \Exception('Lỗi, cập nhật thông tin sách thất bại');
             }
 
             $this->updateBookInCategory($id, $data['category_id']);
-
             DB::commit();
+
             return true;
         } catch (\Exception $e) {
             DB::rollBack();
@@ -214,6 +218,7 @@ class BookService
                     $this->imageService->deleteFromStorage($url);
                 }
             }
+
             return false;
         }
     }
@@ -223,29 +228,16 @@ class BookService
      *
      * @param int $id
      *
-     * @return array
+     * @return bool
      */
-    public function destroy(int $id): array
+    public function destroy(int $id): bool
     {
         try {
-            if ($this->bookRepository->destroy($id)) {
-                return [
-                    'message' => 'Book deleted successfully.',
-                    'code' => Response::HTTP_OK,
-                ];
-            }
-            
-            return [
-                'error' => 'Book that are on order cannot be deleted.',
-                'code' => Response::HTTP_BAD_REQUEST,
-            ];
+            return $this->bookRepository->destroy($id);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 
-            return [
-                'error' => 'The request could not be processed.',
-                'code' => Response::HTTP_INTERNAL_SERVER_ERROR,
-            ];
+            return false;
         }
     }
 

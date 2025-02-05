@@ -23,16 +23,22 @@ class BookController extends Controller
 
     /**
      * Display a listing of the resource.
+     * 
+     * @param BookSearchRequest $request
      *
      * @return JsonResponse
      */
     public function index(BookSearchRequest $request): JsonResponse
     {
-        if ($books = $this->bookService->getAllByPagination($request->validated())) {
-            return response()->json($books);
+        if (!$books = $this->bookService->getAllByPagination($request->validated())) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                Response::HTTP_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+            );
         }
-
-        return response()->json(['error' => 'The request could not be processed.'], Response::HTTP_BAD_REQUEST);
+        
+        return responseOkAPI($books);
     }
 
     /**
@@ -44,11 +50,15 @@ class BookController extends Controller
      */
     public function store(StoreBookRequest $request): JsonResponse
     {
-        if ($book = $this->bookService->store($request->validated())) {
-            return response()->json($book, Response::HTTP_CREATED);
+        if (!$book = $this->bookService->store($request->validated())) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                Response::HTTP_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+            );
         }
-
-        return response()->json(['error' => 'The request could not be processed.'], Response::HTTP_BAD_REQUEST);
+        
+        return responseOkAPI($book, Response::HTTP_CREATED);
     }
 
     /**
@@ -60,11 +70,15 @@ class BookController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        if ($book = $this->bookService->show($id)) {
-            return response()->json($book);
+        if (!$book = $this->bookService->show($id)) {
+            return responseErrorAPI(
+                Response::HTTP_NOT_FOUND,
+                Response::HTTP_NOT_FOUND,
+                'Không tìm thấy sách.'
+            );
         }
-
-        return response()->json(['error' => 'The request could not be processed.'], Response::HTTP_BAD_REQUEST);
+        
+        return responseOkAPI($book);
     }
 
     /**
@@ -78,11 +92,17 @@ class BookController extends Controller
      */
     public function update(UpdateBookRequest $request, int $id): JsonResponse
     {
-        if ($this->bookService->update($request->validated(), $id)) {
-            return response()->json(true);
+        if (!$this->bookService->update($request->validated(), $id)) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                Response::HTTP_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+            );
         }
-
-        return response()->json(['error' => 'The request could not be processed.'], Response::HTTP_BAD_REQUEST);
+        
+        return responseOkAPI([
+            'message' => 'Cập nhật sách thành công.'
+        ]);
     }
 
     /**
@@ -94,12 +114,16 @@ class BookController extends Controller
      */
     public function destroy(int $id): JsonResponse
     {
-        $result = $this->bookService->destroy($id);
-
-        if($result['code'] >= 200 && $result['code'] < 300) {
-            return response()->json(['message' => $result['message']], $result['code']);
+        if (!$this->bookService->destroy($id)) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Sách đang được mượn, không thể xóa.'
+            );
         }
 
-        return response()->json(['error' => $result['error']], $result['code']);
+        return responseOkAPI([
+            'message' => 'Xóa sách thành công.'
+        ]);
     }
 }
