@@ -14,6 +14,8 @@ class FeedbackService
      * Constructor
      *
      * @param FeedbackRepositoryInterface $feedbackRepository
+     * 
+     * @param BookRepositoryInterface $bookRepository
      */
     public function __construct(
         protected FeedbackRepositoryInterface $feedbackRepository,
@@ -44,6 +46,7 @@ class FeedbackService
                 if (empty($bookIds)) {
                     return null;
                 }
+
                 $data['book_ids'] = $bookIds;
 
                 return $this->feedbackRepository->getAllByPaginate($data);

@@ -46,7 +46,8 @@ class FeedbackRepository extends BaseRepository implements FeedbackRepositoryInt
             $query->orderBy($data['column'], $data['order']);
         }
 
-        return $query->paginate($data['limit']);
+        return $query->orderBy('created_at', config('constants.DEFAULT_ORDER_DATE'))
+            ->paginate($data['limit']);
     }
 
     /**

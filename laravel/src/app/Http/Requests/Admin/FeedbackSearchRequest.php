@@ -23,7 +23,7 @@ class FeedbackSearchRequest extends FormRequest
     public function rules(): array
     {
         $columns = DB::getSchemaBuilder()->getColumnListing('feedbacks');
-        
+
         return [
             'name' => 'nullable|string|max:255',
             'limit' => 'nullable|integer|min:1',
@@ -42,16 +42,16 @@ class FeedbackSearchRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.string' => 'Name must be a string!',
-            'name.max' => 'Name may not be greater than 255 characters!',
-            'limit.min' => 'The minimum value must be greater than 1',
-            'limit.integer' => 'Limit must be an integer!',
-            'column.string' => 'Column must be a string!',
-            'column.in' => 'Column must be one of the columns in the feedbacks table!',
-            'order.string' => 'Type must be a string!',
-            'order.in' => 'Type must be asc or desc!',
-            'start_date.date' => 'Start date must be a date!',
-            'end_date.date' => 'End date must be a date!',
+            'name.string' => 'Tên phải là một chuỗi ký tự!',
+            'name.max' => 'Tên không được vượt quá 255 ký tự!',
+            'limit.min' => 'Giá trị tối thiểu phải lớn hơn 1!',
+            'limit.integer' => 'Giới hạn phải là một số nguyên!',
+            'column.string' => 'Cột phải là một chuỗi ký tự!',
+            'column.in' => 'Cột phải là một trong các cột của bảng phản hồi!',
+            'order.string' => 'Kiểu sắp xếp phải là một chuỗi ký tự!',
+            'order.in' => 'Kiểu sắp xếp phải là "asc" hoặc "desc"!',
+            'start_date.date' => 'Ngày bắt đầu phải là một ngày hợp lệ!',
+            'end_date.date' => 'Ngày kết thúc phải là một ngày hợp lệ!',
         ];
     }
 }
