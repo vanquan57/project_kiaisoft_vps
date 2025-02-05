@@ -145,27 +145,7 @@ const handleShowDetailsBook = (id) => {
 };
 </script>
 
-<style lang="scss">
-@import '@/assets/scss/book.scss';
-
-.list-book-management-container {
-    padding: 10px;
-    .actions-group-book{
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        gap: 10px!important;
-        .actions-group{
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px!important;
-        }
-    }
-    .image-book{
-        object-fit: cover;
-    }
-}
+<style lang="scss" scoped>
+@import '@/assets/scss/components/book/list_book.scss';
 </style>
 

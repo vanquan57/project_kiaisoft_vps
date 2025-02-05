@@ -158,25 +158,5 @@ const chartOptionsUser = {
 </script>
 
 <style lang="scss" scoped>
-.chart-container {
-    display: flex;
-    gap: 20px;
-    padding: 0 20px;
-    .chart-left {
-        min-height: 350px;
-        height: 350px;
-        max-height: 350px;
-        max-width: 50%;
-        display: block;
-        width: 444px;
-    }
-    .chart-right {
-        min-height: 350px;
-        height: 350px;
-        max-height: 350px;
-        max-width: 50%;
-        display: block;
-        width: 444px;
-    }
-}
+@import '@/assets/scss/components/chart/user_book.scss';
 </style>

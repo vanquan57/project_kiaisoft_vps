@@ -342,8 +342,5 @@ function configUpdateAlert(config) {
 }
 </script>
 
-<style lang="scss">
-.ck-blurred, .ck-placeholder, .ck-content {
-    height: 250px !important;
-}
+<style lang="scss" scoped>
 </style>

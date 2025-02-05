@@ -211,19 +211,5 @@ const handleSearch = async () => {
 </script>
 
 <style lang="scss" scoped>
-.search-form-container {
-    padding: 10px 10px 10px 10px;
-    box-sizing: border-box;
-    overflow: hidden;
-    .search-form {
-        display: flex;
-        gap: 10px;
-        .search-button {
-            width: 100%;
-        }
-        .el-form-item {
-            margin-bottom: 0 !important;
-        }
-    }
-}
+@import '@/assets/scss/components/search/form_search.scss';
 </style>

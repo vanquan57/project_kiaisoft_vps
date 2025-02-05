@@ -240,30 +240,5 @@ const handleUpdateStatusOrderDetails = async (
 </script>
 
 <style lang="scss" scoped>
-.order-management-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    height: 100%;
-    padding-bottom: 15px;
-    .order-management-breadcrumb-container {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-        margin: 10px 0;
-        padding: 0 10px;
-        h1 {
-            font-size: 24px;
-            font-weight: bold;
-        }
-    }
-    .order-management-search {
-        width: 100%;
-    }
-    .order-management-content {
-        width: 100%;
-    }
-}
+@import '@/assets/scss/views/order_view.scss';
 </style>

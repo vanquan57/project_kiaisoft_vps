@@ -127,21 +127,5 @@ const handleSubmit = async () => {
 </script>
 
 <style lang="scss" scoped>
-.author-form-container {
-    width: 100%;
-    max-width: 600px;
-    margin: 30px auto;
-    .author-form {
-        margin: auto;
-        width: 100%;
-        height: 300px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        textarea {
-            white-space: pre-wrap !important;
-            word-wrap: break-word !important;
-        }
-    }
-}
+@import '@/assets/scss/components/author/form_author.scss';
 </style>

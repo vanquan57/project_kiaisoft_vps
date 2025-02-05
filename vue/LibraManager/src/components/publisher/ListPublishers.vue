@@ -79,20 +79,5 @@ const handleOptionDelete = (id) => {
 </script>
 
 <style lang="scss" scoped>
-.list-publisher-container {
-    width: 100%;
-    padding: 10px;
-    box-sizing: border-box;
-    overflow: hidden;
-    .actions-group {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-    }
-}
-.format-description {
-    white-space: pre-wrap;
-}
-
+@import '@/assets/scss/components/publisher/list_publisher.scss';
 </style>

@@ -1,5 +1,5 @@
 import './assets/main.css';
-import './assets/scss/style.scss';
+import './assets/scss/override/style.scss';
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import ElementPlus from 'element-plus';
