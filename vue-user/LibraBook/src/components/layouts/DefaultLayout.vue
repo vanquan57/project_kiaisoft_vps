@@ -14,13 +14,5 @@ import FooterLayout from '@/components/layouts/FooterLayout.vue';
 </script>
 
 <style lang="scss" scoped>
-.layout-container {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-}
-
-main {
-    flex: 1;
-}
+@import '@/assets/scss/layouts/default_layout.scss';
 </style>

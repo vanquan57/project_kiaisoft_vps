@@ -24,9 +24,5 @@ const props = defineProps({
 </script>
 
 <style lang="scss" scoped>
-.breadcrumb {
-    padding: 20px 0;
-    font-size: 14px;
-    font-family: "Poppins", sans-serif;
-}
+@import '@/assets/scss/components/breadcrumb/breadcrumb.scss';
 </style>
