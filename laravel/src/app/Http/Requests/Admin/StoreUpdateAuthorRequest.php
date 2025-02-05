@@ -35,11 +35,10 @@ class StoreUpdateAuthorRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.unique' => 'The name has already been taken.',
-            'name.required' => 'The name is required.',
-            'name.max' => 'The name must be at most 100 characters.',
-            'description.max' => 'The description must be at most 255 characters.',
-            'description.string' => 'The description must be a string.',
+            'name.required' => 'Tên tác giả không được để trống.',
+            'name.max' => 'Tên tác giả không được vượt quá 100 ký tự.',
+            'description.max' => 'Mô tả không được vượt quá 255 ký tự.',
+            'description.string' => 'Mô tả phải là một chuỗi ký tự hợp lệ.',
         ];
     }
 }

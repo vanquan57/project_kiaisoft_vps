@@ -4,8 +4,6 @@ namespace App\Http\Services;
 
 use App\Http\Repositories\AuthorRepositoryInterface;
 use App\Models\Author;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Http\Response;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Log;
 
@@ -116,29 +114,16 @@ class AuthorService
      *
      * @param int $id
      *
-     * @return array
+     * @return bool
      */
-    public function destroy(int $id): array
+    public function destroy(int $id): bool
     {
         try {
-            if ($this->authorRepository->destroy($id)) {
-                return [
-                    'message' => 'The author has been deleted',
-                    'code' => Response::HTTP_OK,
-                ];
-            }
-
-            return [
-                'error' => 'Author with registered books cannot be deleted',
-                'code' => Response::HTTP_BAD_REQUEST,
-            ];
+            return $this->authorRepository->destroy($id);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 
-            return [
-                'error' => 'The request could not be processed',
-                'code' => Response::HTTP_INTERNAL_SERVER_ERROR,
-            ];
+            return false;
         }
     }
 }

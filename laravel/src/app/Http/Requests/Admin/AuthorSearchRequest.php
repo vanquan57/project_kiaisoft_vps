@@ -24,7 +24,7 @@ class AuthorSearchRequest extends FormRequest
     public function rules(): array
     {
         $columns = DB::getSchemaBuilder()->getColumnListing('authors');
-        
+
         return [
             'name' => 'nullable|string|max:255',
             'limit' => 'nullable|integer|min:1',
@@ -41,14 +41,14 @@ class AuthorSearchRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.max' => 'The search must be at most 255 characters.',
-            'name.string' => 'The search must be a string.',
-            'limit.integer' => 'The limit must be an integer.',
-            'limit.min' => 'The limit must be at least 1.',
-            'order.string' => 'The order must be a string.',
-            'order.in' => 'The order must be asc or desc.',
-            'column.string' => 'The column must be a string.',
-            'column.in' => 'The column field invalid.',
+            'name.max' => 'Từ khóa tìm kiếm không được vượt quá 255 ký tự.',
+            'name.string' => 'Từ khóa tìm kiếm phải là một chuỗi ký tự hợp lệ.',
+            'limit.integer' => 'Giá trị giới hạn phải là một số nguyên.',
+            'limit.min' => 'Giá trị giới hạn phải lớn hơn hoặc bằng 1.',
+            'order.string' => 'Thứ tự sắp xếp phải là một chuỗi ký tự.',
+            'order.in' => 'Thứ tự sắp xếp chỉ được phép là "asc" hoặc "desc".',
+            'column.string' => 'Tên cột phải là một chuỗi ký tự hợp lệ.',
+            'column.in' => 'Giá trị của cột không hợp lệ.',
         ];
     }
 }

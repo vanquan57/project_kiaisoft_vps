@@ -15,7 +15,6 @@ class AuthorController extends Controller
      * Constructor
      *
      * @param AuthorService $authorService
-     *
      */
     public function __construct(
         protected AuthorService $authorService
@@ -30,11 +29,15 @@ class AuthorController extends Controller
      */
     public function index(AuthorSearchRequest $request): JsonResponse
     {
-        if ($authors = $this->authorService->getAllByPaginate($request->validated())) {
-            return response()->json($authors);
+        if (!$authors = $this->authorService->getAllByPaginate($request->validated())) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau'
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI($authors);
     }
 
     /**
@@ -46,11 +49,15 @@ class AuthorController extends Controller
      */
     public function store(StoreUpdateAuthorRequest $request): JsonResponse
     {
-        if ($author = $this->authorService->store($request->validated())) {
-            return response()->json($author, Response::HTTP_CREATED);
+        if (!$author = $this->authorService->store($request->validated())) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau'
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI($author, Response::HTTP_CREATED);
     }
 
     /**
@@ -62,11 +69,15 @@ class AuthorController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        if ($author = $this->authorService->show($id)) {
-            return response()->json($author);
+        if (!$author = $this->authorService->show($id)) {
+            return responseErrorAPI(
+                Response::HTTP_NOT_FOUND,
+                ERROR_CODE_NOT_FOUND,
+                'Không tìm thấy tác giả'
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI($author);
     }
 
     /**
@@ -80,11 +91,17 @@ class AuthorController extends Controller
      */
     public function update(StoreUpdateAuthorRequest $request, int $id): JsonResponse
     {
-        if ($author = $this->authorService->update($id, $request->validated())) {
-            return response()->json($author);
+        if (!$this->authorService->update($id, $request->validated())) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau'
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI([
+            'message' => 'Cập nhật tác giả thành công'
+        ]);
     }
 
     /**
@@ -96,12 +113,16 @@ class AuthorController extends Controller
      */
     public function destroy(int $id): JsonResponse
     {
-        $result =  $this->authorService->destroy($id);
-
-        if($result['code'] === Response::HTTP_OK) {
-            return response()->json(['message' => $result['message']]);
+        if (!$this->authorService->destroy($id)) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Tác giả có sách đăng ký, không thể xóa.'
+            );
         }
 
-        return response()->json(['error' => $result['error']], $result['code']);
+        return responseOkAPI([
+            'message' => 'Xóa tác giả thành công.'
+        ]);
     }
 }
