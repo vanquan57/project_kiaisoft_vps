@@ -76,6 +76,7 @@
                 <EditPublisher
                     :id="props.id"
                     :current-page="dataPagination.currentPage"
+                    :name="name"
                     @get-publishers="getPublishers"
                 />
             </div>
@@ -97,6 +98,7 @@ import HTTP_STATUS_CODE from '@/config/statusCode';
 import { useRouter } from 'vue-router';
 import { ElMessageBox, ElNotification } from 'element-plus';
 import DEFAULT_CONSTANTS from '@/config/constants';
+import { showNotificationSuccess, showNotificationError } from '@/helpers/notification';
 
 const router = useRouter();
 const route = useRoute();
@@ -122,7 +124,7 @@ const breadcrumbList = ref([
         path: '/category'
     }
 ]);
-
+const name = ref('');
 const dataPagination = ref({
     limit: 10,
     total: 0,
@@ -136,20 +138,26 @@ const styleInput = ref('width: 400px');
  *
  * @returns {Promise<void>}
  */
-const getPublishers = async (page = 1, column = null, order = null) => {
+const getPublishers = async (page = 1, column = null, order = null, name = null) => {
     try {
         const response = await axiosInstance.get('/publisher', {
             params: {
+                name: name,
                 page,
                 limit: dataPagination.value.limit,
                 column: column ?? DEFAULT_CONSTANTS.COLUMN,
                 order: order ?? DEFAULT_CONSTANTS.ORDER
             }
         });
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-            tableData.value = response.data.data;
-            dataPagination.value.total = response.data.total;
-            dataPagination.value.currentPage = response.data.current_page;
+
+        if (response.success) {
+            if (!response.data) {
+                tableData.value = [];
+            } else {
+                tableData.value = response.data.data;
+                dataPagination.value.total = response.data.total;
+                dataPagination.value.currentPage = response.data.current_page;
+            }
         }
     } catch (error) {
     }
@@ -225,17 +233,11 @@ const handleSearch = async (search) => {
     });
 
     if (search !== '') {
-        const response = await axiosInstance.get('/publisher', {
-            params: {
-                name: search.trim()
-            }
-        });
-        tableData.value = response.data.data;
-        dataPagination.value.total = response.data.total;
-        dataPagination.value.currentPage = response.data.current_page;
-        dataPagination.value.limit = response.data.limit;
+        name.value = search.trim();
+        await getPublishers(dataPagination.value.currentPage, null, null, search.trim());
     } else {
-        getPublishers();
+        name.value = '';
+        await getPublishers();
     }
 };
 
@@ -268,21 +270,13 @@ const handleOptionDelete = async (id) => {
 
         const response = await axiosInstance.delete(`/publisher/${id}`);
 
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-            ElNotification({
-                title: 'Thành công',
-                message: 'Xóa nhà xuất bản thành công',
-                type: 'success'
-            });
+        if (response.success) {
+            showNotificationSuccess(response.data.message);
 
-            getPublishers(dataPagination.value.currentPage);
+            tableData.value = tableData.value.filter((item) => item.id !== id);
         }
     } catch (error) {
-        ElNotification({
-            title: 'Thất bại',
-            message: 'Nhà xuất bản có sách đăng ký, không thể xóa',
-            type: 'error'
-        });
+        showNotificationError(error);
     }
 };
 

@@ -82,6 +82,11 @@ const rules = {
     ],
     description: [
         {
+            required: true,
+            message: 'Vui lòng nhập tên nhà xuất bản',
+            trigger: 'blur'
+        },
+        {
             max: 255,
             message: 'Mô tả không được quá 255 ký tự',
             trigger: 'change'

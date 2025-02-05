@@ -76,6 +76,7 @@
                 <EditCategory
                     :id="props.id"
                     :current-page="dataPagination.currentPage"
+                    :name="name"
                     @get-categories="getCategories"
                 />
             </div>
@@ -97,6 +98,7 @@ import { useRouter } from 'vue-router';
 import { ElNotification, ElMessageBox } from 'element-plus';
 import BreadcrumbComponent from '@/components/breadcrumb/BreadcrumbComponent.vue';
 import DEFAULT_CONSTANTS from '@/config/constants';
+import { showNotificationSuccess, showNotificationError } from '@/helpers/notification';
 
 const router = useRouter();
 const route = useRoute();
@@ -130,26 +132,33 @@ const dataPagination = ref({
     currentPage: 1
 });
 const tableData = ref([]);
+const name = ref('');
 
 /**
  * Get categories
  *
  * @returns {Promise<void>}
  */
-const getCategories = async (page = 1, column = null, order = null) => {
+const getCategories = async (page = 1, column = null, order = null, name = null) => {
     try {
         const response = await axiosInstance.get('/category', {
             params: {
+                name: name,
                 page,
                 limit: dataPagination.value.limit,
                 column: column ?? DEFAULT_CONSTANTS.COLUMN,
                 order: order ?? DEFAULT_CONSTANTS.ORDER
             }
         });
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-            tableData.value = response.data.data;
-            dataPagination.value.total = response.data.total;
-            dataPagination.value.currentPage = response.data.current_page;
+
+        if (response.success) {
+            if (!response.data) {
+                tableData.value = [];
+            } else {
+                tableData.value = response.data.data;
+                dataPagination.value.total = response.data.total;
+                dataPagination.value.currentPage = response.data.current_page;
+            }
         }
     } catch (error) {}
 };
@@ -224,15 +233,11 @@ const handleSearch = async (search) => {
     });
 
     if (search !== '') {
-        const response = await axiosInstance.get('/category', {
-            params: { name: search.trim() }
-        });
-        tableData.value = response.data.data;
-        dataPagination.value.total = response.data.total;
-        dataPagination.value.currentPage = response.data.current_page;
-        dataPagination.value.limit = response.data.limit;
+        name.value = search.trim();
+        await getCategories(dataPagination.value.currentPage, null, null, search.trim());
     } else {
-        getCategories();
+        name.value = '';
+        await getCategories();
     }
 };
 
@@ -269,21 +274,13 @@ const handleOptionDelete = async (id) => {
 
         const response = await axiosInstance.delete(`/category/${id}`);
 
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-            ElNotification({
-                title: 'Thành công',
-                message: 'Xóa danh mục thành công',
-                type: 'success'
-            });
+        if (response.success) {
+            showNotificationSuccess(response.data.message);
 
-            getCategories(dataPagination.value.currentPage);
+            tableData.value = tableData.value.filter((item) => item.id !== id);
         }
     } catch (error) {
-        ElNotification({
-            title: 'Thất bại',
-            message: 'Danh mục có sách, không thể xóa',
-            type: 'error'
-        });
+        showNotificationError(error);
     }
 };
 </script>

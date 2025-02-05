@@ -16,6 +16,7 @@ import axiosInstance from '@/config/axios';
 import HTTP_STATUS_CODE from '@/config/statusCode';
 import { ElNotification } from 'element-plus';
 import { useRouter } from 'vue-router';
+import { showNotificationSuccess, showNotificationError } from '@/helpers/notification';
 
 const emit = defineEmits(['getBooks']);
 const router = useRouter();
@@ -62,23 +63,14 @@ const handleSubmit = async (data) => {
 
     try {
         const response = await axiosInstance.post('book', formData);
-        if (response.status === HTTP_STATUS_CODE.HTTP_CREATED) {
-            ElNotification.success({
-                title: 'Thành công',
-                message: 'Tạo sách thành công',
-                type: 'success'
-            });
+        if (response.success) {
+            showNotificationSuccess('Thêm mới sách thành công');
 
             emit('getBooks', 1, 'created_at', 'desc');
             router.push('/book');
         }
     } catch (error) {
-        console.log(error);
-        ElNotification.error({
-            title: 'Lỗi',
-            message: 'Có lỗi xảy ra khi tạo sách',
-            type: 'error'
-        });
+        showNotificationError(error);
     }
 };
 </script>

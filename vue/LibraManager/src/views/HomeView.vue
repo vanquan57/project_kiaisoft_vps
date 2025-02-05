@@ -1,23 +1,20 @@
 <template>
     <div class="dashboard-container">
-        <div class="dashboard-item">
-            <h1>
-                Top 10 người mượn sách nhiều nhất và 10 sách được mượn nhiều
-                nhất
-            </h1>
-            <TopUserAndBook
-                :top-users="topUsers"
-                :top-books="topBooks"
-            />
-        </div>
+        <TopUserAndBook
+            :top-users="topUsers"
+            :top-books="topBooks"
+        />
         <div class="dashboard-container__month__category">
-            <div class="dashboard-item">
+            <div class="dashboard-item dashboard-item__month">
                 <h1>Số lượng đơn mượn theo từng tháng</h1>
                 <TotalOrdersByMonth :total-orders-by-month="totalOrdersByMonth" />
             </div>
-            <div class="dashboard-item">
+            <div class="dashboard-item dashboard-item__category">
                 <h1>Tổng số lượng sách trong mỗi loại danh mục</h1>
-                <TotalBookInCategory :pie-chart-data="pieChartData" />
+                <TotalBookInCategory
+                    :pie-chart-data="pieChartData"
+                    class="pie-chart-container"
+                />
             </div>
         </div>
         <div class="dashboard-item">
@@ -61,7 +58,7 @@ const getDataDashboard = async () => {
     try {
         const response = await axios.get('dashboard');
 
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+        if (response.success) {
             topUsers.value = response.data.topUsers;
             topBooks.value = response.data.topBooks;
             pieChartData.value = response.data.totalBooksInCategories;

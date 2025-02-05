@@ -8,42 +8,40 @@
         >
             <el-table-column
                 prop="id"
-                label="ID"
-                width="50"
+                label="STT"
+                width="60"
+                type="index"
                 fixed
             />
             <el-table-column
                 prop="code"
                 label="Mã nhân viên"
-                width="130"
+                width="100"
                 fixed
             />
             <el-table-column
                 prop="name"
                 label="Tên người dùng"
                 fixed
-                width="160"
             />
             <el-table-column
                 prop="email"
                 label="Email"
-                width="180"
+                width="230"
             />
             <el-table-column
                 prop="fullAddress"
                 label="Địa chỉ"
-                width="280"
             />
             <el-table-column
                 fixed="right"
                 label="Cập nhật trạng thái"
-                min-width="160"
+                width="160"
             >
                 <template #default="{ row }">
                     <el-select
                         clearable
                         placeholder="Chọn trạng thái"
-                        style="width: 120px"
                         :model-value="row.status"
                     >
                         <el-option

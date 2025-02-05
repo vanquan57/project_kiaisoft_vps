@@ -15,6 +15,7 @@ import axiosInstance from '@/config/axios';
 import HTTP_STATUS_CODE from '@/config/statusCode';
 import { ElNotification } from 'element-plus';
 import { useRouter } from 'vue-router';
+import { showNotificationError } from '@/helpers/notification';
 
 const router = useRouter();
 const props = defineProps({
@@ -25,11 +26,13 @@ const props = defineProps({
     currentPage: {
         type: Number,
         required: true
+    },
+    name: {
+        type: String,
+        required: true
     }
 });
-
 const emit = defineEmits(['getCategories']);
-
 const category = ref(null);
 
 /**
@@ -43,19 +46,13 @@ watch(() => props.id, async (newId) => {
     try {
         const response = await axiosInstance.get(`/category/${newId}`);
 
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+        if (response.success) {
             category.value = response.data;
         }
     } catch (error) {
-        if (error && error.status === HTTP_STATUS_CODE.HTTP_BAD_REQUEST) {
-            ElNotification({
-                title: 'Thất bại',
-                message: 'Danh mục không tồn tại',
-                type: 'error'
-            });
+        showNotificationError(error);
 
-            router.push({ name: 'category' });
-        }
+        router.push({ name: 'category' });
     }
 }, { immediate: true });
 
@@ -70,32 +67,18 @@ const handleSubmit = async (data) => {
     try {
         const response = await axiosInstance.put(`/category/${props.id}`, data);
 
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+        if (response.success) {
             ElNotification({
                 title: 'Thành công',
-                message: 'Cập nhật danh mục thành công',
+                message: response.data.message,
                 type: 'success'
             });
 
-            emit('getCategories', props.currentPage);
+            emit('getCategories', props.currentPage, null, null, props.name ?? null);
             router.push({ name: 'category' });
         }
     } catch (error) {
-        if (error && error.status === HTTP_STATUS_CODE.HTTP_UNPROCESSABLE_ENTITY) {
-            ElNotification({
-                title: 'Thất bại',
-                message: 'Dữ liệu không hợp lệ',
-                type: 'error'
-            });
-        }
-
-        if (error && error.status === HTTP_STATUS_CODE.HTTP_BAD_REQUEST) {
-            ElNotification({
-                title: 'Thất bại',
-                message: 'Có lỗi xảy ra, vui lòng thử lại sau',
-                type: 'error'
-            });
-        }
+        showNotificationError(error);
     }
 };
 

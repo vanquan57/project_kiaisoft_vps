@@ -28,7 +28,7 @@
                     :author-data="authorData"
                     :publisher-data="publisherData"
                     :category-data="categoryData"
-                    :reset-search="resetSearch"
+                    :is-reset="true"
                     @search="handleSearch"
                 />
             </div>
@@ -90,6 +90,7 @@
                     :publisher-data="publisherData"
                     :category-data="categoryData"
                     :current-page="dataPagination.currentPage"
+                    :form-search="formSearch"
                     @get-books="getBooks"
                 />
             </div>
@@ -111,6 +112,7 @@ import HTTP_STATUS_CODE from '@/config/statusCode';
 import { ElNotification, ElMessageBox } from 'element-plus';
 import { useRouter, useRoute } from 'vue-router';
 import DEFAULT_CONSTANTS from '@/config/constants';
+import { showNotificationSuccess, showNotificationError } from '@/helpers/notification';
 
 const router = useRouter();
 const route = useRoute();
@@ -145,6 +147,12 @@ const dataPagination = ref({
     currentPage: 1
 });
 const bookDetails = ref({});
+const formSearch = ref({
+    name: '',
+    category_id: null,
+    author_id: null,
+    publisher_id: null
+});
 
 /**
  * The method get data initial
@@ -210,21 +218,26 @@ watchEffect(() => {
  *
  * @returns {Promise<void>}
  */
-const getBooks = async (page = 1, column = null, order = null) => {
+const getBooks = async (page = 1, column = null, order = null, formSearch = {}) => {
     try {
         const response = await axiosInstance.get('/book', {
             params: {
                 page,
                 limit: dataPagination.value.limit,
                 column: column ?? DEFAULT_CONSTANTS.COLUMN,
-                order: order ?? DEFAULT_CONSTANTS.ORDER
+                order: order ?? DEFAULT_CONSTANTS.ORDER,
+                ...formSearch
             }
         });
 
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-            booksData.value = response.data.data;
-            dataPagination.value.total = response.data.total;
-            dataPagination.value.currentPage = response.data.current_page;
+        if (response.success) {
+            if (!response.data) {
+                booksData.value = [];
+            } else {
+                booksData.value = response.data.data;
+                dataPagination.value.total = response.data.total;
+                dataPagination.value.currentPage = response.data.current_page;
+            }
         }
     } catch (error) {}
 };
@@ -288,50 +301,33 @@ const handleSearch = async (search) => {
                     category:
                         categoryData.value.find(
                             (item) => item.id === search.category_id
-                        )?.name || null,
+                        )?.slug || null,
                     author:
                         authorData.value.find(
                             (item) => item.id === search.author_id
-                        )?.name || null,
+                        )?.slug || null,
                     publisher:
                         publisherData.value.find(
                             (item) => item.id === search.publisher_id
-                        )?.name || null
-                }
-            });
-            const response = await axiosInstance.get('/book', {
-                params: {
-                    name: search.search.trim(),
-                    category_id: search.category_id ? search.category_id : null,
-                    author_id: search.author_id ? search.author_id : null,
-                    publisher_id: search.publisher_id
-                        ? search.publisher_id
-                        : null
+                        )?.slug || null
                 }
             });
 
-            if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-                if (response.data.data.length > 0) {
-                    booksData.value = response.data.data;
-                    dataPagination.value.total = response.data.total;
-                    dataPagination.value.currentPage = response.data.current_page;
-                } else {
-                    booksData.value = [];
-                    dataPagination.value.total = 0;
-                    dataPagination.value.currentPage = 1;
-                }
-            }
+            formSearch.value = {
+                name: search.search.trim(),
+                category_id: search.category_id ? search.category_id : null,
+                author_id: search.author_id ? search.author_id : null,
+                publisher_id: search.publisher_id
+                    ? search.publisher_id
+                    : null
+            };
+
+            await getBooks(1, null, null, formSearch.value);
         } else {
             await getBooks();
         }
     } catch (error) {
-        if (error.status === HTTP_STATUS_CODE.HTTP_BAD_REQUEST) {
-            ElNotification.error({
-                title: 'Lỗi',
-                message: 'Có lỗi xảy ra, vui lòng thử lại sau',
-                type: 'error'
-            });
-        }
+        showNotificationError(error);
     }
 };
 
@@ -344,7 +340,7 @@ const handleSearch = async (search) => {
  */
 const handlePageChange = async (page) => {
     dataPagination.value.currentPage = page;
-    await getBooks(page);
+    await getBooks(page, null, null, formSearch.value);
 };
 
 /**
@@ -367,23 +363,14 @@ const handleOptionDelete = async (id) => {
         );
 
         const response = await axiosInstance.delete(`/book/${id}`);
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-            ElNotification.success({
-                title: 'Thành công',
-                message: 'Xóa sách thành công',
-                type: 'success'
-            });
 
-            await getBooks(dataPagination.value.currentPage);
+        if (response.success) {
+            showNotificationSuccess(response.data.message);
+
+            booksData.value = booksData.value.filter((item) => item.id !== id);
         }
     } catch (error) {
-        if (error.status === HTTP_STATUS_CODE.HTTP_BAD_REQUEST) {
-            ElNotification.error({
-                title: 'Lỗi',
-                message: 'Sách đang được mượn, không thể xóa',
-                type: 'error'
-            });
-        }
+        showNotificationError(error);
     }
 };
 
@@ -397,17 +384,11 @@ const handleOptionDelete = async (id) => {
 const handleShowDetailsBook = async (id) => {
     try {
         const response = await axiosInstance.get(`/book/${id}`);
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+        if (response.success) {
             bookDetails.value = response.data;
         }
     } catch (error) {
-        if (error.status === HTTP_STATUS_CODE.HTTP_BAD_REQUEST) {
-            ElNotification.error({
-                title: 'Lỗi',
-                message: 'Có lỗi xảy ra, vui lòng thử lại sau',
-                type: 'error'
-            });
-        }
+        showNotificationError(error);
     }
 };
 </script>

@@ -15,6 +15,7 @@ import axiosInstance from '@/config/axios';
 import HTTP_STATUS_CODE from '@/config/statusCode';
 import { useRouter } from 'vue-router';
 import { ElNotification } from 'element-plus';
+import { showNotificationSuccess, showNotificationError } from '@/helpers/notification';
 
 const router = useRouter();
 const props = defineProps({
@@ -24,6 +25,10 @@ const props = defineProps({
     },
     currentPage: {
         type: Number,
+        required: true
+    },
+    name: {
+        type: String,
         required: true
     }
 });
@@ -43,19 +48,14 @@ watch(() => props.id, async (newId) => {
     try {
         const response = await axiosInstance.get(`/author/${newId}`);
 
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+        if (response.success) {
             author.value = response.data;
         }
-    } catch (error) {
-        if (error && error.status === HTTP_STATUS_CODE.HTTP_INTERNAL_SERVER_ERROR) {
-            ElNotification.error({
-                title: 'Lỗi',
-                message: 'Có lỗi xảy ra, vui lòng thử lại sau',
-                type: 'error'
-            });
 
-            router.push({ name: 'author' });
-        }
+    } catch (error) {
+        showNotificationError(error);
+
+        router.push({ name: 'author' });
     }
 }, { immediate: true });
 
@@ -70,32 +70,14 @@ const handleSubmit = async (data) => {
     try {
         const response = await axiosInstance.put(`/author/${props.id}`, data);
 
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-            ElNotification.success({
-                title: 'Thành công',
-                message: 'Cập nhật tác giả thành công',
-                type: 'success'
-            });
+        if (response.success) {
+            showNotificationSuccess(response.data.message);
 
-            emit('getAuthors', props.currentPage);
+            emit('getAuthors', props.currentPage, null, null, props.name);
             router.push({ name: 'author' });
         }
     } catch (error) {
-        if (error && error.status === HTTP_STATUS_CODE.HTTP_UNPROCESSABLE_ENTITY) {
-            ElNotification.error({
-                title: 'Lỗi',
-                message: 'Dữ liệu không hợp lệ',
-                type: 'error'
-            });
-        }
-
-        if (error && error.status === HTTP_STATUS_CODE.HTTP_INTERNAL_SERVER_ERROR) {
-            ElNotification.error({
-                title: 'Lỗi',
-                message: 'Có lỗi xảy ra, vui lòng thử lại sau',
-                type: 'error'
-            });
-        }
+        showNotificationError(error);
     }
 };
 

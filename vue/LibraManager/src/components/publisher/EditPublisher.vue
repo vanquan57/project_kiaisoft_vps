@@ -15,7 +15,7 @@ import axiosInstance from '@/config/axios';
 import HTTP_STATUS_CODE from '@/config/statusCode';
 import { ElMessageBox, ElNotification } from 'element-plus';
 import { useRouter } from 'vue-router';
-
+import { showNotificationSuccess, showNotificationError } from '@/helpers/notification';
 const router = useRouter();
 const props = defineProps({
     id: {
@@ -24,6 +24,10 @@ const props = defineProps({
     },
     currentPage: {
         type: Number,
+        required: true
+    },
+    name: {
+        type: String,
         required: true
     }
 });
@@ -43,14 +47,16 @@ watch(() => props.id, async (newId) => {
     try {
         const response = await axiosInstance.get(`/publisher/${newId}`);
 
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+        if (response.success) {
             publisher.value = response.data;
         }
     } catch (error) {
+        const errors = error.data.errors;
 
-        if (error && error.status === HTTP_STATUS_CODE.HTTP_BAD_REQUEST) {
-            await ElMessageBox.alert('Có lỗi xảy ra, vui lòng thử lại sau', 'Error', {
-                confirmButtonText: 'OK',
+        if (error && error.status === HTTP_STATUS_CODE.HTTP_NOT_FOUND) {
+            ElNotification({
+                title: 'Thất bại',
+                message: errors.error_message,
                 type: 'error'
             });
 
@@ -70,32 +76,14 @@ const handleSubmit = async (data) => {
     try {
         const response = await axiosInstance.put(`/publisher/${props.id}`, data);
 
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-            ElNotification({
-                title: 'Thành công',
-                message: 'Cập nhật nhà xuất bản thành công',
-                type: 'success'
-            });
+        if (response.success) {
+            showNotificationSuccess(response.data.message);
 
-            emit('get-publishers', props.currentPage);
+            emit('get-publishers', props.currentPage, null, null, props.name);
             router.push({ name: 'publisher' });
         }
     } catch (error) {
-        if (error && error.status === HTTP_STATUS_CODE.HTTP_UNPROCESSABLE_ENTITY) {
-            ElNotification({
-                title: 'Thất bại',
-                message: 'Dữ liệu không hợp lệ',
-                type: 'error'
-            });
-        }
-
-        if (error && error.status === HTTP_STATUS_CODE.HTTP_BAD_REQUEST) {
-            ElNotification({
-                title: 'Thất bại',
-                message: 'Có lỗi xảy ra, vui lòng thử lại sau',
-                type: 'error'
-            });
-        }
+        showNotificationError(error);
     }
 };
 
