@@ -4,6 +4,7 @@
             :data="tableData"
             class="table-order"
             :scrolling="true"
+            :empty-text="'Không tìm thấy đơn mượn'"
         >
             <el-table-column
                 label="STT"
@@ -14,7 +15,7 @@
             />
             <el-table-column
                 prop="code"
-                label="Mã đơn hàng"
+                label="Mã đơn mượn"
                 width="150"
                 fixed
                 align="center"

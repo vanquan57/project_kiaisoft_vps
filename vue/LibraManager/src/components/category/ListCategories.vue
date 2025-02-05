@@ -4,6 +4,7 @@
             class="list-category-table"
             :data="props.tableData"
             :scrolling="true"
+            :empty-text="'Không tìm thấy danh mục'"
         >
             <el-table-column
                 label="STT"
@@ -93,5 +94,10 @@ const handleOptionDelete = (id) => {
 }
 .format-description {
     white-space: pre-wrap;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 </style>

@@ -141,7 +141,6 @@ const onSubmit = () => {
 
 <style lang="scss" scoped>
 @import "@/assets/scss/_variables.scss";
-
 .login-admin {
     display: flex;
     justify-content: center;
@@ -197,7 +196,6 @@ const onSubmit = () => {
             width: 70%;
             display: flex;
             flex-direction: column;
-            gap: 15px;
             .input-field {
                 width: 100%;
                 height: 40px;

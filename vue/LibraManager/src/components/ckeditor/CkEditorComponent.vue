@@ -11,6 +11,7 @@
                         v-model="editorData"
                         :editor="editor"
                         :config="config"
+                        placeholder="Nhập nội dung"
                     />
                 </div>
             </div>
@@ -271,7 +272,7 @@ const config = computed(() => {
                 reversed: true
             }
         },
-        placeholder: 'Type or paste your content here!',
+        placeholder: 'Nhập nội dung mô tả',
         table: {
             contentToolbar: [
                 'tableColumn',

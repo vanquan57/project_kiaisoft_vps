@@ -4,12 +4,13 @@
             :data="props.tableData"
             class="table-feedback"
             :scrolling="true"
+            :empty-text="'Không tìm thấy phản hồi'"
         >
             <el-table-column
-                prop="id"
                 label="STT"
                 width="100"
                 fixed
+                type="index"
             />
             <el-table-column
                 prop="user.name"

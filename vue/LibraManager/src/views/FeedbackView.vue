@@ -10,10 +10,9 @@
             </div>
             <div class="feedback-management-search">
                 <SearchForm
-                    placeholder="Nhập tên sách ..."
+                    placeholder="Nhập tên sách"
                     :is-has-date="true"
                     @search="handleSearch"
-                    :data-book="dataBooks"
                 />
             </div>
             <div class="feedback-management-content">
@@ -49,6 +48,7 @@ import axiosInstance from '@/config/axios';
 import HTTP_STATUS_CODE from '@/config/statusCode';
 import { useRouter } from 'vue-router';
 import { ElMessage, ElNotification } from 'element-plus';
+import DEFAULT_CONSTANTS from '@/config/constants';
 
 const router = useRouter();
 const route = useRoute();
@@ -63,14 +63,13 @@ const props = defineProps({
         default: null
     }
 });
-const dataBooks = ref([]);
 const breadcrumbList = ref([
     {
         name: 'Trang chủ',
         path: '/'
     },
     {
-        name: 'Phản hồi',
+        name: 'Danh sách',
         path: '/feedback'
     }
 ]);
@@ -94,8 +93,8 @@ const getFeedbacks = async (page = 1, order = null, column = null) => {
             params: {
                 page,
                 limit: dataPagination.value.limit,
-                order,
-                column
+                column: column ?? DEFAULT_CONSTANTS.COLUMN,
+                order: order ?? DEFAULT_CONSTANTS.ORDER
             }
         });
         if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
@@ -107,25 +106,13 @@ const getFeedbacks = async (page = 1, order = null, column = null) => {
     }
 };
 
-const getBooks = async () => {
-    const response = await axiosInstance.get('/book', {
-        params: {
-            limit: 1000
-        }
-    });
-    if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-        dataBooks.value = response.data.data;
-    }
-};
-
 /**
  * The method handle mount
  *
  * @returns {Promise<void>}
  */
 onMounted(async () => {
-    await getFeedbacks(dataPagination.value.currentPage, 'asc', 'status');
-    await getBooks();
+    await getFeedbacks(dataPagination.value.currentPage);
 });
 
 /**
@@ -138,8 +125,8 @@ onMounted(async () => {
 const handleSearch = async (search) => {
     const queryParams = {};
 
-    if (search.book_id) {
-        queryParams.book_id = search.book_id;
+    if (search.search) {
+        queryParams.name = search.search;
     }
 
     if (search.startDate) {
@@ -168,6 +155,7 @@ const handleSearch = async (search) => {
                 dataPagination.value.currentPage = response.data.current_page;
             }
         } catch (error) {
+            tableData.value = [];
         }
     }
 };

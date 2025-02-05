@@ -14,7 +14,7 @@
                     class="category-button"
                 >
                     <el-button type="primary">
-                        Thêm mới danh mục
+                        Thêm mới
                     </el-button>
                 </router-link>
             </div>
@@ -22,7 +22,7 @@
                 <div class="category-management-search">
                     <h1>Danh sách danh mục</h1>
                     <SearchForm
-                        placeholder="Nhập tên danh mục ..."
+                        placeholder="Nhập tên danh mục"
                         :style-input="styleInput"
                         @search="handleSearch"
                     />
@@ -95,7 +95,8 @@ import axiosInstance from '@/config/axios';
 import HTTP_STATUS_CODE from '@/config/statusCode';
 import { useRouter } from 'vue-router';
 import { ElNotification, ElMessageBox } from 'element-plus';
-import BreadcrumbComponent from '@/components/Breadcrumb/BreadcrumbComponent.vue';
+import BreadcrumbComponent from '@/components/breadcrumb/BreadcrumbComponent.vue';
+import DEFAULT_CONSTANTS from '@/config/constants';
 
 const router = useRouter();
 const route = useRoute();
@@ -117,7 +118,7 @@ const breadcrumbList = ref([
         path: '/'
     },
     {
-        name: 'Danh mục',
+        name: 'Danh sách',
         path: '/category'
     }
 ]);
@@ -141,8 +142,8 @@ const getCategories = async (page = 1, column = null, order = null) => {
             params: {
                 page,
                 limit: dataPagination.value.limit,
-                column: column ?? null,
-                order: order ?? null
+                column: column ?? DEFAULT_CONSTANTS.COLUMN,
+                order: order ?? DEFAULT_CONSTANTS.ORDER
             }
         });
         if (response.status === HTTP_STATUS_CODE.HTTP_OK) {

@@ -52,6 +52,11 @@ const orderByMonthData = computed(() => ({
             data: props.topMostPopularBooks.map(
                 (item) => item.wish_lists_count
             ),
+            datalabels: {
+                formatter: (value) => {
+                    return '';
+                }
+            },
             backgroundColor: '#f87979',
             borderColor: '#f87979'
         }
@@ -72,6 +77,16 @@ const chartOptions = {
                 stepSize: 1
             },
             beginAtZero: true
+        },
+        x: {
+            ticks: {
+                callback: function(value) {
+                    const label = this.getLabelForValue(value);
+                    const maxLength = 10;
+
+                    return label.length > maxLength ? label.substring(0, maxLength) + '...' : label;
+                }
+            }
         }
     }
 };

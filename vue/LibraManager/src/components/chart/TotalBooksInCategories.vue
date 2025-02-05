@@ -11,11 +11,13 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { Pie } from 'vue-chartjs';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
+
 import {
     Chart as ChartJS, ArcElement, Tooltip, Legend
 } from 'chart.js';
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
 const props = defineProps({
     pieChartData: {
@@ -64,7 +66,15 @@ const pieChartData = computed(() => {
 const chartOptions = {
     responsive: true,
     plugins: {
-        legend: { position: 'top' }
+        legend: { position: 'top' },
+        datalabels: {
+            formatter: (value) => {
+                if (value === 0) {
+                    return '';
+                }
+                return value;
+            }
+        }
     },
     barPercentage: 0.8,
     categoryPercentage: 0.8

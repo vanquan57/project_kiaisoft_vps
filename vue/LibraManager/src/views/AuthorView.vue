@@ -14,7 +14,7 @@
                     class="author-button"
                 >
                     <el-button type="primary">
-                        Thêm mới tác giả
+                        Thêm mới
                     </el-button>
                 </router-link>
             </div>
@@ -22,7 +22,7 @@
                 <div class="author-management-search">
                     <h1>Danh sách tác giả</h1>
                     <SearchForm
-                        placeholder="Nhập tên tác giả ..."
+                        placeholder="Nhập tên tác giả"
                         :style-input="styleInput"
                         @search="handleSearch"
                     />
@@ -96,6 +96,7 @@ import axiosInstance from '@/config/axios';
 import HTTP_STATUS_CODE from '@/config/statusCode';
 import { useRouter } from 'vue-router';
 import { ElNotification, ElMessageBox } from 'element-plus';
+import DEFAULT_CONSTANTS from '@/config/constants';
 
 const router = useRouter();
 const route = useRoute();
@@ -138,11 +139,11 @@ watchEffect(() => {
                 path: '/'
             },
             {
-                name: 'Tác giả',
+                name: 'Danh sách',
                 path: '/author'
             },
             {
-                name: 'Thêm tác giả',
+                name: 'Thêm mới',
                 path: '/author/create'
             }
         ];
@@ -153,11 +154,11 @@ watchEffect(() => {
                 path: '/'
             },
             {
-                name: 'Tác giả',
+                name: 'Danh sách',
                 path: '/author'
             },
             {
-                name: 'Cập nhật tác giả',
+                name: 'Cập nhật',
                 path: `/author/edit/${props.id}`
             }
         ];
@@ -168,7 +169,7 @@ watchEffect(() => {
                 path: '/'
             },
             {
-                name: 'Tác giả',
+                name: 'Danh sách',
                 path: '/author'
             }
         ];
@@ -182,13 +183,12 @@ watchEffect(() => {
  */
 const getAuthors = async (page = 1, column = null, order = null) => {
     try {
-        console.log(page, column, order);
         const response = await axiosInstance.get('/author', {
             params: {
                 page,
                 limit: dataPagination.value.limit,
-                column,
-                order
+                column: column ?? DEFAULT_CONSTANTS.COLUMN,
+                order: order ?? DEFAULT_CONSTANTS.ORDER
             }
         });
         if (response.status === HTTP_STATUS_CODE.HTTP_OK) {

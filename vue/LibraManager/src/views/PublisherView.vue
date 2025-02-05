@@ -14,7 +14,7 @@
                     class="publisher-button"
                 >
                     <el-button type="primary">
-                        Thêm mới nhà xuất bản
+                        Thêm mới
                     </el-button>
                 </router-link>
             </div>
@@ -22,7 +22,7 @@
                 <div class="publisher-management-search">
                     <h1>Danh sách nhà xuất bản</h1>
                     <SearchForm
-                        placeholder="Nhập tên nhà xuất bản ..."
+                        placeholder="Nhập tên nhà xuất bản"
                         :style-input="styleInput"
                         @search="handleSearch"
                     />
@@ -84,7 +84,7 @@
 </template>
 
 <script setup>
-import BreadcrumbComponent from '@/components/Breadcrumb/BreadcrumbComponent.vue';
+import BreadcrumbComponent from '@/components/breadcrumb/BreadcrumbComponent.vue';
 import SearchForm from '@/components/search/SearchComponent.vue';
 import ListPublishers from '@/components/publisher/ListPublishers.vue';
 import { ref, onMounted, watchEffect } from 'vue';
@@ -95,7 +95,8 @@ import EditPublisher from '@/components/publisher/EditPublisher.vue';
 import axiosInstance from '@/config/axios';
 import HTTP_STATUS_CODE from '@/config/statusCode';
 import { useRouter } from 'vue-router';
-import { ElMessageBox } from 'element-plus';
+import { ElMessageBox, ElNotification } from 'element-plus';
+import DEFAULT_CONSTANTS from '@/config/constants';
 
 const router = useRouter();
 const route = useRoute();
@@ -141,8 +142,8 @@ const getPublishers = async (page = 1, column = null, order = null) => {
             params: {
                 page,
                 limit: dataPagination.value.limit,
-                column: column ?? null,
-                order: order ?? null
+                column: column ?? DEFAULT_CONSTANTS.COLUMN,
+                order: order ?? DEFAULT_CONSTANTS.ORDER
             }
         });
         if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
@@ -171,11 +172,11 @@ watchEffect(() => {
                 path: '/'
             },
             {
-                name: 'Nhà xuất bản',
+                name: 'Danh sách',
                 path: '/publisher'
             },
             {
-                name: 'Thêm nhà xuất bản',
+                name: 'Thêm mới',
                 path: '/publisher/create'
             }
         ];
@@ -186,11 +187,11 @@ watchEffect(() => {
                 path: '/'
             },
             {
-                name: 'Nhà xuất bản',
+                name: 'Danh sách',
                 path: '/publisher'
             },
             {
-                name: 'Cập nhật nhà xuất bản',
+                name: 'Cập nhật',
                 path: `/publisher/edit/${props.id}`
             }
         ];
@@ -201,7 +202,7 @@ watchEffect(() => {
                 path: '/'
             },
             {
-                name: 'Nhà xuất bản',
+                name: 'Danh sách',
                 path: '/publisher'
             }
         ];
@@ -279,7 +280,7 @@ const handleOptionDelete = async (id) => {
     } catch (error) {
         ElNotification({
             title: 'Thất bại',
-            message: 'Nhà xuất bản có sách đăng k, không thể xóa',
+            message: 'Nhà xuất bản có sách đăng ký, không thể xóa',
             type: 'error'
         });
     }

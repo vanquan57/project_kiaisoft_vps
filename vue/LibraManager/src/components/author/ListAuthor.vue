@@ -4,6 +4,7 @@
             :data="props.tableData"
             class="table-author"
             :scrolling="true"
+            :empty-text="'Không tìm thấy tác giả'"
         >
             <el-table-column
                 type="index"
@@ -93,6 +94,11 @@ const handleOptionDelete = (id) => {
     }
     .format-description {
         white-space: pre-wrap;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 }
 </style>
