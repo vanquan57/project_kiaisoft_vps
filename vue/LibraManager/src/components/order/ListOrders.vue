@@ -129,29 +129,5 @@ const handleViewDetails = (idOrder) => {
 </script>
 
 <style lang="scss" scoped>
-.list-order-container {
-    width: 100%;
-    padding: 10px;
-    box-sizing: border-box;
-    overflow: hidden;
-}
-.status-missing {
-    color: orange;
-    font-weight: bold;
-}
-
-.status-borrowing {
-    color: blue;
-    font-weight: bold;
-}
-
-.status-overdue {
-    color: red;
-    font-weight: bold;
-}
-
-.status-returned {
-    color: green;
-    font-weight: bold;
-}
+@import '@/assets/scss/components/order/list_order.scss';
 </style>

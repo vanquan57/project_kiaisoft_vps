@@ -74,32 +74,5 @@ const getDataDashboard = async () => {
 </script>
 
 <style lang="scss" scoped>
-.dashboard-container {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-    margin: 20px;
-    .dashboard-item {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        padding: 10px;
-        background-color: #ffffff;
-        border-radius: 8px;
-        box-shadow: inset 2px 2px 2px rgba(1, 1, 1, 0.3),
-            inset -2px -2px 2px rgba(205, 205, 205, 0.9);
-        h1 {
-            font-size: 16px;
-            font-weight: 600;
-            text-align: center;
-            margin: 10px 0;
-            text-transform: uppercase;
-        }
-    }
-    .dashboard-container__month__category{
-        display: flex;
-        flex-direction: row;
-        gap: 30px;
-    }
-}
+@import '@/assets/scss/views/home_view.scss';
 </style>

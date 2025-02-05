@@ -1,12 +1,12 @@
-.el-table .cell{
-    text-align: left;
-    text-wrap: wrap;
-}
-.table-publisher{
+.table-author{
     width: 100% !important;
     border-radius: 10px !important;
+    .el-table .cell{
+        text-align: left;
+        text-wrap: wrap;
+    }
 }
-.publisher-form-item{
+.author-form-item{
     display: flex;
     justify-content: center;
     width: 100%;
@@ -17,20 +17,26 @@
     .el-form-item__content{
         margin-left: 0 !important;
     }
-    .publisher-form-item__description{
+    .author-form-item__description{
         .el-textarea__inner{
             height: 100px;
         }
     }
-    .publisher-form-button__submit{
+    .author-form-button__submit{
         width: 300px;
         margin: 0 auto;
+    }  
+    .el-table__header{
+        .el-table__cell{
+            text-align: center;
+        }
     }
 }
-.list-publisher-container{
+.list-author-container{
     .el-table_1_column_3.el-table-fixed-column--left.is-last-column.is-leaf.el-table__cell{
         .cell{
             text-align: center;
         }
     }
 }
+

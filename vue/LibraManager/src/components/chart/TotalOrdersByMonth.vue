@@ -67,14 +67,6 @@ const chartOptions = {
 
 
 <style lang="scss" scoped>
-.dashboard-item__month{
-    canvas{
-        min-height: 350px;
-        height: 350px;
-        max-height: 350px;
-        display: block;
-        width: 100% !important;
-    }
-}
+@import '@/assets/scss/components/chart/order.scss';
 </style>
 

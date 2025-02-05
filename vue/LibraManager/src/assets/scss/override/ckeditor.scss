@@ -19,7 +19,10 @@
 	word-break: break-word;
 }
 
-
 .editor-container_classic-editor .editor-container__editor {
 	flex: 1;
+}
+
+.ck-blurred, .ck-placeholder, .ck-content {
+    height: 250px !important;
 }

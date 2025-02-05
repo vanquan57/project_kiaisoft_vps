@@ -127,22 +127,6 @@ const handleSubmit = async () => {
 };
 </script>
 
-<style lang="scss">
-.category-form-container {
-    width: 100%;
-    max-width: 600px;
-    margin: 30px auto;
-    .category-form {
-        margin: auto;
-        width: 100%;
-        height: 300px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-        textarea {
-            white-space: pre-wrap !important;
-            word-wrap: break-word !important;
-        }
-    }
-}
+<style lang="scss" scoped>
+@import '@/assets/scss/components/category/form_category.scss';
 </style>

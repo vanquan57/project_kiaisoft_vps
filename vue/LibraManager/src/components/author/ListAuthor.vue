@@ -78,27 +78,6 @@ const handleOptionDelete = (id) => {
 };
 </script>
 
-<style lang="scss">
-@import "@/assets/scss/author.scss";
-
-.list-author-container {
-    width: 100%;
-    padding: 10px;
-    box-sizing: border-box;
-    overflow: hidden;
-    .actions-group {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-    }
-    .format-description {
-        white-space: pre-wrap;
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-}
+<style lang="scss" scoped>
+@import '@/assets/scss/components/author/list_author.scss';
 </style>

@@ -123,17 +123,5 @@ const handleSubmit = async () => {
 </script>
 
 <style lang="scss" scoped>
-.publisher-form-container {
-    width: 100%;
-    max-width: 600px;
-    margin: 30px auto;
-    .publisher-form {
-        margin: auto;
-        width: 100%;
-        height: 300px;
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
-    }
-}
+@import '@/assets/scss/components/publisher/form_publisher.scss';
 </style>
