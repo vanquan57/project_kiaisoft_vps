@@ -39,21 +39,21 @@ class RegisterRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Name is required',
-            'name.string' => 'Name must be a string',
-            'name.max' => 'Name must not be greater than 100 characters',
-            'code.required' => 'Employee code is required',
-            'code.string' => 'Employee code must be a string',
-            'code.regex' => 'You are not employees kiaisoft ?',
-            'email.required' => 'Email is required',
-            'email.email' => 'Email must be a valid email address',
-            'email.regex' => 'You are not employees kiaisoft ?',
-            'password.required' => 'Password is required',
-            'password.string' => 'Password must be a string',
-            'password.min' => 'Password must be at least 8 characters',
-            'password.regex' => 'Password must contain at least one uppercase letter and one special character',
-            'confirm_password.required' => 'Confirm password is required',
-            'confirm_password.same' => 'Confirm password must match password',
+            'name.required' => 'Vui lòng nhập tên',
+            'name.string' => 'Tên phải là chuỗi',
+            'name.max' => 'Tên không được quá 100 ký tự',
+            'code.required' => 'Vui lòng nhập mã nhân viên',
+            'code.string' => 'Mã nhân viên phải là chuỗi',
+            'code.regex' => 'Bạn không phải nhân viên kiaisoft ?',
+            'email.required' => 'Vui lòng nhập email',
+            'email.email' => 'Email không đúng định dạng',
+            'email.regex' => 'Bạn không phải là nhân viên kiaisoft ?',
+            'password.required' => 'Vui lòng nhập mật khẩu',
+            'password.string' => 'Mật khẩu phải là chuỗi',
+            'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự',
+            'password.regex' => 'Mật khẩu phải chứa ít nhất 1 ký tự viết hoa và 1 ký tự đặc biệt',
+            'confirm_password.required' => 'Vui lòng nhập lại mật khẩu',
+            'confirm_password.same' => 'Mật khẩu không khớp',
         ];
     }
 }

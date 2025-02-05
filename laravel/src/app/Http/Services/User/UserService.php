@@ -5,10 +5,10 @@ namespace App\Http\Services\User;
 use App\Http\Repositories\EmployeeCodeRepositoryInterface;
 use App\Http\Repositories\UserRepositoryInterface;
 use App\Models\User;
-use Google_Client;
 use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
+use Laravel\Socialite\Facades\Socialite;
 
 class UserService
 {
@@ -30,9 +30,9 @@ class UserService
      *
      * @param array $data
      *
-     * @return Model|null
+     * @return array
      */
-    public function register(array $data): ?Model
+    public function register(array $data): array
     {
         try {
             if ($user = $this->userRepository->getRegisteredAccount($data['code'], $data['email'])) {
@@ -41,25 +41,46 @@ class UserService
                     $user->password = bcrypt($data['password']);
                     $user->save();
 
-                    return $user;
+                    return [
+                        'message' => 'Đăng ký tài khoản thành công',
+                        'code' => Response::HTTP_CREATED,
+                    ];
                 }else{
-                    return null;
+                    return [
+                        'error' => 'Tài khoản đã được đăng ký',
+                        'error_code' => ERROR_BAD_REQUEST,
+                        'code' => Response::HTTP_BAD_REQUEST,
+                    ];
                 }
             }
+
             // Using for unique email and code not using form request because has method register with google account
             if($this->userRepository->checkExistsAccountRegister($data['code'], $data['email'])) {
-                return null;
+                return [
+                    'error' => 'Tài khoản đã được đăng ký',
+                    'error_code' => ERROR_BAD_REQUEST,
+                    'code' => Response::HTTP_BAD_REQUEST,
+                ];
             }
 
             if ($this->employeeCodeRepository->checkIsEmployeeKiaisoft($data['code'], $data['email'])) {
                 $data['status'] = User::STATUS_ACTIVE;
             }
 
-            return $this->userRepository->store($data);
+            if($this->userRepository->store($data)) {
+                return [
+                    'message' => 'Đăng ký tài khoản thành công',
+                    'code' => Response::HTTP_CREATED,
+                ];
+            }
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 
-            return null;
+            return [
+                'error' => 'Không thể xử lý yêu cầu, vui lòng thử lại sau',
+                'error_code' => ERROR_CODE_INTERNAL_SERVER_ERROR,
+                'code' => Response::HTTP_INTERNAL_SERVER_ERROR,
+            ];
         }
     }
 
@@ -91,44 +112,43 @@ class UserService
     public function registerGoogle(array $data): ?Authenticatable
     {
         try {
-            $client = new Google_Client([
-                'client_id' => config('services.google.client_id'),
-            ]);
+            $userGoogle = Socialite::driver('google')->userFromToken($data['access_token']);
 
-            $payload = $client->verifyIdToken($data['credential']);
-
-            if (!$payload) {
+            if (!$userGoogle) {
                 return null;
             }
 
-            $userRegistered = $this->userRepository->getRegisteredAccount($data['code'], $payload['email']);
+            $userRegistered = $this->userRepository->getRegisteredAccount($data['code'], $userGoogle->user['email']);
             // Check if the user has registered an account but not mapping with google id
+
             if ($userRegistered && empty($userRegistered->google_id)) {
-                $userRegistered->google_id = $payload['sub'];
+                $userRegistered->google_id = $userGoogle->user['sub'];
                 $userRegistered->save();
 
                 return $userRegistered;
             }
+
             // Check if the user has not registered an account
             if (!$userRegistered) {
-                if (!$this->employeeCodeRepository->checkIsEmployeeKiaisoft($data['code'], $payload['email'])) {
+                if (!$this->employeeCodeRepository->checkIsEmployeeKiaisoft($data['code'], $userGoogle->user['email'])) {
                     return null;
                 }
 
-                if (strpos($payload['email'], 'kiaisoft') === false) {
+                if (strpos($userGoogle->user['email'], 'kiaisoft') === false) {
                     return null;
                 }
 
                 $dataRegister['code'] = $data['code'];
-                $dataRegister['email'] = $payload['email'];
-                $dataRegister['name'] = $payload['name'];
+                $dataRegister['email'] = $userGoogle->user['email'];
+                $dataRegister['name'] = $userGoogle->user['name'];
                 $dataRegister['status'] = User::STATUS_ACTIVE;
-                $dataRegister['google_id'] = $payload['sub'];
+                $dataRegister['google_id'] = $userGoogle->user['sub'];
 
                 return $this->userRepository->store($dataRegister);
             }
+
             // Check if user registered with google account and mapping with google id
-            if($userRegistered && $userRegistered->google_id == $payload['sub']) {
+            if($userRegistered && $userRegistered->google_id == $userGoogle->user['sub']) {
                 return $userRegistered;
             }
 

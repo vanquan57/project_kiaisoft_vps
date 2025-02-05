@@ -23,7 +23,7 @@ class RegisterGoogleRequest extends FormRequest
     {
         return [
             'code' => 'required|string|regex:/^K\d{5}$/',
-            'credential' => 'required|string',
+            'access_token' => 'required|string',
         ];
     }
 
@@ -35,11 +35,11 @@ class RegisterGoogleRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'code.required' => 'Employee code is required',
-            'code.string' => 'Employee code must be a string',
-            'code.regex' => 'You are not employees kiaisoft ?',
-            'credential.required' => 'Credential is required',
-            'credential.string' => 'Credential must be a string',
+            'code.required' => 'Vui lòng nhập mã nhân viên',
+            'code.string' => 'Mã nhân viên phải là chuỗi',
+            'code.regex' => 'Bạn không phải nhân viên kiaisoft ?',
+            'access_token.required' => 'Thông tin xác thực không được để trống',
+            'access_token.string' => 'Thông tin xác thực phải là chuỗi',
         ];
     }
 }

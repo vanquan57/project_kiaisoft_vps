@@ -12,6 +12,7 @@ use Google_Client;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
@@ -40,15 +41,14 @@ class AuthController extends Controller
         $credentials['status'] = User::STATUS_ACTIVE;
 
         if (!$token = auth('api')->attempt($credentials)) {
-            return response()->json(
-                [
-                    'error' => 'Unauthorized',
-                ],
-                Response::HTTP_UNAUTHORIZED
+            return responseErrorAPI(
+                Response::HTTP_UNAUTHORIZED,
+                ERROR_CODE_AUTHENTICATE,
+                'Email hoặc mật khẩu không chính xác'
             );
         }
 
-        return $this->respondWithToken($token);
+        return responseOkAPI($this->respondWithToken($token));
     }
 
     /**
@@ -60,11 +60,20 @@ class AuthController extends Controller
      */
     public function register(RegisterRequest $request): JsonResponse
     {
-        if ($user = $this->userService->register($request->validated())) {
-            return response()->json($user, Response::HTTP_CREATED);
+        $result = $this->userService->register($request->validated());
+
+        if ($result['code'] !== Response::HTTP_CREATED) {
+            return responseErrorAPI(
+                $result['code'],
+                $result['error_code'],
+                $result['error']
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed.'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI(
+            $result['message'],
+            $result['code']
+        );
     }
 
     /**
@@ -78,18 +87,21 @@ class AuthController extends Controller
     {
         if ($user = $this->userService->registerGoogle($request->validated())) {
             if (!$token = auth('api')->login($user)) {
-                return response()->json(
-                    [
-                        'error' => 'Unauthorized',
-                    ],
-                    Response::HTTP_UNAUTHORIZED
+                return responseErrorAPI(
+                    Response::HTTP_UNAUTHORIZED,
+                    ERROR_CODE_AUTHENTICATE,
+                    'Bạn không có quyền truy cập vào trang web này'
                 );
             }
 
-            return $this->respondWithToken($token);
+            return responseOkAPI($this->respondWithToken($token));
         }
 
-        return response()->json(['error' => 'The request could not be processed.'], Response::HTTP_BAD_REQUEST);
+        return responseErrorAPI(
+            Response::HTTP_BAD_REQUEST,
+            ERROR_BAD_REQUEST,
+            'Bạn không phải nhân viên kiaisoft ?. Vui lòng kiểm tra email và mã nhân viên'
+        );
     }
 
     /**
@@ -101,42 +113,35 @@ class AuthController extends Controller
      */
     public function loginGoogle(Request $request): JsonResponse
     {
-        $client = new Google_Client([
-            'client_id' => config('services.google.client_id'),
-        ]);
+        $userGoogle = Socialite::driver('google')->userFromToken($request->input('access_token'));
 
-        $payload = $client->verifyIdToken($request->input('credential'));
-
-        if (!$payload) {
-            return response()->json(
-                [
-                    'error' => 'Unauthorized',
-                ],
-                Response::HTTP_UNAUTHORIZED
+        if (!$userGoogle) {
+            return responseErrorAPI(
+                Response::HTTP_UNAUTHORIZED,
+                ERROR_CODE_AUTHENTICATE,
+                'Không tìm thấy thông tin tài khoản. Vui lòng thử lại'
             );
         }
 
-        $user = $this->userService->findByGoogleId($payload['sub']);
+        $user = $this->userService->findByGoogleId($userGoogle->user['sub']);
 
         if (!$user) {
-            return response()->json(
-                [
-                    'error' => 'Unauthorized',
-                ],
-                Response::HTTP_UNAUTHORIZED
+            return responseErrorAPI(
+                Response::HTTP_UNAUTHORIZED,
+                ERROR_CODE_AUTHENTICATE,
+                'Vui lòng đăng ký tài khoản trước khi đăng nhập'
             );
         }
 
         if (!$token = auth('api')->login($user)) {
-            return response()->json(
-                [
-                    'error' => 'Unauthorized',
-                ],
-                Response::HTTP_UNAUTHORIZED
+            return responseErrorAPI(
+                Response::HTTP_UNAUTHORIZED,
+                ERROR_CODE_AUTHENTICATE,
+                'Bạn không có quyền truy cập vào trang web này'
             );
         }
 
-        return $this->respondWithToken($token);
+        return responseOkAPI($this->respondWithToken($token));
     }
 
     /**
@@ -149,11 +154,9 @@ class AuthController extends Controller
         auth('api')->logout();
         auth('api')->invalidate(auth('api')->getToken());
 
-        return response()->json(
-            [
-                'message' => 'Successfully logged out',
-            ]
-        );
+        return responseOkAPI([
+            'message' => 'Đăng xuất thành công.'
+        ]);
     }
 
     /**
@@ -161,14 +164,14 @@ class AuthController extends Controller
      *
      * @param string $token
      *
-     * @return JsonResponse
+     * @return array
      */
-    protected function respondWithToken($token): JsonResponse
+    protected function respondWithToken($token): array
     {
-        return response()->json([
+        return [
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth('api')->factory()->getTTL() * 60,
-        ]);
+        ];
     }
 }
