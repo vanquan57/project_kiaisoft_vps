@@ -58,4 +58,38 @@ class PublisherRepository extends BaseRepository implements PublisherRepositoryI
 
         return false;
     }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param array $attributes
+     *
+     * @return Model
+     */
+    public function store(array $attributes): Model
+    {
+        return $this->model->create([
+            'name' => $attributes['name'],
+            'description' => $attributes['description'],
+            'slug' => $attributes['name'],
+        ]);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param int $id
+     * 
+     * @param array $attributes
+     *
+     * @return bool
+     */
+    public function update(int $id, array $attributes): bool
+    {
+        return $this->model->find($id)->update([
+            'name' => $attributes['name'],
+            'description' => $attributes['description'],
+            'slug' => $attributes['name'],
+        ]);
+    }
 }

@@ -4,9 +4,6 @@ namespace App\Http\Services;
 
 use App\Http\Repositories\PublisherRepositoryInterface;
 use App\Models\Publisher;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Log;
 
@@ -56,8 +53,6 @@ class PublisherService
     public function store(array $data): ?Publisher
     {
         try {
-            $data['slug'] = $data['name'];
-
             return $this->publisherRepository->store($data);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
@@ -102,8 +97,6 @@ class PublisherService
                 return false;
             }
 
-            $data['slug'] = $data['name'];
-
             return $this->publisherRepository->update($id, $data);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
@@ -117,29 +110,16 @@ class PublisherService
      *
      * @param int $id
      *
-     * @return array
+     * @return bool
      */
-    public function destroy(int $id): array
+    public function destroy(int $id): bool
     {
         try {
-            if ($this->publisherRepository->destroy($id)) {
-                return [
-                    'message' => 'The publisher has been deleted',
-                    'code' => Response::HTTP_OK,
-                ];
-            }
-            
-            return [
-                'error' => 'Publisher with registered books cannot be deleted',
-                'code' => Response::HTTP_BAD_REQUEST,
-            ];
+            return $this->publisherRepository->destroy($id);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 
-            return [
-                'error' => 'The request could not be processed.',
-                'code' => Response::HTTP_INTERNAL_SERVER_ERROR,
-            ];
+            return false;
         }
     }
 }

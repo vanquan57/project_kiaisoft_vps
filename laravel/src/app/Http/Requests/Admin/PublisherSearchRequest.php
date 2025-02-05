@@ -24,7 +24,7 @@ class PublisherSearchRequest extends FormRequest
     public function rules(): array
     {
         $columns = DB::getSchemaBuilder()->getColumnListing('publishers');
-        
+
         return [
             'name' => 'nullable|string|max:255',
             'limit' => 'nullable|integer|min:1',
@@ -41,14 +41,14 @@ class PublisherSearchRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.string' => 'The search keyword must be a string.',
-            'name.max' => 'The search keyword must not be greater than 255 characters.',
-            'limit.integer' => 'The limit must be an integer.',
-            'limit.min' => 'The limit must be at least 1.',
-            'order.string' => 'The order must be a string.',
-            'order.in' => 'The order must be asc or desc.',
-            'column.string' => 'The column must be a string.',
-            'column.in' => 'The column field invalid.',
+            'name.string' => 'Từ khóa tìm kiếm phải là một chuỗi ký tự hợp lệ.',
+            'name.max' => 'Từ khóa tìm kiếm không được vượt quá 255 ký tự.',
+            'limit.integer' => 'Giới hạn phải là một số nguyên.',
+            'limit.min' => 'Giới hạn phải là số nguyên dương',
+            'order.string' => 'Thứ tự sắp xếp phải là một chuỗi.',
+            'order.in' => 'Thứ tự sắp xếp chỉ được phép là "asc" hoặc "desc".',
+            'column.string' => 'Tên cột phải là một chuỗi ký tự hợp lệ.',
+            'column.in' => 'Tên trường không tồn tại',
         ];
     }
 }

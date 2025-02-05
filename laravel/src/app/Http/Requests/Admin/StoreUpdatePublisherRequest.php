@@ -43,13 +43,13 @@ class StoreUpdatePublisherRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'Name is required',
-            'name.string' => 'Name must be a string',
-            'name.max' => 'Name must not be greater than 100 characters',
-            'name.unique' => 'Name must be unique',
-            'description.required' => 'Description is required',
-            'description.string' => 'Description must be a string',
-            'description.max' => 'Description must not be greater than 255 characters',
+            'name.required' => 'Tên là trường bắt buộc.',
+            'name.string' => 'Tên phải là một chuỗi ký.',
+            'name.max' => 'Tên không được vượt quá 100 ký tự.',
+            'name.unique' => 'Tên nhà xuất bản đã tồn tại.',
+            'description.required' => 'Mô tả là trường bắt buộc.',
+            'description.string' => 'Mô tả phải là một chuỗi ký tự hợp lệ.',
+            'description.max' => 'Mô tả không được vượt quá 255 ký tự.',
         ];
     }
 }

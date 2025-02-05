@@ -22,16 +22,22 @@ class PublisherController extends Controller
 
     /**
      * Display a listing of the resource.
+     * 
+     * @param PublisherSearchRequest $request
      *
      * @return JsonResponse
      */
     public function index(PublisherSearchRequest $request): JsonResponse
     {
-        if ($publishers = $this->publisherService->getAllByPaginate($request->validated())) {
-            return response()->json($publishers);
+        if (!$publishers = $this->publisherService->getAllByPaginate($request->validated())) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau'
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed.'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI($publishers);
     }
 
     /**
@@ -43,11 +49,15 @@ class PublisherController extends Controller
      */
     public function store(StoreUpdatePublisherRequest $request): JsonResponse
     {
-        if ($publisher = $this->publisherService->store($request->validated())) {
-            return response()->json($publisher, Response::HTTP_CREATED);
+        if (!$publisher = $this->publisherService->store($request->validated())) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau'
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed.'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI($publisher, Response::HTTP_CREATED);
     }
 
     /**
@@ -59,11 +69,15 @@ class PublisherController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        if ($publisher = $this->publisherService->show($id)) {
-            return response()->json($publisher);
+        if (!$publisher = $this->publisherService->show($id)) {
+            return responseErrorAPI(
+                Response::HTTP_NOT_FOUND,
+                ERROR_BAD_REQUEST,
+                'Nhà xuất bản không tồn tại'
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed.'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI($publisher);
     }
 
     /**
@@ -77,11 +91,17 @@ class PublisherController extends Controller
      */
     public function update(StoreUpdatePublisherRequest $request, int $id): JsonResponse
     {
-        if ($this->publisherService->update($id, $request->validated())) {
-            return response()->json(true);
+        if (!$this->publisherService->update($id, $request->validated())) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau'
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed.'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI([
+            'message' => 'Cập nhật nhà xuất bản thành công'
+        ]);
     }
 
     /**
@@ -93,12 +113,16 @@ class PublisherController extends Controller
      */
     public function destroy(int $id): JsonResponse
     {
-        $result = $this->publisherService->destroy($id);
-
-        if($result['code'] >= 200 && $result['code'] < 300) {
-            return response()->json(['message' => $result['message']], $result['code']);
+        if (!$this->publisherService->destroy($id)) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau'
+            );
         }
 
-        return response()->json(['error' => $result['error']], $result['code']);
+        return responseOkAPI([
+            'message' => 'Xóa nhà xuất bản thành công'
+        ]);
     }
 }
