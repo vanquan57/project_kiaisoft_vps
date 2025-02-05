@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\CreateEmployeeCodeRequest;
 use App\Http\Requests\Admin\EmployeeSearchRequest;
 use App\Http\Services\UserService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
@@ -27,15 +28,17 @@ class EmployeeCodeController extends Controller
      * 
      * @return JsonResponse
      */
-    public function index(EmployeeSearchRequest $request)
+    public function index(EmployeeSearchRequest $request): JsonResponse
     {
         if ($employees = $this->userService->getAllEmployeesCodes($request->validated())) {
-            return response()->json($employees);
+            return $this->responseOkAPI($employees);
         }
 
-        return response()->json([
-            'error' => 'The request could not be processed',
-        ], Response::HTTP_BAD_REQUEST);
+        return $this->responseErrorAPI(
+            Response::HTTP_BAD_REQUEST,
+            Response::HTTP_BAD_REQUEST,
+            'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+        );
     }
 
     /**
@@ -45,15 +48,18 @@ class EmployeeCodeController extends Controller
      * 
      * @return JsonResponse
      */
-    public function store(CreateEmployeeCodeRequest $request)
+    public function store(CreateEmployeeCodeRequest $request): JsonResponse
     {
         if ($this->userService->storeEmployeeCode($request->validated())) {
-            return response()->json(true);
+            return $this->responseOkAPI([
+                'message' => 'Thêm thông tin nhân viên thành công'
+            ]);
         }
 
-        return response()->json([
-            'error' => 'The request could not be processed',
-        ], Response::HTTP_BAD_REQUEST);
+        return $this->responseErrorAPI(
+            Response::HTTP_BAD_REQUEST,
+            Response::HTTP_BAD_REQUEST,
+            'Dữ liệu không hợp lệ, vui lòng kiểm tra lại'
+        );
     }
-
 }

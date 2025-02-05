@@ -28,10 +28,14 @@ class CategoryController extends Controller
     public function index(CategorySearchRequest $request): JsonResponse
     {
         if ($categories = $this->categoryService->getAllByPagination($request->validated())) {
-            return response()->json($categories);
+            return $this->responseOkAPI($categories);
         }
 
-        return response()->json(['error' => 'The request could not be processed'], Response::HTTP_BAD_REQUEST);
+        return $this->responseErrorAPI(
+            Response::HTTP_BAD_REQUEST,
+            Response::HTTP_BAD_REQUEST,
+            'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+        );
     }
 
     /**
@@ -44,10 +48,14 @@ class CategoryController extends Controller
     public function store(StoreUpdateCategoryRequest $request): JsonResponse
     {
         if ($category = $this->categoryService->store($request->validated())) {
-            return response()->json($category, Response::HTTP_CREATED);
+            return $this->responseOkAPI($category, Response::HTTP_CREATED);
         }
 
-        return response()->json(['error' => 'The request could not be processed'], Response::HTTP_BAD_REQUEST);
+        return $this->responseErrorAPI(
+            Response::HTTP_BAD_REQUEST,
+            Response::HTTP_BAD_REQUEST,
+            'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+        );
     }
 
     /**
@@ -60,10 +68,14 @@ class CategoryController extends Controller
     public function show(int $id): JsonResponse
     {
         if ($category = $this->categoryService->show($id)) {
-            return response()->json($category);
+            return $this->responseOkAPI($category);
         }
 
-        return response()->json(['error' => 'The request could not be processed'], Response::HTTP_BAD_REQUEST);
+        return $this->responseErrorAPI(
+            Response::HTTP_NOT_FOUND,
+            Response::HTTP_NOT_FOUND,
+            'Danh mục không tồn tại.'
+        );
     }
 
     /**
@@ -78,10 +90,16 @@ class CategoryController extends Controller
     public function update(StoreUpdateCategoryRequest $request, int $id): JsonResponse
     {
         if ($this->categoryService->update($request->validated(), $id)) {
-            return response()->json(['message' => 'Category updated successfully']);
+            return $this->responseOkAPI([
+                'message' => 'Cập nhật danh mục thành công.'
+            ]);
         }
 
-        return response()->json(['error' => 'The request could not be processed'], Response::HTTP_BAD_REQUEST);
+        return $this->responseErrorAPI(
+            Response::HTTP_BAD_REQUEST,
+            Response::HTTP_BAD_REQUEST,
+            'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+        );
     }
 
     /**
@@ -95,10 +113,16 @@ class CategoryController extends Controller
     {
         $result = $this->categoryService->destroy($id);
 
-        if($result['code'] >= 200 && $result['code'] < 300) {
-            return response()->json(['message' => $result['message']], $result['code']);
+        if ($result['code'] == Response::HTTP_OK) {
+            return $this->responseOkAPI([
+                'message' => $result['message']
+            ]);
         }
 
-        return response()->json(['error' => $result['error']], $result['code']);
+        return $this->responseErrorAPI(
+            $result['code'],
+            $result['code'],
+            $result['error']
+        );
     }
 }

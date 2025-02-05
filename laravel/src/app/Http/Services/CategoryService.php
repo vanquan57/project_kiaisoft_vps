@@ -125,20 +125,20 @@ class CategoryService
         try {
             if ($this->categoryRepository->destroy($id)) {
                 return [
-                    'message' => 'Category deleted successfully',
+                    'message' => 'Xóa danh mục thành công',
                     'code' => Response::HTTP_OK
                 ];
             }
 
             return [
-                'error' => 'Categories with registered books cannot be deleted',
+                'error' => 'Danh mục có sách, không thể xóa',
                 'code' => Response::HTTP_BAD_REQUEST
             ];
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 
             return [
-                'error' => 'The request could not be processed',
+                'error' => 'Không thể xử lý yêu cầu, vui lòng thử lại sau',
                 'code' => Response::HTTP_INTERNAL_SERVER_ERROR
             ];
         }

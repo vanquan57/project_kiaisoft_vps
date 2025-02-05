@@ -41,14 +41,14 @@ class CategorySearchRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.string' => 'The search field must be a string.',
-            'name.max' => 'The search field may not be greater than 255 characters.',
-            'limit.integer' => 'The limit field must be an integer.',
-            'limit.min' => 'The limit field must be at least 1.',
-            'order.string' => 'The order field must be a string.', 
-            'order.in' => 'The order field must be asc or desc.',
-            'column.string' => 'The column field must be a string.',
-            'column.in' => 'The column field invalid.',
-        ];
+            'name.string' => 'Trường tìm kiếm phải là một chuỗi.',
+            'name.max' => 'Trường tìm kiếm không được vượt quá 255 ký tự.',
+            'limit.integer' => 'Trường giới hạn phải là một số nguyên.',
+            'limit.min' => 'Trường giới hạn phải có giá trị tối thiểu là 1.',
+            'order.string' => 'Trường sắp xếp phải là một chuỗi.',
+            'order.in' => 'Trường sắp xếp phải là asc hoặc desc.',
+            'column.string' => 'Trường cột phải là một chuỗi.',
+            'column.in' => 'Trường cột không hợp lệ.',
+        ];        
     }
 }

@@ -35,9 +35,9 @@ class UpdateStatusUserRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'status.required' => 'Status is required',
-            'status.integer' => 'Status must be an integer',
-            'status.in' => 'Invalid status',
-        ];
+            'status.required' => 'Trạng thái là bắt buộc.',
+            'status.integer' => 'Trạng thái phải là một số nguyên.',
+            'status.in' => 'Trạng thái không hợp lệ.',
+        ];        
     }
 }
