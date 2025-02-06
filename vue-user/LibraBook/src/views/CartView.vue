@@ -92,12 +92,15 @@
 <script setup>
 import BreadcrumbComponent from '@/components/Breadcrumb/BreadcrumbComponent.vue';
 import axiosInstance from '@/config/axios';
-import HTTP_STATUS_CODE from '@/config/statusCode';
 import { onMounted, ref } from 'vue';
-import { ElNotification } from 'element-plus';
 import IconRemoveCart from '@/components/icons/IconRemoveCart.vue';
 import { useCounterCartAndWishList } from '@/stores/counterCartAndWishList';
+import { showNotificationError, showNotificationSuccess } from '@/helpers/notification';
+import { useAuthStore } from '@/stores/auth';
+import { useRouter } from 'vue-router';
 
+const authStore = useAuthStore();
+const router = useRouter();
 const counterCartAndWishList = useCounterCartAndWishList();
 const breadcrumbList = [
     { name: 'Trang chủ', path: '/' },
@@ -108,13 +111,31 @@ const cart = ref([]);
 const imageUrl = (url) => {
     return `${import.meta.env.VITE_URL_IMAGE}${url}`;
 };
+
+/**
+ * Mounted
+ *
+ * @returns {Promise<void>}
+*/
 onMounted(async () => {
     await getWishList();
     await getCart();
 });
 
+/**
+ * Update cart
+ *
+ * @returns {Promise<void>}
+*/
 async function updateCart() {
+    if (!await authStore.checkTokenValidity()) {
+        router.push({ name: 'auth-login' });
+
+        return;
+    }
+
     localStorage.removeItem('cart');
+
     const dataCart = cart.value.map((item) => {
         return {
             book_id: item.id,
@@ -129,7 +150,8 @@ async function updateCart() {
             const response = await axiosInstance.put('/cart', {
                 cart: dataCart
             });
-            if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+
+            if (response.success) {
                 const dataStoreToLocalStorage = cart.value.map((item) => {
                     return {
                         book_id: item.id,
@@ -139,62 +161,113 @@ async function updateCart() {
                         return_date: item.returnDate
                     };
                 });
+
                 localStorage.setItem(
                     'cart',
                     JSON.stringify(dataStoreToLocalStorage)
                 );
-                ElNotification.success('Cập nhật giỏ mượn thành công');
+
+                const { success, error } = response.data.message;
+
+                if (success) {
+                    showNotificationSuccess(success);
+                }
+
+                if (error) {
+                    const showError = () => {
+                        showNotificationError(error);
+                    };
+
+                    success ? setTimeout(showError, 2000) : showError();
+                }
             }
         } catch (error) {
-            ElNotification.error('Cập nhật giỏ mượn thất bại');
+            showNotificationError(error);
         }
     } else {
-        ElNotification.error('Vui lòng điền đầy đủ các trường và kiểm tra ngày trả');
+        showNotificationError('Vui lòng điền đầy đủ các trường và kiểm tra ngày trả');
     }
 }
 
+/**
+ * Get wish list
+ *
+ * @returns {Promise<void>}
+*/
 async function getWishList() {
     try {
         const response = await axiosInstance.get('/wish-list');
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+
+        if (response.success) {
             counterCartAndWishList.setWishList(response.data.length);
         }
     } catch (error) {}
 }
 
-
+/**
+ * Get cart
+ *
+ * @returns {Promise<void>}
+*/
 async function getCart() {
     try {
-
         localStorage.removeItem('cart');
         const response = await axiosInstance.get('/cart');
 
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+        if (response.success) {
             for (const item of response.data) {
                 item.returnDate = new Date().toISOString().split('T')[0];
                 item.error = '';
             }
+
             cart.value = response.data;
+
             counterCartAndWishList.setCart(response.data.length);
         }
     } catch (error) {}
 }
 
+/**
+ * Remove from cart
+ *
+ * @param {number} id - The id of the item
+ *
+ * @returns {Promise<void>}
+*/
 async function removeFromCart(id) {
+    if (!await authStore.checkTokenValidity()) {
+        router.push({ name: 'auth-login' });
+
+        return;
+    }
+
     try {
         const response = await axiosInstance.delete(`/cart/${id}`);
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-            await getCart();
-            ElNotification.success('Xóa sách khỏi giỏ mượn thành công');
+
+        if (response.success) {
+            cart.value = cart.value.filter((item) => item.id !== id);
+            counterCartAndWishList.setCart(cart.value.length);
+
+            showNotificationSuccess(response.data.message);
         }
     } catch (error) {
-        ElNotification.error('Xóa sách khỏi giỏ mượn thất bại');
+        showNotificationError(error);
     }
 }
 
+/**
+ * Validate return date
+ *
+ * @param {number} id - The id of the item
+ *
+ * @param {string} returnDate - The return date
+ *
+ * @returns {Promise<void>}
+*/
 function validateReturnDate(id, returnDate) {
     const newReturnDate = new Date(returnDate);
     const currentDate = new Date();
+
     if (newReturnDate < currentDate) {
         cart.value.find((item) => item.id === id).error =
             'Ngày trả không thể nhỏ hơn ngày hiện tại';
@@ -203,206 +276,20 @@ function validateReturnDate(id, returnDate) {
     }
 }
 
+/**
+ * Validate quantity
+ *
+ * @param {number} id - The id of the item
+ *
+ * @param {number} quantity - The quantity
+ *
+ * @returns {Promise<void>}
+*/
 function validateQuantity(id, quantity) {
     cart.value.find((item) => item.id === id).borrowQuantity = quantity;
 }
 </script>
 
-
 <style lang="scss" scoped>
-@import "@/assets/scss/_variables.scss";
-.cart-container {
-    padding: 30px 0;
-    @media (min-width: 1024px) {
-        padding: 60px 0;
-    }
-    @media (max-width: 768px) {
-        padding: 0 10px;
-    }
-}
-
-
-.cart-body {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    @media (min-width: 1024px) {
-        margin-top: 60px;
-    }
-    .cart-item-title {
-        display: grid;
-        grid-template-columns: 1fr 1fr 1fr;
-        justify-content: space-between;
-        align-items: center;
-        text-align: center;
-        gap: 20px;
-        padding: 24px;
-        box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
-    }
-    .cart-item {
-        display: grid;
-
-        grid-template-columns: 1fr 1fr 1fr;
-        text-align: center;
-        align-items: center;
-        gap: 20px;
-        padding: 10px;
-        box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
-        padding-right: 30px;
-        &:hover {
-            background-color: #f0f0f0;
-        }
-        .book-image {
-            width: 54px;
-            height: 54px;
-            object-fit: cover;
-            aspect-ratio: 1/1;
-        }
-        .image-column {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            position: relative;
-            h3 {
-                font-size: 14px;
-                font-weight: 400;
-                color: #000;
-                text-align: left;
-                @media (max-width: 768px) {
-                    font-size: 12px;
-                    width: 80px;
-                }
-            }
-            .cart-item-column-icon {
-                position: absolute;
-                top: -10px;
-                left: -20px;
-                cursor: pointer;
-            }
-        }
-        .quantity-column {
-            input {
-                width: 72px;
-                height: 44px;
-                border: 1px solid $primary-color;
-                border-radius: 4px;
-                color: $primary-color;
-                padding: 0 10px;
-                text-align: center;
-                @media (max-width: 768px) {
-                    width: 50px;
-                }
-            }
-        }
-
-
-        .return-date-column {
-            input {
-                width: 100%;
-                height: 44px;
-                border: 1px solid $primary-color;
-                border-radius: 4px;
-                color: $primary-color;
-                padding: 0 10px;
-                text-align: center;
-                @media (max-width: 768px) {
-                    width: 50%;
-                }
-            }
-            .return-date-column-error {
-                color: red;
-                font-size: 12px;
-                margin-top: 5px;
-            }
-        }
-        .action-column {
-            button {
-                background-color: $primary-color;
-                color: #fff;
-                padding: 10px 20px;
-                border-radius: 5px;
-                border: none;
-                cursor: pointer;
-            }
-        }
-    }
-}
-.cart-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 20px;
-    margin: 24px 0 80px 0;
-    button {
-        width: 218px;
-        height: 56px;
-        border-radius: 4px;
-        border: 1px solid $border-color;
-        cursor: pointer;
-        font-size: 16px;
-        font-weight: 500;
-        background-color: transparent;
-        &:hover {
-            background-color: $primary-color;
-            color: #fff;
-        }
-    }
-}
-.cart-footer-checkout {
-    display: flex;
-    justify-content: flex-end;
-    padding-bottom: 40px;
-    @media (min-width: 1024px) {
-        padding-bottom: 80px;
-    }
-    &-container {
-        display: flex;
-        flex-direction: column;
-        width: 470px;
-        max-height: 324px;
-        border: 1px solid $border-color;
-        padding: 24px;
-        h1{
-            margin-top: 8px;
-            font-size: 20px;
-            font-weight: 500;
-        }
-    }
-
-    &-total {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid $border-color;
-        padding-bottom: 16px;
-        margin-top: 24px;
-    }
-    &-button {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        margin-top: 16px;
-        a {
-            background-color: $primary-color;
-            width: 260px;
-            height: 56px;
-            color: #fff;
-            padding: 10px 20px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-            text-decoration: none;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-    }
-}
-
-@media (min-width: 1024px) {
-    .cart-container {
-        max-width: 1170px;
-        margin: 0 auto;
-    }
-}
+@import '@/assets/scss/views/cart_view.scss';
 </style>
