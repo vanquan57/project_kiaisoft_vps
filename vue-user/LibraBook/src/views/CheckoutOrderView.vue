@@ -10,6 +10,7 @@
                     :model="checkoutForm"
                     :rules="rules"
                     class="from-checkout"
+                    require-asterisk-position="right"
                 >
                     <el-form-item
                         label-position="top"
@@ -51,14 +52,14 @@
                     <el-form-item
                         label-position="top"
                         label="Tỉnh thành"
-                        prop="province"
+                        prop="province_id"
                     >
                         <el-select
-                            v-model="checkoutForm.province"
+                            v-model="checkoutForm.province_id"
                             placeholder="Chọn tỉnh thành"
                             filterable
                             :no-data-text="'Không tìm thấy tỉnh thành'"
-                            @change="getDistricts(checkoutForm.province)"
+                            @change="getDistricts(checkoutForm.province_id)"
                         >
                             <el-option
                                 v-for="item in provinces"
@@ -74,14 +75,14 @@
                     <el-form-item
                         label-position="top"
                         label="Quận huyện"
-                        prop="district"
+                        prop="district_id"
                     >
                         <el-select
-                            v-model="checkoutForm.district"
+                            v-model="checkoutForm.district_id"
                             placeholder="Chọn quận huyện"
                             filterable
                             :no-data-text="'Không tìm thấy quận huyện'"
-                            @change="getWards(checkoutForm.district)"
+                            @change="getWards(checkoutForm.district_id)"
                         >
                             <el-option
 
@@ -96,10 +97,10 @@
                     <el-form-item
                         label-position="top"
                         label="Xã phường"
-                        prop="ward"
+                        prop="ward_id"
                     >
                         <el-select
-                            v-model="checkoutForm.ward"
+                            v-model="checkoutForm.ward_id"
                             placeholder="Chọn xã phường"
                             filterable
                             :no-data-text="'Không tìm thấy xã phường'"
@@ -142,7 +143,7 @@
                                     alt=""
                                     class="checkout-cart__item-image-img"
                                 >
-                                <p>{{ item.name }}</p>
+                                <p class="checkout-cart__item-info-name_book">{{ item.name }}</p>
                             </div>
                             <p class="checkout-cart__item-quantity">
                                 {{ item.quantity }}
@@ -155,10 +156,9 @@
                 </div>
                 <div class="cart-footer-checkout">
                     <div class="cart-footer-checkout-container">
-                        <h1>Tổng cộng</h1>
                         <div class="cart-footer-checkout-total">
                             <p>Tổng cộng</p>
-                            <p>{{ dataCart.length }}</p>
+                            <p>{{ dataCart.reduce((total, item) => total + item.quantity, 0) }}</p>
                         </div>
                     </div>
                 </div>
@@ -175,29 +175,22 @@
 <script setup>
 import BreadcrumbLayout from '@/components/Breadcrumb/BreadcrumbComponent.vue';
 import axiosInstance from '@/config/axios';
-import HTTP_STATUS_CODE from '@/config/statusCode';
-import { ElNotification } from 'element-plus';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCounterCartAndWishList } from '@/stores/counterCartAndWishList';
+import { showNotificationError, showNotificationSuccess } from '@/helpers/notification';
 
 const router = useRouter();
 const counterCartAndWishList = useCounterCartAndWishList();
 const breadcrumbList = [
     {
         name: 'Trang chủ',
-
         path: '/'
-    },
-    {
-        name: 'Tài khoản của tôi',
-        path: '/account'
     },
     {
         name: 'Giỏ mượn',
         path: '/cart'
     },
-
     {
         name: 'Mượn sách',
         path: '/checkout'
@@ -223,9 +216,9 @@ const checkoutForm = ref({
     employee_code: '',
     email: '',
     phone: '',
-    province: '',
-    district: '',
-    ward: '',
+    province_id: null,
+    district_id: null,
+    ward_id: null,
     address: ''
 });
 const checkoutFormRef = ref(null);
@@ -234,19 +227,19 @@ const rules = ref({
     name: [
         {
             required: true,
-            message: '',
+            message: 'Vui lòng nhập họ tên của bạn',
         }
     ],
     employee_code: [
         {
             required: true,
-            message: '',
+            message: 'Vui lòng nhập mã nhân viên của bạn',
         }
     ],
     email: [
         {
             required: true,
-            message: '',
+            message: 'Vui lòng nhập email của bạn',
         }
     ],
     phone: [
@@ -267,21 +260,21 @@ const rules = ref({
             trigger: 'blur'
         }
     ],
-    province: [
+    province_id: [
         {
             required: true,
             message: 'Vui lòng chọn tỉnh thành của bạn',
             trigger: 'change'
         }
     ],
-    district: [
+    district_id: [
         {
             required: true,
             message: 'Vui lòng chọn quận huyện của bạn',
             trigger: 'change'
         }
     ],
-    ward: [
+    ward_id: [
         {
             required: true,
             message: 'Vui lòng chọn xã phường của bạn',
@@ -297,10 +290,16 @@ const rules = ref({
     ]
 });
 
+/**
+ * Get information user
+ *
+ * @returns {Promise<void>}
+ */
 const getInformationUser = async () => {
     try {
         const response = await axiosInstance.get('profile');
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+
+        if (response.success) {
             checkoutForm.value.name = response.data.name;
             checkoutForm.value.employee_code = response.data.code;
             checkoutForm.value.email = response.data.email;
@@ -308,6 +307,11 @@ const getInformationUser = async () => {
     } catch (error) {}
 };
 
+/**
+ * Get data cart
+ *
+ * @returns {Promise<void>}
+ */
 const getDataCart = async () => {
     try {
         const cart = JSON.parse(localStorage.getItem('cart'));
@@ -318,15 +322,28 @@ const getDataCart = async () => {
     } catch (error) {}
 };
 
+/**
+ * Get provinces
+ *
+ * @returns {Promise<void>}
+ */
 const getProvinces = async () => {
     try {
         const response = await axiosInstance.get('/provinces');
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+
+        if (response.success) {
             provinces.value = response.data;
         }
     } catch (error) {}
 };
 
+/**
+ * Get districts
+ *
+ * @param {number} provinceId - The province id
+ *
+ * @returns {Promise<void>}
+ */
 const getDistricts = async (provinceId) => {
     const provinceCode = provinces.value.find(
         (province) => province.id === provinceId
@@ -334,46 +351,65 @@ const getDistricts = async (provinceId) => {
 
     try {
         const response = await axiosInstance.get(`/districts/${provinceCode}`);
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+
+        if (response.success) {
             districts.value = response.data;
         }
     } catch (error) {}
 };
 
+/**
+ * Get wards
+ *
+ * @param {number} districtId - The district id
+ *
+ * @returns {Promise<void>}
+ */
 const getWards = async (districtId) => {
     const districtCode = districts.value.find(
         (district) => district.id === districtId
     ).code;
     try {
         const response = await axiosInstance.get(`/wards/${districtCode}`);
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+
+        if (response.success) {
             wards.value = response.data;
         }
     } catch (error) {}
 };
 
+/**
+ * Get counter cart
+ *
+ * @returns {Promise<void>}
+ */
 const getCounterCart = async () => {
     try {
         const response = await axiosInstance.get('/cart');
 
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+        if (response.success) {
             counterCartAndWishList.setCart(response.data.length);
         }
     } catch (error) {}
 };
 
+/**
+ * Get counter wish list
+ *
+ * @returns {Promise<void>}
+ */
 const getCounterWishList = async () => {
     try {
         const response = await axiosInstance.get('/wish-list');
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+
+        if (response.success) {
             counterCartAndWishList.setWishList(response.data.length);
         }
     } catch (error) {}
 };
 
 /**
- * Handle submit form category send emit to parent component
-
+ * Handle submit form checkout order
  *
  * @returns {Promise<void>}
  */
@@ -385,12 +421,11 @@ const handleSubmit = async () => {
             const dataCart = JSON.parse(localStorage.getItem('cart'));
 
             if (!dataCart) {
-                ElNotification({
-                    title: 'Lỗi',
-                    message: 'Vui lòng cập nhật giỏ mượn',
-                    type: 'error'
-                });
+                showNotificationError('Vui lòng cập nhật giỏ mượn');
+
+                return;
             }
+
             const dataCartStore = dataCart.map((item) => {
                 return {
                     book_id: item.book_id,
@@ -403,149 +438,25 @@ const handleSubmit = async () => {
                 name: checkoutForm.value.name,
                 email: checkoutForm.value.email,
                 phone: checkoutForm.value.phone,
-                province_id: checkoutForm.value.province,
-                district_id: checkoutForm.value.district,
-                ward_id: checkoutForm.value.ward,
+                province_id: checkoutForm.value.province_id,
+                district_id: checkoutForm.value.district_id,
+                ward_id: checkoutForm.value.ward_id,
                 address: checkoutForm.value.address,
                 order_details: dataCartStore
             });
 
-            if (response.status === HTTP_STATUS_CODE.HTTP_CREATED) {
+            if (response.success) {
                 localStorage.removeItem('cart');
+                showNotificationSuccess(response.data.message);
                 router.push('/my-account/orders');
             }
         } catch (error) {
-            if (error.status === HTTP_STATUS_CODE.HTTP_BAD_REQUEST) {
-                ElNotification({
-                    title: 'Lỗi',
-                    message: 'Vui lòng thử lại và kiểm tra số lượng sách',
-                    type: 'error'
-                });
-            }
+            showNotificationError(error);
         }
     }
 };
 </script>
 
 <style lang="scss">
-@import "@/assets/scss/_variables.scss";
-
-.breadcrumb-container-checkout {
-    padding: 60px 0;
-}
-.checkout-order-container {
-    display: flex;
-    width: 100%;
-    gap: 173px;
-    padding-bottom: 140px;
-    .el-form-item {
-        margin-bottom: 0px;
-    }
-    .el-form-item__content {
-        margin-bottom: 32px;
-    }
-    .el-form-item__label {
-        font-size: 16px;
-        font-weight: 400;
-    }
-    .el-input__wrapper,
-
-    .el-select__wrapper {
-        background-color: $background-color-input !important;
-        height: 50px;
-        padding: 0 10px !important;
-    }
-    &-left {
-        width: 50%;
-        max-width: 470px;
-    }
-    &-right {
-        width: 50%;
-        max-width: 425px;
-        .checkout-cart__title {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
-            text-align: center;
-        }
-        .checkout-cart__list {
-            margin-top: 20px;
-            max-height: 500px;
-            overflow-y: auto;
-        }
-        .checkout-cart__item {
-            padding: 10px 0;
-            .checkout-cart__item-info-image {
-
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-            .checkout-cart__item-info {
-                display: grid;
-                grid-template-columns: 2fr 1fr 1fr;
-                text-align: center;
-                justify-content: center;
-                align-items: center;
-                .checkout-cart__item-image-img {
-                    width: 54px;
-                    height: 54px;
-                    object-fit: cover;
-                }
-            }
-        }
-        .cart-footer-checkout {
-            display: flex;
-            justify-content: flex-end;
-            padding-bottom: 40px;
-            margin-top: 20px;
-            &-container {
-                display: flex;
-                flex-direction: column;
-                gap: 16px;
-                width: 100%;
-                max-height: 324px;
-            }
-            h1 {
-                font-size: 16px;
-                font-weight: 400;
-            }
-            &-total {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                gap: 20px;
-                border-top: 1px solid $border-color;
-                padding-top: 16px;
-            }
-        }
-        .checkout-cart__button {
-            display: flex;
-            button {
-                background-color: $primary-color;
-                width: 267px;
-                height: 56px;
-                color: #fff;
-                padding: 16px 48px;
-                border-radius: 5px;
-                border: none;
-                cursor: pointer;
-                text-decoration: none;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                margin-top: 32px;
-            }
-        }
-    }
-}
-@media (min-width: 1024px) {
-    .breadcrumb-container-checkout {
-        max-width: 1170px;
-        margin: 0 auto;
-    }
-    .checkout-order-container {
-        max-width: 1170px;
-        margin: 0 auto;
-    }
-}
+@import '@/assets/scss/views/checkout_order_view.scss';
 </style>
