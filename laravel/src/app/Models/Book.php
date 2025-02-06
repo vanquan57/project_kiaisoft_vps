@@ -36,6 +36,8 @@ class Book extends Model
         'image',
     ];
 
+    protected $appends = ['average_star'];
+
     /**
      * The attributes that should be cast to native types.
      *
@@ -151,7 +153,7 @@ class Book extends Model
     /**
      * The method averages the star and returns it as an integer
      */
-    public function averageStar()
+    public function getAverageStarAttribute()
     {
         return (int) round($this->feedbacks()->avg('star'));
     }

@@ -22,16 +22,22 @@ class BookController extends Controller
 
     /**
      * Display a listing of the resource.
+     * 
+     * @param BookSearchRequest $request
      *
      * @return JsonResponse
      */
     public function index(BookSearchRequest $request): JsonResponse
     {
-        if ($books = $this->bookService->getAllByPaginationForSiteUser($request->validated())) {
-            return response()->json($books);
+        if (!$books = $this->bookService->getAllByPaginationForSiteUser($request->validated())) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                Response::HTTP_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed.'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI($books);
     }
 
     /**
@@ -43,11 +49,15 @@ class BookController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        if ($book = $this->bookService->show($id)) {
-            return response()->json($book);
+        if (!$book = $this->bookService->show($id)) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                Response::HTTP_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed.'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI($book);
     }
 
     /**
@@ -59,11 +69,15 @@ class BookController extends Controller
      */
     public function updateBookViewCount(int $id): JsonResponse
     {
-        if ($this->bookService->updateViewCount($id)) {
-            return response()->json(true);
+        if (!$this->bookService->updateViewCount($id)) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                Response::HTTP_BAD_REQUEST,
+                'Cập nhật lượt xem thất bại. Vui lòng thử lại sau'
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed.'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI('Cập nhật lượt xem sách thành công.');
     }
 
 }

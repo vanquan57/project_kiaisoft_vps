@@ -37,8 +37,6 @@ class BookService
                 'name' => $dataSearch['name'] ?? null,
                 'limit' => $dataSearch['limit'] ?? config('constants.DEFAULT_LIMIT'),
                 'author_id' => $dataSearch['author_id'] ?? null,
-                'author_id' => $dataSearch['author_id'] ?? null,
-                'publisher_id' => $dataSearch['publisher_id'] ?? null,
                 'publisher_id' => $dataSearch['publisher_id'] ?? null,
                 'category_id' => $dataSearch['category_id'] ?? null,
                 'order' => $dataSearch['order'] ?? 'asc',
@@ -90,7 +88,7 @@ class BookService
                 return false;
             }
 
-            $book->increment('views');
+            $this->bookRepository->updateBookViewCount($book);
 
             return true;
         } catch (\Exception $e) {

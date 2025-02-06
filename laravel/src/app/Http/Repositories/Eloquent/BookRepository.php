@@ -130,10 +130,6 @@ class BookRepository extends BaseRepository implements BookRepositoryInterface
         }
 
         $books = $query->withCount('feedbacks')->paginate($data['limit']);
-        
-        foreach ($books as $book) {
-            $book->average_star = $book->averageStar();
-        }
 
         return $books;
     }
@@ -153,10 +149,6 @@ class BookRepository extends BaseRepository implements BookRepositoryInterface
             'categories',
             'images',
         ])->find($id);
-
-        if ($book) {
-            $book->average_star = $book->averageStar();
-        }
 
         return $book;
     }
@@ -309,5 +301,17 @@ class BookRepository extends BaseRepository implements BookRepositoryInterface
         ->orderBy('wish_lists_count', $data['order_by_type'])
         ->take($data['limit'])
         ->get(['id', 'name']);
+    }
+
+    /**
+     * Update view book 
+     * 
+     * @param Book $book
+     * 
+     * @return void
+     */
+    public function updateBookViewCount(Book $book): void
+    {
+        $book->increment('views');
     }
 }
