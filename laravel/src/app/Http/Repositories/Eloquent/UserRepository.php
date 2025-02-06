@@ -3,6 +3,7 @@
 namespace App\Http\Repositories\Eloquent;
 
 use App\Http\Repositories\UserRepositoryInterface;
+use App\Models\Book;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -330,5 +331,95 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     public function destroyBookFromWishList(User $user, int $bookId): int
     {
         return $user->wishLists()->detach($bookId);
+    }
+
+    /**
+     * Get book in cart of user
+     * 
+     * @param User $user
+     *
+     * @return Collection|null
+     * 
+    */
+    public function getAllBookInCart(User $user): ?Collection
+    {
+        return $user->books()->get();
+    }
+
+    /**
+     * Get book quantity in my cart
+     *
+     * @param User $user 
+     * 
+     * @param int $bookId
+     *
+     * @return int
+     */
+    public function getTotalQuantityBookInMyCart(User $user, int $bookId): int
+    {
+        return $user->books()->wherePivot('book_id', $bookId)->sum('carts.quantity');
+    }
+
+    /**
+     * Get book exiting in cart of user
+     *
+     * @param User $user 
+     * 
+     * @param int $bookId
+     * 
+     * @return Model|null
+     */
+    public function getBookExitingInCart(User $user, int $bookId): ?Model
+    {
+        return $user->books()->wherePivot('book_id', $bookId)->first();
+    }
+
+    /**
+     * Add book to cart of user
+     * 
+     * @param User $user
+     * 
+     * @param int $bookId
+     * 
+     * @param int $quantity
+     * 
+     * @return bool
+     */
+    public function addBookToCart(User $user, int $bookId, int $quantity): bool
+    {
+        $user->books()->attach($bookId, ['quantity' => $quantity]);
+        $user->refresh();
+
+        return $user->books()->wherePivot('book_id', $bookId)->exists();
+    }
+
+    /**
+     * Update book exiting in cart of user
+     * 
+     * @param User $user
+     * 
+     * @param int $bookId
+     * 
+     * @param int $newQuantity
+     * 
+     * @return int
+     */
+    public function updateBookExitingInCart(User $user, int $bookId, int $newQuantity): int
+    {
+        return $user->books()->updateExistingPivot($bookId, ['quantity' => $newQuantity]);
+    }
+
+    /**
+     * Delete book in cart of user
+     * 
+     * @param User $user
+     * 
+     * @param int $bookId
+     * 
+     * @return int
+     */
+    public function destroyBookInCart(User $user, int $bookId): int
+    {
+        return $user->books()->detach($bookId);
     }
 }

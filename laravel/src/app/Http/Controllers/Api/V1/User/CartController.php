@@ -24,11 +24,15 @@ class CartController extends Controller
      */
     public function index(): JsonResponse
     {
-        if ($bookInCart = $this->cartService->getBookInCartByUserId()) {
-            return response()->json($bookInCart);
+        if (!$bookInCart = $this->cartService->getAllBookInCart()) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                Response::HTTP_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI($bookInCart);
     }
 
     /**
@@ -40,11 +44,19 @@ class CartController extends Controller
      */
     public function store(StoreUpdateCartRequest $request): JsonResponse
     {
-        if ($cart = $this->cartService->store($request->all())) {
-            return response()->json($cart);
+        $result = $this->cartService->store($request->all());
+
+        if ($result['code'] !== Response::HTTP_CREATED) {
+            return responseErrorAPI(
+                $result['code'],
+                $result['error_code'],
+                $result['error']
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI([
+            'message' => $result['message']
+        ], $result['code']);
     }
 
     /**
@@ -56,11 +68,19 @@ class CartController extends Controller
      */
     public function update(StoreUpdateCartRequest $request): JsonResponse
     {
-        if ($this->cartService->update($request->validated())) {
-            return response()->json(true);
+        $result = $this->cartService->update($request->validated());
+
+        if ($result['code'] !== Response::HTTP_OK) {
+            return responseErrorAPI(
+                $result['code'],
+                $result['error_code'],
+                $result['error']
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI([
+            'message' => $result['message']
+        ]);
     }
 
 
@@ -73,10 +93,16 @@ class CartController extends Controller
      */
     public function destroy(int $bookId): JsonResponse
     {
-        if ($this->cartService->destroy($bookId)) {
-            return response()->json(true);
+        if (!$this->cartService->destroy($bookId)) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                Response::HTTP_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI([
+            'message' => 'Đã xóa sách khỏi giỏ mượn thành công.'
+        ]);
     }
 }

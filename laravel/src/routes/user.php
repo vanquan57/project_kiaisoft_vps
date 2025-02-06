@@ -35,7 +35,7 @@ Route::group(['prefix' => 'v1'], function () {
             Route::get('/cart', [CartController::class, 'index']);
             Route::post('/cart', [CartController::class, 'store']);
             Route::put('/cart', [CartController::class, 'update']);
-            Route::delete('/cart/{book_id}', [CartController::class, 'destroy']);
+            Route::delete('/cart/{bookId}', [CartController::class, 'destroy']);
         });
         Route::get('/feedbacks', [FeedbackController::class, 'getFeedbacksByBookId']);
         Route::get('categories', [CategoryController::class, 'index']);

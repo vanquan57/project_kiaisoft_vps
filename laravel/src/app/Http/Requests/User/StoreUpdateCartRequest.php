@@ -36,14 +36,14 @@ class StoreUpdateCartRequest extends FormRequest
     public function messages(): array
     {
         return [
-            "cart.required" => "The cart field is required.",
-            "cart.array" => "The cart must be an array.",
-            "cart.*.book_id.required" => "The book_id field is required.",
-            "cart.*.book_id.integer" => "The book_id must be an integer.",
-            "cart.*.book_id.exists" => "The selected book_id is invalid.",
-            "cart.*.quantity.required" => "The quantity field is required.",
-            "cart.*.quantity.integer" => "The quantity must be an integer.",
-            "cart.*.quantity.min" => "The quantity must be at least 1.",
+            "cart.required" => "Trường giỏ mượn là bắt buộc.",
+            "cart.array" => "Giỏ mượn phải là một mảng các sách.",
+            "cart.*.book_id.required" => "Trường mã sách là bắt buộc.",
+            "cart.*.book_id.integer" => "Mã sách phải là một số nguyên.",
+            "cart.*.book_id.exists" => "Mã sách đã chọn không hợp lệ.",
+            "cart.*.quantity.required" => "Trường số lượng là bắt buộc.",
+            "cart.*.quantity.integer" => "Số lượng phải là một số nguyên.",
+            "cart.*.quantity.min" => "Số lượng phải ít nhất là 1.",
         ];
     }
 }
