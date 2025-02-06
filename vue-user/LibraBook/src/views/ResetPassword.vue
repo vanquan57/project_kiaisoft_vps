@@ -57,21 +57,18 @@
 
 <script setup>
 import images from '@/assets/images';
-import HTTP_STATUS_CODE from '@/config/statusCode';
-import { reactive, ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { ElNotification } from 'element-plus';
+import { reactive, ref, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import axiosInstance from '@/config/axios';
+import { showNotificationSuccess, showNotificationError } from '@/helpers/notification';
+
 const router = useRouter();
+const route = useRoute();
 const form = reactive({
     password: '',
-    confirm_password: ''
-});
-const props = defineProps({
-    token: {
-        type: String,
-        required: true
-    }
+    confirm_password: '',
+    email: '',
+    token: ''
 });
 const resetPasswordForm = ref(null);
 
@@ -79,27 +76,27 @@ const rules = {
     password: [
         {
             required: true,
-            message: 'Please input your new password',
+            message: 'Vui lòng nhập mật khẩu mới',
             trigger: 'blur'
         },
         {
             pattern: /^(?=.*\d)(?=.*[A-Z]).{8,}$/,
             message:
-                'Password must be at least 8 characters and contain at least one number and one uppercase letter',
+                'Mật khẩu phải có ít nhất 8 ký tự và chứa ít nhất một số và một chữ cái viết hoa',
             trigger: 'blur'
         }
     ],
     confirm_password: [
         {
             required: true,
-            message: 'Please input your password confirmation',
+            message: 'Vui lòng nhập lại mật khẩu',
             trigger: 'blur'
         },
         {
             validator: (rule, value, callback) => {
                 if (value !== form.password) {
                     callback(
-                        new Error('The password confirmation does not match')
+                        new Error('Mật khẩu không khớp')
                     );
                 } else {
                     callback();
@@ -110,6 +107,11 @@ const rules = {
     ]
 };
 
+/**
+ * Handle submit reset password form
+ *
+ * @returns {void}
+ */
 const handleSubmit = async () => {
     await resetPasswordForm.value.validate(async (valid) => {
         if (valid) {
@@ -117,135 +119,45 @@ const handleSubmit = async () => {
                 const response = await axiosInstance.post(
                     'auth/reset-password',
                     {
-                        email: localStorage.getItem('email'),
-                        token: props.token,
+                        email: form.email,
+                        token: form.token,
                         password: form.password,
                         confirm_password: form.confirm_password
                     }
                 );
-                if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-                    localStorage.removeItem('email');
+
+                if (response.success) {
+                    showNotificationSuccess(response.data.message);
+
                     router.push({ name: 'auth-login' });
                 }
             } catch (error) {
-                if (
-                    error.status ===
-                        HTTP_STATUS_CODE.HTTP_UNPROCESSABLE_ENTITY ||
-                    error.status === HTTP_STATUS_CODE.HTTP_BAD_REQUEST
-                ) {
-                    ElNotification.error({
-                        title: 'Lỗi',
-                        message: 'Token không hợp lệ hoặc đã hết hạn',
-                        type: 'error'
-                    });
-                }
+                showNotificationError(error);
             }
-
         }
     });
 };
+
+/**
+ * Validate reset password form when mounted
+ *
+ * @returns {void}
+ */
+onMounted(() => {
+    const email = route.query.email;
+    const token = route.query.token;
+
+    if (email && token) {
+        form.email = email;
+        form.token = token;
+    } else {
+        showNotificationError('Liên kết không hợp lệ, Vui lòng thử lại');
+
+        router.push({ name: 'auth-verify-email' });
+    }
+});
 </script>
 
-<style lang="scss" scoped>
-@import '@/assets/scss/commonInput.scss';
-@import "@/assets/scss/_variables.scss";
-
-.reset-password-container {
-    margin: 40px 0 60px 0;
-    display: flex;
-
-    .side-image {
-        width: 56%;
-        img {
-            width: 100%;
-            max-height: 781px;
-            object-fit: cover;
-        }
-    }
-    .reset-password-form {
-        flex: 1;
-        display: flex;
-        justify-content: center;
-
-        .form-control {
-            width: 371px;
-            display: flex;
-            justify-content: center;
-            flex-direction: column;
-            .form-header {
-                color: $text-color-black;
-                h2 {
-                    font-size: clamp(24px, 2.5vw, 36px);
-                    font-weight: 500;
-                    line-height: 30px;
-                }
-                p {
-                    margin-top: 10px;
-                    font-size: clamp(16px, 1.5vw, 18px);
-                }
-            }
-            .form-group {
-                border: none;
-                margin-top: 20px;
-                margin-bottom: 0;
-
-                .form-input {
-                    width: 100%;
-                    height: 40px;
-                    border-bottom: 1.5px solid #e0e0e0;
-                    margin-bottom: 10px;
-                }
-            }
-            .form-group-actions {
-                display: flex;
-                flex-direction: column;
-                width: 100%;
-                .login-actions {
-                    display: flex;
-                    gap: 10px;
-                    height: 56px;
-                    align-items: center;
-                    margin-top: 30px;
-                    justify-content: space-between;
-                    button {
-                        width: 100%;
-                        height: 100%;
-                        background-color: $color-red;
-                        color: $text-color-white;
-                        border: none;
-                        border-radius: 5px;
-                        cursor: pointer;
-                        font-size: 16px;
-                        font-weight: 500;
-                        transition: all 0.3s;
-                        &:hover {
-                            opacity: 0.9;
-                        }
-                    }
-                    a {
-                        color: $color-red;
-                        font-size: 16px;
-                        font-weight: 400;
-                        text-decoration: none;
-                    }
-                }
-            }
-        }
-    }
-}
-@media (max-width: 768px) {
-    .side-image {
-        display: none;
-    }
-    .form-header {
-        text-align: center;
-    }
-}
-@media (min-width: 1024px) {
-    .reset-password-container {
-        max-width: 1170px;
-        margin: 0 auto;
-        padding: 40px 0 60px 0;
-    }
-}
+<style lang="scss">
+@import '@/assets/scss/views/reset_password_view.scss';
 </style>
