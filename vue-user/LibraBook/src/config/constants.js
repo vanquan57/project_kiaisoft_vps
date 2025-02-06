@@ -14,7 +14,8 @@ const DEFAULT_CONSTANTS = {
     MOST_LOVED: 'most_loved',
     MOST_NEW_RELEASED: 'most-new-released',
     TYPE_HARD_COVER: 1,
-    TYPE_SOFT_COVER: 2
+    TYPE_SOFT_COVER: 2,
+    LIMIT_HISTORY_ORDER: 10
 };
 
 export default DEFAULT_CONSTANTS;

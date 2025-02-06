@@ -5,7 +5,7 @@ services:
         volumes:
             - ./LibraBook:/app
             - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
-        container_name: vue-app
+        container_name: vue-app-user
         ports:
             - ${VUE_APP_HOST}:80
 

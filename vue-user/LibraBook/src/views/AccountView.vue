@@ -9,9 +9,10 @@
                 :model="accountForm"
                 :rules="rules"
                 class="from-checkout"
+                require-asterisk-position="right"
                 @submit.prevent="updateUserInfo"
             >
-                <el-row :gutter="50">
+                <el-row :gutter="gutterValue">
                     <el-col :span="12">
                         <el-form-item
                             label-position="top"
@@ -37,7 +38,7 @@
                         </el-form-item>
                     </el-col>
                 </el-row>
-                <el-row :gutter="50">
+                <el-row :gutter="gutterValue">
                     <el-col :span="12">
                         <el-form-item
                             label-position="top"
@@ -51,14 +52,14 @@
                         <el-form-item
                             label-position="top"
                             label="Tỉnh thành"
-                            prop="province"
+                            prop="province_id"
                         >
                             <el-select
-                                v-model="accountForm.province"
+                                v-model="accountForm.province_id"
                                 placeholder="Chọn tỉnh thành"
                                 filterable
                                 no-data-text="Không tìm thấy tỉnh thành"
-                                @change="getDistricts(accountForm.province)"
+                                @change="getDistricts(accountForm.province_id)"
                             >
                                 <el-option
                                     v-for="item in provinces"
@@ -72,19 +73,19 @@
                         </el-form-item>
                     </el-col>
                 </el-row>
-                <el-row :gutter="50">
+                <el-row :gutter="gutterValue">
                     <el-col :span="12">
                         <el-form-item
                             label-position="top"
                             label="Quận huyện"
-                            prop="district"
+                            prop="district_id"
                         >
                             <el-select
-                                v-model="accountForm.district"
+                                v-model="accountForm.district_id"
                                 placeholder="Chọn quận huyện"
                                 filterable
                                 no-data-text="Không tìm thấy quận huyện"
-                                @change="getWards(accountForm.district)"
+                                @change="getWards(accountForm.district_id)"
                             >
                                 <el-option
                                     v-for="item in districts"
@@ -101,10 +102,10 @@
                         <el-form-item
                             label-position="top"
                             label="Xã phường"
-                            prop="ward"
+                            prop="ward_id"
                         >
                             <el-select
-                                v-model="accountForm.ward"
+                                v-model="accountForm.ward_id"
                                 placeholder="Chọn xã phường"
                                 filterable
                                 no-data-text="Không tìm thấy xã phường"
@@ -154,10 +155,9 @@
 
 <script setup>
 import axiosInstance from '@/config/axios';
-import HTTP_STATUS_CODE from '@/config/statusCode';
-import { ElNotification } from 'element-plus';
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useAuthStore } from '@/stores/auth';
+import { showNotificationError, showNotificationSuccess } from '@/helpers/notification';
 
 const authStore = useAuthStore();
 const provinces = ref([]);
@@ -168,9 +168,9 @@ const accountForm = ref({
     name: '',
     employee_code: '',
     email: '',
-    province: '',
-    district: '',
-    ward: '',
+    province_id: null,
+    district_id: null,
+    ward_id: null,
     address: ''
 });
 const defaultAddress = ref({
@@ -179,9 +179,9 @@ const defaultAddress = ref({
     district: '',
     ward: '',
     address: '',
-    province_id: '',
-    district_id: '',
-    ward_id: ''
+    province_id: null,
+    district_id: null,
+    ward_id: null
 });
 
 const rules = ref({
@@ -195,30 +195,30 @@ const rules = ref({
     employee_code: [
         {
             required: true,
-            message: ''
+            message: 'Vui lòng nhập mã nhân viên của bạn'
         }
     ],
     email: [
         {
             required: true,
-            message: ''
+            message: 'Vui lòng nhập email của bạn'
         }
     ],
-    province: [
+    province_id: [
         {
             required: true,
             message: 'Vui lòng chọn tỉnh thành của bạn',
             trigger: 'change'
         }
     ],
-    district: [
+    district_id: [
         {
             required: true,
             message: 'Vui lòng chọn quận huyện của bạn',
             trigger: 'change'
         }
     ],
-    ward: [
+    ward_id: [
         {
             required: true,
             message: 'Vui lòng chọn xã phường của bạn',
@@ -233,15 +233,29 @@ const rules = ref({
         }
     ]
 });
+
+/**
+ * Get provinces
+ *
+ * @returns {Promise<void>}
+ */
 const getProvinces = async () => {
     try {
         const response = await axiosInstance.get('/provinces');
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+
+        if (response.success) {
             provinces.value = response.data;
         }
     } catch (error) {}
 };
 
+/**
+ * Get districts
+ *
+ * @param {number} provinceId - The province id
+ *
+ * @returns {Promise<void>}
+ */
 const getDistricts = async (provinceId) => {
     const provinceCode = provinces.value.find(
         (province) => province.id === provinceId
@@ -249,24 +263,39 @@ const getDistricts = async (provinceId) => {
 
     try {
         const response = await axiosInstance.get(`/districts/${provinceCode}`);
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+
+        if (response.success) {
             districts.value = response.data;
         }
     } catch (error) {}
 };
 
+/**
+ * Get wards
+ *
+ * @param {number} districtId - The district id
+ *
+ * @returns {Promise<void>}
+ */
 const getWards = async (districtId) => {
     const districtCode = districts.value.find(
         (district) => district.id === districtId
     ).code;
+
     try {
         const response = await axiosInstance.get(`/wards/${districtCode}`);
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+
+        if (response.success) {
             wards.value = response.data;
         }
     } catch (error) {}
 };
 
+/**
+ * Mounted
+ *
+ * @returns {Promise<void>}
+ */
 onMounted(async () => {
     await getProvinces();
     await getUserInfo();
@@ -274,151 +303,108 @@ onMounted(async () => {
     await getWards(defaultAddress.value.district_id);
 });
 
-
+/**
+ * Get user info
+ *
+ * @returns {Promise<void>}
+ */
 const getUserInfo = async () => {
     try {
         const response = await axiosInstance.get('/profile');
-        accountForm.value.name = response.data.name;
-        accountForm.value.employee_code = response.data.code;
-        accountForm.value.email = response.data.email;
-        accountForm.value.province = response.data.province.name;
-        accountForm.value.district = response.data.district.name;
-        accountForm.value.ward = response.data.ward.name;
-        accountForm.value.address = response.data.address;
-        // default address
-        defaultAddress.value.name = response.data.name;
-        defaultAddress.value.province = response.data.province.name;
-        defaultAddress.value.district = response.data.district.name;
-        defaultAddress.value.ward = response.data.ward.name;
-        defaultAddress.value.address = response.data.address;
-        defaultAddress.value.province_id = response.data.province_id;
-        defaultAddress.value.district_id = response.data.district_id;
-        defaultAddress.value.ward_id = response.data.ward_id;
+
+        if (response.success) {
+            accountForm.value.name = response.data.name;
+            accountForm.value.employee_code = response.data.code;
+            accountForm.value.email = response.data.email;
+            accountForm.value.province_id = response.data.province_id;
+            accountForm.value.district_id = response.data.district_id;
+            accountForm.value.ward_id = response.data.ward_id;
+            accountForm.value.address = response.data.address;
+            // default address
+            defaultAddress.value.name = response.data.name;
+            defaultAddress.value.province = response.data.province.name;
+            defaultAddress.value.district = response.data.district.name;
+            defaultAddress.value.ward = response.data.ward.name;
+            defaultAddress.value.address = response.data.address;
+            defaultAddress.value.province_id = response.data.province_id;
+            defaultAddress.value.district_id = response.data.district_id;
+            defaultAddress.value.ward_id = response.data.ward_id;
+        }
     } catch (error) {}
 };
 
+/**
+ * Update user info
+ *
+ * @returns {Promise<void>}
+ */
 const updateUserInfo = async () => {
-    if (!authStore.checkTokenValidity()) {
+    if (!await authStore.checkTokenValidity()) {
         router.push({ name: 'auth-login' });
         return;
     }
+
     try {
         accountFormRef.value.validate(async (valid) => {
             if (valid) {
-                const provinceId =
-                    typeof accountForm.value.province !== 'string'
-                        ? accountForm.value.province
-                        : defaultAddress.value.province_id;
-                const districtId =
-                    typeof accountForm.value.district !== 'string'
-                        ? accountForm.value.district
-                        : defaultAddress.value.district_id;
-                const wardId =
-                    typeof accountForm.value.ward !== 'string'
-                        ? accountForm.value.ward
-                        : defaultAddress.value.ward_id;
                 if (
                     accountForm.value.name !== defaultAddress.value.name ||
-                    accountForm.value.province !==
-                        defaultAddress.value.province ||
-                    accountForm.value.district !==
-                        defaultAddress.value.district ||
-                    accountForm.value.ward !== defaultAddress.value.ward ||
+                    accountForm.value.province_id !==
+                        defaultAddress.value.province_id ||
+                    accountForm.value.district_id !==
+                        defaultAddress.value.district_id ||
+                    accountForm.value.ward_id !== defaultAddress.value.ward_id ||
                     accountForm.value.address !== defaultAddress.value.address
                 ) {
                     const response = await axiosInstance.put('/profile', {
                         name: accountForm.value.name,
                         address: accountForm.value.address,
-                        province_id: provinceId,
-                        district_id: districtId,
-                        ward_id: wardId
+                        province_id: accountForm.value.province_id,
+                        district_id: accountForm.value.district_id,
+                        ward_id: accountForm.value.ward_id
                     });
-                    if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-                        ElNotification({
-                            title: 'Thành công',
-                            message: 'Cập nhật thông tin tài khoản thành công',
-                            type: 'success'
-                        });
+
+                    if (response.success) {
+                        showNotificationSuccess(response.data.message);
+
                         await getUserInfo();
                     }
                 } else {
-                    ElNotification({
-                        title: 'Cảnh báo',
-                        message: 'Không có thay đổi nào được tìm thấy',
-                        type: 'warning'
-                    });
+                    showNotificationError('Không có thay đổi nào được tìm thấy');
                 }
             }
         });
     } catch (error) {
-        ElNotification({
-            title: 'Thất bại',
-            message: 'Cập nhật thông tin tài khoản thất bại',
-            type: 'error'
-        });
+        showNotificationError(error);
     }
 };
 
+/**
+ * Cancel update user info
+ *
+ * @returns {Promise<void>}
+ */
 const cancelUpdateUserInfo = async () => {
     await getUserInfo();
 };
+
+const windowWidth = ref(window.innerWidth);
+
+const updateWidth = () => {
+    windowWidth.value = window.innerWidth;
+};
+
+onMounted(() => {
+    window.addEventListener('resize', updateWidth);
+});
+
+onUnmounted(() => {
+    window.removeEventListener('resize', updateWidth);
+});
+
+const gutterValue = computed(() => (windowWidth.value < 478 ? 30 : 50));
 </script>
 
 <style lang="scss" scoped>
-@import "@/assets/scss/_variables.scss";
-.account-container__right__update-info {
-    @media (min-width: 1024px) {
-        padding: 40px 80px 24px 80px;
-    }
-    &__title {
-        font-size: 20px;
-        font-weight: 600;
-        margin-bottom: 16px;
-        color: $primary-color;
-    }
-    &__form {
-        .el-form-item {
-            margin-bottom: 24px;
-        }
-        .el-input__wrapper {
-            height: 50px;
-        }
-        .el-select__selection {
-            height: 40px;
-        }
-    }
-    .group-button {
-        display: flex;
-        justify-content: flex-end;
-        .btn-cancel {
-            background-color: transparent;
-            border: 1px solid #ccc;
-            padding: 10px 20px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-right: 20px;
-            height: 56px;
-            &:hover {
-                background-color: #ccc;
-                color: #fff;
-            }
-        }
-        .btn-update {
-            background-color: $primary-color;
-            color: #fff;
-            padding: 10px 20px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            height: 56px;
-            width: 215px;
-            &:hover {
-                background-color: $color-red;
-            }
-        }
-    }
-}
+
 </style>

@@ -156,9 +156,9 @@ import { onMounted, ref } from 'vue';
 import STATUS_CODE_ORDER from '@/config/statusOrder';
 import axiosInstance from '@/config/axios';
 import { useAuthStore } from '@/stores/auth';
-import HTTP_STATUS_CODE from '@/config/statusCode';
-import { ElNotification } from 'element-plus';
 import { useRouter } from 'vue-router';
+import { showNotificationError, showNotificationSuccess } from '@/helpers/notification';
+import DEFAULT_CONSTANTS from '@/config/constants';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -188,12 +188,17 @@ const searchForm = ref({
 });
 const tableData = ref([]);
 const dataPagination = ref({
-    limit: 10,
+    limit: DEFAULT_CONSTANTS.LIMIT_HISTORY_ORDER,
     total: 0,
     currentPage: 1
 });
 const orderDetails = ref({});
 
+/**
+ * Handle search
+ *
+ * @returns {Promise<void>}
+ */
 const handleSearch = async () => {
     await searchFormRef.value.validate((valid) => {
         if (valid) {
@@ -202,11 +207,25 @@ const handleSearch = async () => {
     });
 };
 
+/**
+ * Handle page change
+ *
+ * @param {number} page - The page
+ *
+ * @returns {Promise<void>}
+ */
 const handlePageChange = (page) => {
     dataPagination.value.currentPage = page;
     getListOrder(page, dataPagination.value.limit);
 };
 
+/**
+ * Get list order
+ *
+ * @param {number} page - The page
+ *
+ * @param {number} limit - The limit
+ */
 const getListOrder = async (page = 1, limit = 10) => {
     try {
         const response = await axiosInstance.get('/order', {
@@ -219,8 +238,10 @@ const getListOrder = async (page = 1, limit = 10) => {
             }
         });
 
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+        if (response.success && response.data) {
             tableData.value = response.data.data;
+        } else {
+            tableData.value = [];
         }
     } catch (error) {}
 };
@@ -235,18 +256,28 @@ const getListOrder = async (page = 1, limit = 10) => {
 const handleViewDetails = async (idOrder) => {
     try {
         const response = await axiosInstance.get(`/order/${idOrder}`);
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+
+        if (response.success) {
             orderDetails.value = response.data;
         }
     } catch (error) {
-        ElNotification.error({
-            title: 'Lỗi',
-            message: 'Vui lòng thử lại sau',
-            type: 'error'
-        });
+        showNotificationError(error);
     }
 };
 
+/**
+ * Handle update status order details
+ *
+ * @param {number} orderId - The id order
+ *
+ * @param {number} bookId - The id book
+ *
+ * @param {number} status - The status
+ *
+ * @param {string} note - The note
+ *
+ * @returns {Promise<void>}
+ */
 const handleUpdateStatusOrderDetails = async (orderId, bookId, status, note = null) => {
     try {
         if (status === STATUS_CODE_ORDER.MISSING) {
@@ -256,13 +287,10 @@ const handleUpdateStatusOrderDetails = async (orderId, bookId, status, note = nu
                 status: STATUS_CODE_ORDER.MISSING
             });
 
-            if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+            if (response.success) {
                 getListOrder(dataPagination.value.currentPage);
-                ElNotification.success({
-                    title: 'Thành công',
-                    message: 'Cập nhật trạng thái thành công',
-                    type: 'success'
-                });
+
+                showNotificationSuccess(response.data.message);
             }
         } else {
             const response = await axiosInstance.put(`/order/${orderId}`, {
@@ -270,33 +298,39 @@ const handleUpdateStatusOrderDetails = async (orderId, bookId, status, note = nu
                 status: status
             });
 
-            if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+            if (response.success) {
                 getListOrder(dataPagination.value.currentPage);
-                ElNotification.success({
-                    title: 'Thành công',
-                    message: 'Cập nhật trạng thái thành công',
-                    type: 'success'
-                });
+
+                showNotificationSuccess(response.data.message);
             }
         }
+
         handleViewDetails(orderId);
     } catch (error) {
-        ElNotification.error({
-            title: 'Lỗi',
-            message: 'Vui lòng thử lại sau',
-            type: 'error'
-        });
+        showNotificationError(error);
     }
 };
 
-onMounted(() => {
-    if (!authStore.checkTokenValidity()) {
+/**
+ * Mounted
+ *
+ * @returns {Promise<void>}
+ */
+onMounted(async () => {
+    if (!await authStore.checkTokenValidity()) {
         router.push({ name: 'auth-login' });
     } else {
-        getListOrder();
+        await getListOrder();
     }
 });
 
+/**
+ * Format date
+ *
+ * @param {string} inputDate - The input date
+ *
+ * @returns {string}
+ */
 const formatDate = (inputDate) => {
     if (!inputDate) return '';
 
@@ -310,54 +344,5 @@ const formatDate = (inputDate) => {
 </script>
 
 <style lang="scss" scoped>
-.search-form-container {
-    padding: 10px 10px 10px 10px;
-    box-sizing: border-box;
-    overflow: hidden;
-    .search-form {
-        display: grid;
-        grid-template-columns: 2fr 2fr 2fr 1fr;
-        gap: 10px;
-        .search-button {
-            width: 100%;
-        }
-        .el-form-item {
-            @media (max-width: 768px) {
-                max-width: 100px;
-            }
-            margin-bottom: 0 !important;
-        }
-    }
-}
-.list-order-container {
-    width: 100%;
-    padding: 10px;
-    box-sizing: border-box;
-    overflow: hidden;
-}
-.status-missing {
-    color: orange;
-    font-weight: bold;
-}
-
-.status-borrowing {
-    color: blue;
-    font-weight: bold;
-}
-
-.status-overdue {
-    color: red;
-    font-weight: bold;
-}
-
-.status-returned {
-    color: green;
-    font-weight: bold;
-}
-.order-pagination{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 10px;
-}
+@import '@/assets/scss/views/orders_view.scss';
 </style>

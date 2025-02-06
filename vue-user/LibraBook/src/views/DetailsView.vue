@@ -275,7 +275,7 @@
 </template>
 
 <script setup>
-import BookCardComponent from '@/components/Book/BookCardComponent.vue';
+import BookCardComponent from '@/components/book/BookCardComponent.vue';
 import BreadcrumbComponent from '@/components/Breadcrumb/BreadcrumbComponent.vue';
 import IconStar from '@/components/icons/IconStar.vue';
 import IconDeliveryDetail from '@/components/icons/IconDeliveryDetail.vue';

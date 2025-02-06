@@ -17,6 +17,7 @@
                 :model="passwordForm"
                 :rules="rules"
                 class="from-checkout"
+                require-asterisk-position="right"
                 @submit.prevent="handleChangePassword"
             >
                 <el-row :gutter="20">
@@ -84,10 +85,9 @@
 
 <script setup>
 import axiosInstance from '@/config/axios';
-import HTTP_STATUS_CODE from '@/config/statusCode';
-import { ElNotification } from 'element-plus';
-import { onMounted, ref, watch } from 'vue';
+import { ref } from 'vue';
 import { useAuthStore } from '@/stores/auth';
+import { showNotificationError, showNotificationSuccess } from '@/helpers/notification';
 
 const authStore = useAuthStore();
 const passwordFormRef = ref(null);
@@ -147,9 +147,15 @@ const rules = ref({
     ]
 });
 
+/**
+ * Handle change password
+ *
+ * @returns {Promise<void>}
+ */
 const handleChangePassword = async () => {
-    if (!authStore.checkTokenValidity()) {
+    if (!await authStore.checkTokenValidity()) {
         router.push({ name: 'auth-login' });
+
         return;
     }
 
@@ -164,12 +170,10 @@ const handleChangePassword = async () => {
                         confirm_password: passwordForm.value.confirm_password
                     }
                 );
-                if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-                    ElNotification({
-                        title: 'Thành công',
-                        message: 'Cập nhật mật khẩu thành công',
-                        type: 'success'
-                    });
+
+                if (response.success) {
+                    showNotificationSuccess(response.data.message);
+
                     passwordForm.value = {
                         current_password: '',
                         password: '',
@@ -178,22 +182,16 @@ const handleChangePassword = async () => {
                 }
             }
         } catch (error) {
-            if (
-                error.status === HTTP_STATUS_CODE.HTTP_UNPROCESSABLE_ENTITY ||
-                error.status === HTTP_STATUS_CODE.HTTP_BAD_REQUEST
-            ) {
-                errorMessages.value = 'Mật khẩu cũ không đúng';
-            } else {
-                ElNotification({
-                    title: 'Thất bại',
-                    message: 'Cập nhật mật khẩu thất bại',
-                    type: 'error'
-                });
-            }
+            showNotificationError(error);
         }
     });
 };
 
+/**
+ * Cancel change password
+ *
+ * @returns {Promise<void>}
+ */
 const cancelChangePassword = () => {
     passwordForm.value = {
         current_password: '',
@@ -204,72 +202,5 @@ const cancelChangePassword = () => {
 </script>
 
 <style lang="scss">
-@import "@/assets/scss/_variables.scss";
-.account-container__right__update-info {
-    @media (min-width: 1024px) {
-        padding: 40px 80px 24px 80px;
-    }
-    &__title {
-        font-size: 20px;
-        font-weight: 600;
-        margin-bottom: 16px;
-        color: $primary-color;
-    }
-    .error-message-container {
-        width: 70%;
-        padding: 10px 5px;
-        margin-bottom: 20px;
-        background-color: #f8d7da;
-        border-radius: 5px;
-        .error-message {
-            color: $color-red;
-            font-size: 14px;
-        }
-    }
-    &__form {
-        .el-form-item {
-            margin-bottom: 20px;
-        }
-        .el-input__wrapper {
-            height: 50px;
-        }
-        .el-select__selection {
-            height: 40px;
-        }
-    }
-    .group-button {
-        display: flex;
-        justify-content: flex-end;
-        margin-top: 24px;
-        .btn-cancel {
-            background-color: transparent;
-            border: 1px solid #ccc;
-            padding: 10px 20px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-right: 20px;
-            height: 56px;
-            &:hover {
-                background-color: #ccc;
-                color: #fff;
-            }
-        }
-        .btn-update {
-            background-color: $primary-color;
-            color: #fff;
-            padding: 10px 20px;
-            border-radius: 5px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            height: 56px;
-            width: 215px;
-            &:hover {
-                background-color: $color-red;
-            }
-        }
-    }
-}
+@import '@/assets/scss/views/change_password_view.scss';
 </style>
