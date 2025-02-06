@@ -3,13 +3,17 @@
 namespace App\Http\Services\User;
 
 use App\Http\Repositories\BookRepositoryInterface;
+use App\Http\Repositories\OrderDetailsRepositoryInterface;
 use App\Http\Repositories\OrderRepositoryInterface;
+use App\Models\Book;
 use App\Models\Order;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\OrderDetail;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Response;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 class OrderService
 {
@@ -17,10 +21,15 @@ class OrderService
      * The constructor
      *
      * @param OrderRepositoryInterface $orderRepository
+     * 
+     * @param BookRepositoryInterface $bookRepository
+     * 
+     * @param OrderDetailsRepositoryInterface $orderDetailsRepository
      */
     public function __construct(
         protected OrderRepositoryInterface $orderRepository,
-        protected BookRepositoryInterface $bookRepository
+        protected BookRepositoryInterface $bookRepository,
+        protected OrderDetailsRepositoryInterface $orderDetailsRepository
     ) {}
 
     /**
@@ -28,18 +37,13 @@ class OrderService
      *
      *  @param array $dataSearch
      * 
-     * 
      * @return LengthAwarePaginator|null
      */
     public function getAllByPaginate(array $dataSearch): ?LengthAwarePaginator
     {
-        $user = auth('api')->user();
-
-        if (!$user) {
-            return null;
-        }
-
         try {
+            $user = auth('api')->user();
+
             $data = [
                 'user_id' => $user->id,
                 'start_date' => $dataSearch['start_date'] ?? null,
@@ -47,7 +51,7 @@ class OrderService
                 'status' => $dataSearch['status'] ?? null,
                 'limit' => $dataSearch['limit'] ?? config('constants.DEFAULT_LIMIT'),
                 'column' => $dataSearch['column'] ?? null,
-                'order' => $dataSearch['order']?? null,
+                'order' => $dataSearch['order'] ?? null,
             ];
 
             return $this->orderRepository->getAllByPaginate($data);
@@ -63,63 +67,64 @@ class OrderService
      *
      * @param array $data
      *
-     * @return Model|null
+     * @return array
      */
-    public function store(array $data): ?Model
+    public function store(array $data): array
     {
         try {
             DB::beginTransaction();
 
             $user = auth('api')->user();
 
-            if (!$user) {
-                DB::rollBack();
-                return null;
-            }
-
             $data['user_id'] = $user->id;
             $currentCount = $this->orderRepository->countOrders();
             $nextNumber = $currentCount + 1;
-            
+
             if ($nextNumber > 99999) {
                 $orderCode = 'HD' . $nextNumber;
-            }else{
+            } else {
                 $orderCode = 'HD' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
             }
 
             $data['code'] = $orderCode;
-            $data['status'] = Order::STATUS_BORROWING;
             $orderDetails = $data['order_details'];
             unset($data['order_details']);
 
             $order = $this->orderRepository->store($data);
 
+            $bookIds = array_column($orderDetails, 'book_id');
+            $books = $this->bookRepository->findManyByIds($bookIds)->keyBy('id');
+
             if (
-                $order &&
-                $orderDetails &&
-                $this->bookRepository->checkQuantityForMultipleBooks($orderDetails)
+                !$order ||
+                !$this->checkQuantityForMultipleBooks($orderDetails, $books) ||
+                !$this->addBookToOrder($order, $orderDetails) ||
+                !$this->updateQualityAndBorrowingNumberForMultipleBooks($orderDetails, $books)
             ) {
-                if($this->orderRepository->addBookToOrder($order, $orderDetails)){
-                    $this->bookRepository->updateQualityForMultipleBooks($orderDetails);
-
-                    DB::commit();
-
-                    return $order;
-                }
+                throw new \Exception('Có lỗi xảy ra vui lòng thử lại sau.', Response::HTTP_BAD_REQUEST);
             }
 
-            DB::rollBack();
+            DB::commit();
 
-            return null;
+            return [
+                'message' => 'Tiến hành mượn sách thành thành công',
+                'code' => Response::HTTP_CREATED,
+            ];
         } catch (\Exception $e) {
             DB::rollBack();
-
             Log::error($e->getMessage());
 
-            return null;
+            return [
+                'error' => $e->getMessage(),
+                'error_code' => match ($e->getCode()) {
+                    Response::HTTP_BAD_REQUEST => ERROR_BAD_REQUEST,
+                    Response::HTTP_UNAUTHORIZED => ERROR_CODE_AUTHENTICATE,
+                    default => ERROR_CODE_INTERNAL_SERVER_ERROR
+                },
+                'code' => $e->getCode(),
+            ];
         }
     }
-
 
     /**
      * Get details of the order
@@ -133,17 +138,7 @@ class OrderService
         try {
             $user = auth('api')->user();
 
-            if (!$user) {
-                return null;
-            }
-
-            $orderDetails =  $this->orderRepository->getDetails($id);
-
-            if (!$orderDetails || $orderDetails->user_id !== $user->id) {
-                return null;
-            }
-
-            return $orderDetails;
+            return $this->orderRepository->getOrderDetailsInMyOrder($user, $id);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 
@@ -165,16 +160,23 @@ class OrderService
         try {
             DB::beginTransaction();
 
-            if (!$this->orderRepository->updateStatusBookInOrder($data, $id)) {
-                throw new \Exception('Server error please try again later');
+            $user = auth('api')->user();
+
+            if (!$this->orderRepository->getOrderDetailsInMyOrder($user, $id)) {
+                throw new \Exception('Không tìm thấy đơn mượn hoặc bạn không có quyền sửa.');
             }
 
-            if (!$this->updateOrderStatus($id, $this->getOverallOrderStatus($id))) {
-                throw new \Exception('Server error please try again later');
+            $book = $this->orderRepository->getBookInOrder($data, $id);
+
+            if (
+                !$this->updateStatusBookInOrder($book, $data) ||
+                !$this->updateOrderStatus($id, $this->getOverallOrderStatus($id))
+            ) {
+                throw new \Exception('Cập nhật trạng thái đơn mượn thất bại');
             }
 
             DB::commit();
-
+            
             return true;
         } catch (\Exception $e) {
             DB::rollBack();
@@ -193,7 +195,60 @@ class OrderService
      */
     private function getOverallOrderStatus(int $orderId): int
     {
-        return $this->orderRepository->getOverallOrderStatus($orderId);
+        $statuses = $this->orderRepository->getOverallOrderStatus($orderId);
+
+        // If order has only one book then return status of that book
+        if ($statuses->count() === 1) {
+            return $statuses->first();
+        }
+
+        // If order has only one overdue book then return overdue status
+        if ($statuses->contains(OrderDetail::STATUS_OVERDUE)) {
+            return Order::STATUS_OVERDUE;
+        }
+
+        // If order has only one missing book then return missing status
+        if ($statuses->contains(OrderDetail::STATUS_MISSING)) {
+            return Order::STATUS_MISSING;
+        }
+
+        // If order has only one borrowing book then return borrowing status
+        if ($statuses->contains(OrderDetail::STATUS_BORROWING)) {
+            return Order::STATUS_BORROWING;
+        }
+
+        return Order::STATUS_RETURNED;
+    }
+
+    /**
+     * Add book to order
+     * 
+     * @param Order $order
+     * 
+     * @param array $orderDetails
+     */
+    private function addBookToOrder(Order $order, array $orderDetails): bool
+    {
+        $dataOrderDetailsInsert = [];
+
+        foreach ($orderDetails as $orderDetail) {
+            $dataOrderDetailsInsert[] = [
+                'order_id' => $order->id,
+                'book_id' => $orderDetail['book_id'],
+                'quantity' => $orderDetail['quantity'],
+                'borrow_date' => Carbon::now(),
+                'return_date' => $orderDetail['return_date'],
+                'note' => $orderDetail['note'] ?? null,
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ];
+        }
+
+        if (!$this->orderDetailsRepository->insert($dataOrderDetailsInsert)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -208,9 +263,96 @@ class OrderService
     private function updateOrderStatus(int $orderId, int $orderStatus): bool
     {
         try {
-            return $this->orderRepository->updateOrderStatus($orderId, $orderStatus);
+            return $this->orderRepository->update($orderId, [
+                'status' => $orderStatus,
+            ]);
         } catch (\Exception $e) {
             return false;
         }
+    }
+
+    /**
+     * Check quantity for multiple books
+     * 
+     * @param array $orderDetails
+     * 
+     * @param Collection $books
+     * 
+     * @return bool
+     */
+    private function checkQuantityForMultipleBooks(array $orderDetails, Collection $books): bool
+    {
+        foreach ($orderDetails as $orderDetail) {
+            $book = $books[$orderDetail['book_id']];
+
+            if ($book->quantity < $orderDetail['quantity']) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * Update multiple books
+     *
+     * @param array $orderDetails
+     * 
+     * @param Collection $books
+     *
+     * @return bool
+     */
+    private function updateQualityAndBorrowingNumberForMultipleBooks(array $orderDetails, Collection $books): bool
+    {
+        $dataUpdateBooks = [];
+
+        foreach ($orderDetails as $orderDetail) {
+            $book = $books[$orderDetail['book_id']] ?? null;
+
+            if (!$book) {
+                return false;
+            }
+
+            $dataUpdateBooks[] = [
+                ...$book->getAttributes(),
+                'quantity' => $book->quantity - $orderDetail['quantity'],
+                'borrowing_number' => $book->borrowing_number + 1,
+                'updated_at' => Carbon::now(),
+            ];
+        }
+
+        if (!$this->bookRepository->upsert($dataUpdateBooks)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Update the status of a book in an order.
+     *
+     * @param Book $book The book to update.
+     * 
+     * @param array $data The data containing the new status and note.
+     *
+     * @return bool
+     */
+    private function updateStatusBookInOrder(Book $book, array $data): bool
+    {
+        if ($data['status'] == $book->pivot->status) {
+            return false;
+        }
+
+        // If book is missing, update with note
+        if ($data['status'] === OrderDetail::STATUS_MISSING) {
+            return $this->orderRepository->updateStatusBookInOrderWithNote($book, $data['note']);
+        }
+
+        // If status is different current status, update status
+        if ($data['status'] === OrderDetail::STATUS_RETURNED) {
+            return $this->orderRepository->updateStatusBookInOrder($book, $data);
+        }
+
+        return false;
     }
 }

@@ -92,4 +92,13 @@ interface BookRepositoryInterface extends BaseRepositoryInterface
      * @return Collection
     */
     public function findManyByIds(array $ids): Collection;
+
+    /**
+     * Update multiple records to the cart
+     * 
+     * @param array $data
+     * 
+     * @return int
+    */
+    public function upsert(array $data): int;
 }

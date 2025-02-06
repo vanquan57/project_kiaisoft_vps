@@ -23,18 +23,22 @@ class OrderController extends Controller
 
     /**
      * Display a listing of the resource.
+     * 
+     * @param OrderSearchRequest $request
      *
      * @return JsonResponse
      */
     public function index(OrderSearchRequest $request): JsonResponse
     {
-        if ($orders = $this->orderService->getAllByPaginate($request->validated())) {
-            return response()->json($orders);
+        if (!$orders = $this->orderService->getAllByPaginate($request->validated())) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                Response::HTTP_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+            );
         }
 
-        return response()->json([
-            'error' => 'The request could not be processed',
-        ], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI($orders);
     }
 
     /**
@@ -46,13 +50,19 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request): JsonResponse
     {
-        if ($order = $this->orderService->store($request->validated())) {
-            return response()->json($order, Response::HTTP_CREATED);
+        $result = $this->orderService->store($request->validated());
+
+        if ($result['code'] !== Response::HTTP_CREATED) {
+            return responseErrorAPI(
+                $result['code'],
+                $result['error_code'],
+                $result['error']
+            );
         }
 
-        return response()->json([
-            'error' => 'The request could not be processed',
-        ], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI([
+            'message' => $result['message']
+        ], $result['code']);
     }
 
     /**
@@ -64,13 +74,15 @@ class OrderController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        if ($order = $this->orderService->show($id)) {
-            return response()->json($order);
+        if (!$order = $this->orderService->show($id)) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                Response::HTTP_BAD_REQUEST,
+                'Đơn hàng không tồn tại vui lòng kiểm tra lại.'
+            );
         }
 
-        return response()->json([
-            'error' => 'The request could not be processed',
-        ], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI($order);
     }
 
     /**
@@ -84,14 +96,16 @@ class OrderController extends Controller
      */
     public function update(UpdateOrderRequest $request, int $id): JsonResponse
     {
-        if ($this->orderService->update($request->validated(), $id)) {
-            return response()->json([
-                'message' => 'Update successfully',
-            ]);
+        if (!$this->orderService->update($request->validated(), $id)) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                Response::HTTP_BAD_REQUEST,
+                'Không thể xử lý yêu cầu vui lòng thử lại sau.'
+            );
         }
 
-        return response()->json([
-            'error' => 'The request could not be processed',
-        ], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI([
+            'message' => 'Cập nhật đơn mượn thành công',
+        ]);
     }
 }

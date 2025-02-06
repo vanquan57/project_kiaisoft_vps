@@ -4,14 +4,13 @@ namespace App\Http\Repositories\Eloquent;
 
 use App\Http\Repositories\OrderRepositoryInterface;
 use App\Models\Book;
-use App\Mail\OverdueBooksNotification;
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Mail;
 
 class OrderRepository extends BaseRepository implements OrderRepositoryInterface
 {
@@ -29,7 +28,6 @@ class OrderRepository extends BaseRepository implements OrderRepositoryInterface
      */
     public function getAllByPaginate($data): LengthAwarePaginator
     {
-        logger($data);
         $query = $this->model->query();
 
         if (!empty($data['user_id'])) {
@@ -95,13 +93,8 @@ class OrderRepository extends BaseRepository implements OrderRepositoryInterface
     public function getBookInOrder(array $data, int $orderId): ?Model
     {
         $order = $this->model->findOrFail($orderId);
-        $book = $order->orderDetails()->where('book_id', $data['book_id'])->first();
 
-        if (!$book) {
-            return null;
-        }
-
-        return $book;
+        return $order->orderDetails()->where('book_id', $data['book_id'])->first();
     }
 
     /**
@@ -201,29 +194,26 @@ class OrderRepository extends BaseRepository implements OrderRepositoryInterface
     }
 
     /**
-     * The method add book to order
+     * Store the order
      * 
-     * @param Order $order
+     * @param array $data
      * 
-     * @param array $orderDetails
-     * 
-     * @return bool
-     */
-    public function addBookToOrder(Order $order, array $orderDetails): bool
+     * @return Model
+    */
+    public function store(array $data): Model
     {
-        if(count($orderDetails) > 0) {
-            foreach ($orderDetails as $orderDetail) {
-                $order->orderDetails()->attach($orderDetail['book_id'], [
-                    'borrow_date' => Carbon::now(),
-                    'return_date' => $orderDetail['return_date'],
-                    'quantity' => $orderDetail['quantity'],
-                ]);
-            }
-
-            return true;
-        }
-
-        return false;
+        return $this->model->create([
+            'user_id' => $data['user_id'],
+            'code' => $data['code'],
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'],
+            'province_id' => $data['province_id'],
+            'district_id' => $data['district_id'],
+            'ward_id' => $data['ward_id'],
+            'address' => $data['address'],
+            'status' => Order::STATUS_BORROWING,
+        ]);
     }
 
     /**
@@ -234,5 +224,22 @@ class OrderRepository extends BaseRepository implements OrderRepositoryInterface
     public function countOrders(): int
     {
         return $this->model->count();
+    }
+
+    /**
+     * The method get details in my order table
+     * 
+     * @param User $user
+     * 
+     * @param int $orderId
+     * 
+     * @return Model|null
+     */
+    public function getOrderDetailsInMyOrder(User $user, int $orderId): ?Model
+    {
+        return $user->orders()->where('id', $orderId)->with([
+            'user:id,name,email',
+            'orderDetails',
+        ])->first();
     }
 }

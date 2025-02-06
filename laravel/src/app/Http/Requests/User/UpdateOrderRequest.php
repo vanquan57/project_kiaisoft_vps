@@ -37,11 +37,11 @@ class UpdateOrderRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'status.required' => 'Status is required',
-            'status.in' => 'Status is invalid',
-            'book_id.required' => 'Book id is required',
-            'book_id.exists' => 'Book id is invalid',
-            'note.required_if' => 'Note is required when status is missing',
+            'status.required' => 'Trạng thái là bắt buộc.',
+            'status.in' => 'Trạng thái không hợp lệ.',
+            'book_id.required' => 'Mã sách là bắt buộc.',
+            'book_id.exists' => 'Mã sách không hợp lệ.',
+            'note.required_if' => 'Ghi chú là bắt buộc khi trạng thái bị thiếu.',
         ];
     }
 }

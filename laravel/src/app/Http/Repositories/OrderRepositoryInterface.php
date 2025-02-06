@@ -4,6 +4,7 @@ namespace App\Http\Repositories;
 
 use App\Models\Book;
 use App\Models\Order;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -99,20 +100,20 @@ interface OrderRepositoryInterface extends BaseRepositoryInterface
     public function getTotalOrdersByMonthAndYear(Carbon $startMonth, Carbon $currentMonth): ?array;
 
     /**
-     * The method add boook to order
-     * 
-     * @param Order $order
-     * 
-     * @param array $orderDetails
-     * 
-     * @return bool
-    */
-    public function addBookToOrder(Order $order, array $orderDetails): bool;
-
-    /**
      * The method count total order in table
      * 
      * @return int
      */
     public function countOrders(): int;
+
+    /**
+     * The method get details in my order table
+     * 
+     * @param User $user
+     * 
+     * @param int $orderId
+     * 
+     * @return Model|null
+     */
+    public function getOrderDetailsInMyOrder(User $user, int $orderId): ?Model;
 }
