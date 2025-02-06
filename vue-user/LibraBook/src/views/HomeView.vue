@@ -38,20 +38,36 @@
                         </button>
                     </div>
                 </div>
-                <div class="top-book__most-borrowed__list">
-                    <BookCardComponent
-                        v-for="book in topBooksMostBorrowed"
-                        :key="book.id"
-                        :book="book"
-                        @quick-view="handleQuickView"
-                        @add-book-to-cart="handleAddBookToCart"
-                        @add-book-to-wishlist="handleAddBookToWishlist"
-                    />
+                <div
+                    ref="carouselRef"
+                    class="carousel-container"
+                >
+                    <div
+                        class="carousel-wrapper"
+                        :style="{ transform: `translateX(-${currentSlide * 100}%)` }"
+                    >
+                        <div
+                            v-for="(slideBooks, index) in chunkedBooksMostBorrowed"
+                            :key="index"
+                            class="carousel-slide"
+                        >
+                            <div class="top-book__most-borrowed__list">
+                                <BookCardComponent
+                                    v-for="book in slideBooks"
+                                    :key="book.id"
+                                    :book="book"
+                                    @quick-view="handleQuickView"
+                                    @add-book-to-cart="handleAddBookToCart"
+                                    @add-book-to-wishlist="handleAddBookToWishlist"
+                                />
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="btn-container">
                 <button
-                    class="top-book__most-borrowed__btn-view-all"
+                    class="top-book__most-borrowed__btn-view-all red-btn"
                     @click="
                         handleRedirectToListBook({
                             isMostBorrowed: true,
@@ -83,12 +99,28 @@
                     </button>
                 </div>
             </div>
-            <div class="list-category__list">
-                <CategoryCardComponent
-                    v-for="category in listCategoryAndIcon"
-                    :key="category.id"
-                    :category="category"
-                />
+            <div
+                ref="carouselRef"
+                class="carousel-container"
+            >
+                <div
+                    class="carousel-wrapper"
+                    :style="{ transform: `translateX(-${currentSlideCategory * 100}%)` }"
+                >
+                    <div
+                        v-for="(slideCategory, index) in chunkedCategories"
+                        :key="index"
+                        class="carousel-slide"
+                    >
+                        <div class="list-category__list">
+                            <CategoryCardComponent
+                                v-for="category in slideCategory"
+                                :key="category.id"
+                                :category="category"
+                            />
+                        </div>
+                    </div>
+                </div>
             </div>
         </section>
         <section class="section-container top-book__most-viewed">
@@ -146,28 +178,46 @@
             </div>
             <div class="top-book__most-borrowed__title">
                 <h2>Sách mới</h2>
-                <div>
+                <div class="carousel-controls">
                     <button
-                        class="btn-view-all"
-                        @click="
-                            handleRedirectToListBook({
-                                isMostNewReleased: true,
-                            })
-                        "
+                        class="carousel-controls__prev"
+                        @click="handlePrevMostNewReleased"
                     >
-                        Xem thêm
+                        <IconArrowLeft />
+                    </button>
+                    <button
+                        class="carousel-controls__next"
+                        @click="handleNextMostNewReleased"
+                    >
+                        <IconArrowRight />
                     </button>
                 </div>
             </div>
-            <div class="top-book__most-borrowed__list">
-                <BookCardComponent
-                    v-for="book in listNewBooks"
-                    :key="book.id"
-                    :book="book"
-                    @quick-view="handleQuickView"
-                    @add-book-to-cart="handleAddBookToCart"
-                    @add-book-to-wishlist="handleAddBookToWishlist"
-                />
+            <div
+                ref="carouselRef"
+                class="carousel-container"
+            >
+                <div
+                    class="carousel-wrapper"
+                    :style="{ transform: `translateX(-${currentSlideNewReleased * 100}%)` }"
+                >
+                    <div
+                        v-for="(slideBooks, index) in chunkedBooksNewReleased"
+                        :key="index"
+                        class="carousel-slide"
+                    >
+                        <div class="top-book__most-borrowed__list">
+                            <BookCardComponent
+                                v-for="book in slideBooks"
+                                :key="book.id"
+                                :book="book"
+                                @quick-view="handleQuickView"
+                                @add-book-to-cart="handleAddBookToCart"
+                                @add-book-to-wishlist="handleAddBookToWishlist"
+                            />
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="btn-container">
                 <button
@@ -249,8 +299,7 @@
 import images from '@/assets/images';
 import CarouselItem from '@/components/carousel/CarouselComponent.vue';
 import axiosInstance from '@/config/axios';
-import HTTP_STATUS_CODE from '@/config/statusCode';
-import { onMounted, ref, watch, onUnmounted } from 'vue';
+import { onMounted, ref, onUnmounted, computed } from 'vue';
 import IconArrowLeft from '@/components/icons/IconArrowLeft.vue';
 import IconArrowRight from '@/components/icons/IconArrowRight.vue';
 import BookCardComponent from '@/components/book/BookCardComponent.vue';
@@ -263,24 +312,27 @@ import StatsOverviewComponent from '@/components/StatsOverviewComponent.vue';
 import { markRaw } from 'vue';
 import { useRouter} from 'vue-router';
 import IconArrowUp from '@/components/icons/IconArrowUp.vue';
-import { ElNotification } from 'element-plus';
 import { useAuthStore } from '@/stores/auth';
 import { useWishListStore } from '@/stores/wishList';
 import { useCounterCartAndWishList } from '@/stores/counterCartAndWishList';
+import { showNotificationSuccess, showNotificationError } from '@/helpers/notification';
 
 const router = useRouter();
 const categories = ref([]);
-const listCategories = ref([]);
 const topBooksMostBorrowed = ref([]);
 const topBooksMostViewed = ref([]);
 const listNewBooks = ref([]);
-const listCategoryAndIcon = ref([]);
-const currentIndex = ref(1);
-const currentIndexCategory = ref(1);
 const showScrollTop = ref(false);
 const authStore = useAuthStore();
 const wishListStore = useWishListStore();
 const counterCartAndWishList = useCounterCartAndWishList();
+const carouselRef = ref(null);
+const currentSlide = ref(0);
+const currentSlideCategory = ref(0);
+const currentSlideNewReleased = ref(0);
+const booksPerSlide = ref(DEFAULT_CONSTANTS.LIMIT_BOOK);
+const categoryPerSlide = ref(DEFAULT_CONSTANTS.LIMIT_SLIDE_CATEGORY);
+const booksPerSlideNewReleased = ref(DEFAULT_CONSTANTS.LIMIT_NEW_BOOK);
 
 const listImageCategory = [
     images.categoryCamera,
@@ -309,61 +361,63 @@ const fullServices = ref([
     }
 ]);
 
-const getCategories = async () => {
+/**
+ * Get categories
+ *
+ * @returns {Promise<void>}
+*/
+const getCategories = async (limit = DEFAULT_CONSTANTS.LIMIT_CATEGORY) => {
     try {
         const response = await axiosInstance.get('/categories', {
             params: {
-                limit: 10000
+                limit: limit
             }
         });
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-            categories.value = response.data.data;
-        }
-    } catch (error) {}
-};
 
-const getListCategoryByPage = async (page = 1) => {
-    try {
-        const response = await axiosInstance.get('/categories', {
-            params: {
-                limit: DEFAULT_CONSTANTS.LIMIT_CATEGORY,
-                page: page
-            }
-        });
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-            listCategories.value = response.data.data;
-            listCategoryAndIcon.value = [];
-            listCategories.value.forEach((category, index) => {
-                listCategoryAndIcon.value.push({
-                    name: category.name,
+        if (response.success) {
+            categories.value = response.data.data.map((category) => {
+                return {
+                    ...category,
                     icon: listImageCategory[
                         Math.floor(Math.random() * listImageCategory.length)
-                    ],
-                    slug: category.slug,
-                    id: category.id
-                });
+                    ]
+                };
             });
         }
     } catch (error) {}
 };
 
+/**
+ * Get top books most borrowed
+ *
+ * @param {number} page - The page number
+ *
+ * @returns {Promise<void>}
+*/
 const getTopBooksMostBorrowed = async (page = 1) => {
     try {
         const response = await axiosInstance.get('/book', {
             params: {
                 limit: DEFAULT_CONSTANTS.LIMIT_BOOK,
                 most_borrowed: DEFAULT_CONSTANTS.TRUE,
-                page: page,
-                order: DEFAULT_CONSTANTS.DEFAULT_ORDER
+                order: DEFAULT_CONSTANTS.DEFAULT_ORDER,
+                page: page
             }
         });
 
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-            topBooksMostBorrowed.value = response.data.data;
+        if (response.success && response.data.last_page > page) {
+            topBooksMostBorrowed.value.push(...response.data.data);
         }
     } catch (error) {}
 };
 
+/**
+ * Get top books most viewed
+ *
+ * @param {number} page - The page number
+ *
+ * @returns {Promise<void>}
+*/
 const getTopBooksMostViewed = async (page = 1) => {
     try {
         const response = await axiosInstance.get('/book', {
@@ -374,29 +428,44 @@ const getTopBooksMostViewed = async (page = 1) => {
                 order: DEFAULT_CONSTANTS.DEFAULT_ORDER
             }
         });
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-            topBooksMostViewed.value = response.data.data;
+
+        if (response.success && response.data.last_page > page) {
+            topBooksMostViewed.value.push(...response.data.data);
         }
     } catch (error) {}
 };
 
-const getListNewBooks = async () => {
+/**
+ * Get list new books
+ *
+ * @returns {Promise<void>}
+*/
+const getListNewBooks = async (page = 1) => {
     try {
         const response = await axiosInstance.get('/book', {
             params: {
                 limit: DEFAULT_CONSTANTS.LIMIT_NEW_BOOK,
                 latest: DEFAULT_CONSTANTS.TRUE,
-                order: DEFAULT_CONSTANTS.DEFAULT_ORDER
+                order: DEFAULT_CONSTANTS.DEFAULT_ORDER,
+                page: page
             }
         });
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-            listNewBooks.value = response.data.data;
+
+        if (response.success && response.data.last_page > page) {
+            listNewBooks.value.push(...response.data.data);
         }
     } catch (error) {}
 };
 
+/**
+ * Handle add book to cart
+ *
+ * @param {number} id - The book id
+ *
+ * @returns {Promise<void>}
+*/
 const handleAddBookToCart = async (id) => {
-    if (authStore.checkTokenValidity()) {
+    if (await authStore.checkTokenValidity()) {
         try {
             const response = await axiosInstance.post('/cart', {
                 cart: [
@@ -406,113 +475,192 @@ const handleAddBookToCart = async (id) => {
                     }
                 ]
             });
-            if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-                await getCart();
-                ElNotification.success('Thêm vào giỏ hàng thành công');
-            }
 
+            if (response.success) {
+                const { success, error } = response.data.message;
+
+                await getCart();
+
+                if (success) {
+                    showNotificationSuccess(success);
+                }
+
+                if (error) {
+                    const showError = () => {
+                        showNotificationError(error);
+                    };
+
+                    success ? setTimeout(showError, 2000) : showError();
+                }
+            }
         } catch (error) {
-            ElNotification.error('Thêm vào giỏ hàng thất bại, Hết sách !');
+            showNotificationError(error);
         }
     } else {
         router.push({ name: 'auth-login' });
     }
 };
 
+/**
+ * Handle add book to wishlist
+ *
+ * @param {number} id - The book id
+ *
+ * @returns {Promise<void>}
+*/
 const handleAddBookToWishlist = async (id) => {
-    if (authStore.checkTokenValidity()) {
+    if (await authStore.checkTokenValidity()) {
         try {
             const response = await axiosInstance.post('/wish-list', {
                 book_id: id
             });
-            if (response.status === HTTP_STATUS_CODE.HTTP_CREATED) {
+
+            if (response.success) {
                 wishListStore.addToWishList(id);
                 await getWishList();
-                ElNotification.success('Thêm vào danh sách yêu thích thành công');
+
+                showNotificationSuccess(response.data.message);
             }
-
-
         } catch (error) {
-            ElNotification.error('Sách đã tồn tại trong danh sách yêu thích');
+            showNotificationError(error);
         }
     } else {
         router.push({ name: 'auth-login' });
     }
 };
 
+/**
+ * Get wish list
+ *
+ * @returns {Promise<void>}
+*/
 const getWishList = async () => {
     try {
         const response = await axiosInstance.get('/wish-list');
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+
+        if (response.success) {
             const booksInWishList = response.data;
+
             booksInWishList.forEach((book) => {
                 wishListStore.addToWishList(book.id);
             });
+
             counterCartAndWishList.setWishList(booksInWishList.length);
         }
     } catch (error) {}
 };
 
+/**
+ * Get cart
+ *
+ * @returns {Promise<void>}
+*/
 const getCart = async () => {
     try {
         const response = await axiosInstance.get('/cart');
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+
+        if (response.success) {
             counterCartAndWishList.setCart(response.data.length);
         }
     } catch (error) {}
 };
 
+/**
+ * Mounted
+ *
+ * @returns {Promise<void>}
+*/
 onMounted(async () => {
     await getCategories();
-    await getListCategoryByPage(currentIndexCategory.value);
-    await getTopBooksMostBorrowed(currentIndex.value);
-    await getTopBooksMostViewed(currentIndex.value);
+    await getTopBooksMostBorrowed();
+    await getTopBooksMostViewed();
     await getListNewBooks();
     await getWishList();
     await getCart();
     window.addEventListener('scroll', handleScroll);
 });
 
+/**
+ * Handle prev
+ *
+ * @returns {Promise<void>}
+*/
 const handlePrev = () => {
-    if (currentIndex.value > 1) {
-        currentIndex.value--;
+    if (currentSlide.value > 0) {
+        currentSlide.value--;
     }
 };
 
+/**
+ * Handle next
+ *
+ * @returns {Promise<void>}
+*/
 const handleNext = () => {
-    if (currentIndex.value < 2) {
-        currentIndex.value++;
+    if (currentSlide.value < totalSlidesMostBorrowed.value - 1) {
+        currentSlide.value++;
+    } else if (currentSlide.value === totalSlidesMostBorrowed.value - 1) {
+        getTopBooksMostBorrowed(currentSlide.value == 0 ? 2 : currentSlide.value + 1);
+
+        currentSlide.value++;
     }
 };
 
+/**
+ * Handle prev category
+ *
+ * @returns {Promise<void>}
+*/
 const handlePrevCategory = () => {
-    if (currentIndexCategory.value > 1) {
-        currentIndexCategory.value--;
+    if (currentSlideCategory.value > 0) {
+        currentSlideCategory.value--;
     }
 };
 
+/**
+ * Handle next category
+ *
+ * @returns {Promise<void>}
+*/
 const handleNextCategory = () => {
-    if (currentIndexCategory.value < 2) {
-        currentIndexCategory.value++;
+    if (currentSlideCategory.value < totalSlidesCategory.value - 1) {
+        currentSlideCategory.value++;
     }
 };
 
-watch(
-    currentIndexCategory,
-    async () => {
-        await getListCategoryByPage(currentIndexCategory.value);
-    },
-    { immediate: true }
-);
+/**
+ * Handle prev most new released
+ *
+ * @returns {Promise<void>}
+*/
+const handlePrevMostNewReleased = () => {
+    if (currentSlideNewReleased.value > 0) {
+        currentSlideNewReleased.value--;
+    }
+};
 
-watch(
-    currentIndex,
-    async () => {
-        await getTopBooksMostBorrowed(currentIndex.value);
-    },
-    { immediate: true }
-);
+/**
+ * Handle next most new released
+ *
+ * @returns {Promise<void>}
+*/
+const handleNextMostNewReleased = () => {
+    if (currentSlideNewReleased.value < totalSlidesNewReleased.value - 1) {
+        currentSlideNewReleased.value++;
+    } else if (currentSlideNewReleased.value === totalSlidesNewReleased.value - 1) {
+        getListNewBooks(currentSlideNewReleased.value == 0 ? 2 : currentSlideNewReleased.value + 1);
 
+        currentSlideNewReleased.value++;
+    }
+};
+
+/**
+ * Handle redirect to list book
+ *
+ * @param {Object} props - The props
+ *
+ * @returns {Promise<void>}
+*/
 const handleRedirectToListBook = ({ ...props }) => {
     const query = Object.fromEntries(
         Object.entries(props).filter(
@@ -525,6 +673,13 @@ const handleRedirectToListBook = ({ ...props }) => {
     });
 };
 
+/**
+ * Handle quick view
+ *
+ * @param {number} id - The book id
+ *
+ * @returns {Promise<void>}
+*/
 const handleQuickView = (id) => {
     router.push({
         name: 'book.detail',
@@ -534,6 +689,11 @@ const handleQuickView = (id) => {
     });
 };
 
+/**
+ * Scroll to top
+ *
+ * @returns {Promise<void>}
+*/
 const scrollToTop = () => {
     window.scrollTo({
         top: 0,
@@ -541,383 +701,93 @@ const scrollToTop = () => {
     });
 };
 
+/**
+ * Handle scroll
+ *
+ * @returns {Promise<void>}
+*/
 const handleScroll = () => {
     showScrollTop.value = window.scrollY > 500;
 };
 
+/**
+ * Unmounted
+ *
+ * @returns {Promise<void>}
+*/
 onUnmounted(() => {
-    window.removeEventListener('scroll', handleScroll);
+    window.scrollTo({
+        top: 0
+    });
 });
+
+/**
+ * Chunked books most borrowed
+ *
+ * @returns {Promise<void>}
+*/
+const chunkedBooksMostBorrowed = computed(() => {
+    const result = [];
+
+    for (let i = 0; i < topBooksMostBorrowed.value.length; i += booksPerSlide.value) {
+        result.push(topBooksMostBorrowed.value.slice(i, i + booksPerSlide.value));
+    }
+
+    return result;
+});
+
+/**
+ * Chunked categories
+ *
+ * @returns {Promise<void>}
+*/
+const chunkedCategories = computed(() => {
+    const result = [];
+
+    for (let i = 0; i < categories.value.length; i += categoryPerSlide.value) {
+        result.push(categories.value.slice(i, i + categoryPerSlide.value));
+    }
+
+    return result;
+});
+
+/**
+ * Chunked books new released
+ *
+ * @returns {Promise<void>}
+*/
+const chunkedBooksNewReleased = computed(() => {
+    const result = [];
+
+    for (let i = 0; i < listNewBooks.value.length; i += booksPerSlideNewReleased.value) {
+        result.push(listNewBooks.value.slice(i, i + booksPerSlideNewReleased.value));
+    }
+
+    return result;
+});
+
+/**
+ * Total slides most borrowed
+ *
+ * @returns {Promise<void>}
+*/
+const totalSlidesMostBorrowed = computed(() => chunkedBooksMostBorrowed.value.length);
+
+/**
+ * Total slides category
+ *
+ * @returns {Promise<void>}
+*/
+const totalSlidesCategory = computed(() => chunkedCategories.value.length);
+
+/**
+ * Total slides new released
+ *
+ * @returns {Promise<void>}
+*/
+const totalSlidesNewReleased = computed(() => chunkedBooksNewReleased.value.length);
 </script>
 
 <style lang="scss" scoped>
-@import "@/assets/scss/_variables.scss";
-.home-container {
-    display: flex;
-    flex-direction: column;
-    margin: 0 auto;
-    width: 100%;
-    .sidebar-carousel {
-        width: 100%;
-        display: grid;
-        gap: 30px;
-        .category {
-            border-right: 1px solid $border-color;
-            height: 100%;
-            box-sizing: border-box;
-            overflow: hidden;
-            overflow-y: scroll;
-            padding-top: 40px;
-            &::-webkit-scrollbar {
-                display: none;
-            }
-            .category-list {
-                padding-left: 0px;
-                list-style: none;
-                max-height: 344px;
-
-                &_item {
-                    padding: 8px 0;
-                    a {
-                        font-size: 16px;
-                        font-weight: 400;
-                        line-height: 24px;
-                        text-align: center;
-                        text-decoration: none;
-                        color: $text-color-black;
-                        transition: all 0.3s ease;
-                        &:hover {
-                            cursor: pointer;
-                            color: $primary-color;
-                            padding-left: 10px;
-                        }
-                    }
-                }
-            }
-        }
-        .carousel {
-            @media (min-width: 1024px) {
-                padding-top: 45px;
-                padding-left: 40px;
-            }
-        }
-
-    }
-    .btn-container {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-    .top-book,
-    .list-category {
-        border-bottom: 1px solid $border-color;
-    }
-    .top-book{
-        @media (min-width: 1024px) {
-            margin-top: 140px;
-        }
-        padding-bottom: 60px;
-    }
-    .list-category{
-        @media (min-width: 1024px) {
-            margin-top: 80px;
-        }
-        padding-bottom: 70px;
-    }
-    .top-book__most-viewed{
-        @media (min-width: 1024px) {
-            margin-top: 70px;
-        }
-    }
-    .top-book__most-new-released{
-        @media (min-width: 1024px) {
-            margin-top: 70px;
-        }
-    }
-    .top-book__most-borrowed,
-    .section-container {
-        width: 100%;
-        &__today {
-            position: relative;
-            display: flex;
-            align-items: center;
-            &::before {
-                content: "";
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 20px;
-                height: 40px;
-                background-color: $primary-color;
-                border-radius: 5px;
-            }
-            span {
-                font-size: 16px;
-                font-weight: 600;
-                color: $primary-color;
-                margin-left: 30px;
-                margin-top: 12px;
-            }
-        }
-        &__title {
-            font-size: 36px;
-            font-weight: 700;
-            color: $text-color-black;
-            margin-top: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            .btn-view-all {
-                height: 56px;
-                width: 159px;
-                font-size: 16px;
-                font-family: "Poppins", sans-serif;
-                font-weight: 500;
-                background-color: $color-red;
-                color: $text-color-white;
-                border: none;
-                padding: 10px 20px;
-                border-radius: 5px;
-            }
-        }
-        .carousel-controls {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            button {
-                width: 46px;
-                height: 46px;
-                border-radius: 50%;
-                cursor: pointer;
-                border: none;
-                svg {
-                    width: 24px;
-                    height: 24px;
-                    stroke: $text-color-black;
-                }
-                &:hover {
-                    background-color: $primary-color;
-                    svg {
-                        stroke: $text-color-white !important;
-                    }
-                }
-            }
-        }
-        &__list {
-            margin-top: 60px;
-            display: grid;
-            justify-content: center;
-            gap: 30px;
-            overflow: hidden;
-            box-sizing: border-box;
-            @media (min-width: 1024px) {
-                row-gap: 60px;
-            }
-        }
-        &__btn-view-all {
-            height: 56px;
-            width: 234px;
-            margin: 0 auto;
-            margin-top: 60px;
-            font-size: 16px;
-            font-family: "Poppins", sans-serif;
-            font-weight: 500;
-            background-color: $color-red;
-            color: $text-color-white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-        }
-        .list-category__list {
-            display: grid;
-            margin-top: 60px;
-            gap: 30px;
-        }
-        .banner__img {
-            width: 100%;
-            max-height: 500px;
-            object-fit: cover;
-            margin-top: 140px;
-        }
-        .about-service {
-            width: 100%;
-            @media (min-width: 1024px) {
-                margin-top: 140px;
-            }
-            .card-group-service {
-                width: 100%;
-                margin: 0 auto;
-                display: grid;
-                gap: 20px;
-            }
-        }
-    }
-    .book_viral {
-        overflow: hidden;
-        @media (min-width: 1024px) {
-            margin-top: 140px;
-        }
-        &__container {
-            display: flex;
-            gap: 30px;
-            margin-top: 60px;
-            .book_viral__left {
-                width: 50%;
-                height: 100%;
-                img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                }
-            }
-            .book_viral__right {
-                width: 50%;
-                display: flex;
-                flex-direction: column;
-                gap: 30px;
-                .book_viral__right__top {
-                    width: 100%;
-                    height: 50%;
-                    img {
-                        width: 100%;
-                        height: 100%;
-                        object-fit: cover;
-                    }
-                }
-                .book_viral__right__bottom {
-                    display: flex;
-                    gap: 30px;
-                    .book_viral__right__bottom__left {
-                        width: 50%;
-                        height: 100%;
-                        img {
-                            width: 100%;
-                            height: 100%;
-                            object-fit: cover;
-                        }
-                    }
-                    .book_viral__right__bottom__right {
-                        width: 50%;
-                        height: 100%;
-                        img {
-                            width: 100%;
-                            height: 100%;
-                            object-fit: cover;
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-@media (max-width: 768px) {
-    .home-container {
-        padding: 0 10px;
-    }
-    .category {
-        display: none;
-    }
-    .top-book__most-borrowed__list {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    .list-category__list {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    .book_viral {
-        &__container {
-            gap: 10px !important;
-        }
-        .book_viral__right {
-            gap: 10px !important;
-        }
-        .book_viral__right__bottom {
-            gap: 10px !important;
-        }
-    }
-}
-
-@media (min-width: 769px) {
-    .sidebar-carousel {
-        grid-template-columns: 3fr 7fr;
-    }
-}
-@media (min-width: 800px) {
-    .top-book__most-borrowed__list {
-        grid-template-columns: repeat(3, 1fr);
-    }
-    .list-category__list {
-        grid-template-columns: repeat(4, 1fr);
-    }
-}
-@media (max-width: 800px) {
-    .list-category__list {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
-@media (min-width: 801px) and (max-width: 1024px) {
-    .top-book__most-borrowed__list {
-        grid-template-columns: repeat(3, 1fr);
-    }
-    .about-service .card-group-service {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .about-service .card-group-service > *:last-child {
-        grid-column: span 2;
-    }
-}
-@media (max-width: 1024px) {
-    .home-container {
-        padding: 0 10px;
-    }
-    .about-service{
-        padding: 40px 0 60px 0;
-    }
-}
-@media (min-width: 1024px) {
-    .home-container {
-        max-width: 1170px;
-    }
-    .banner {
-        max-width: 1170px;
-    }
-    .book_viral {
-        max-width: 1170px;
-    }
-    .list-category__list {
-        grid-template-columns: repeat(6, 1fr);
-    }
-    .top-book__most-borrowed__list {
-        grid-template-columns: repeat(4, 1fr);
-    }
-    .about-service {
-        margin: 0 auto;
-        padding: 30px 0 140px 0;
-        max-width: 950px;
-    }
-    .card-group-service {
-        grid-template-columns: repeat(3, minmax(270px, 1fr));
-    }
-}
-.scroll-top {
-        position: fixed;
-        bottom: 2rem;
-        right: 2rem;
-        background-color: $background-color-btn-carousel;
-        color: white;
-        width: 3rem;
-        height: 3rem;
-        border-radius: 9999px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        transition: transform 0.2s;
-        border: none;
-        &:hover {
-        transform: translateY(-2px);
-    }
-}
+@import '@/assets/scss/views/home_view.scss';
 </style>

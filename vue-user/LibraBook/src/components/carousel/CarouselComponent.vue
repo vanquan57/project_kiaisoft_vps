@@ -60,24 +60,5 @@ onBeforeUnmount(() => {
 </script>
 
 <style lang="scss" scoped>
-.carousel {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    .carousel-inner {
-        position: relative;
-        width: 100%;
-        overflow: hidden;
-    }
-}
-@media (max-width: 800px) {
-    .carousel-inner {
-        height: 200px;
-    }
-}
-@media (min-width: 800px) {
-    .carousel-inner {
-        height: 344px;
-    }
-}
+@import '@/assets/scss/components/carousel/carousel_component.scss';
 </style>

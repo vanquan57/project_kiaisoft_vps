@@ -1,5 +1,4 @@
 @import "@/assets/scss/_variables.scss";
-
 header {
     display: flex;
     justify-content: center;
@@ -135,6 +134,22 @@ header {
                     display: flex;
                     justify-content: center;
                     align-items: center;
+                    position: relative;
+                    .action-item__counter{
+                        position: absolute;
+                        top: -5px;
+                        right: -5px;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        background-color: $primary-color;
+                        color: $text-color-white;
+                        border-radius: 100%;
+                        width: 16px;
+                        height: 17px;
+                        font-size: 12px;
+                        font-weight: 500;
+                    }
                 }
                 .action-item:last-child {
                     position: relative;

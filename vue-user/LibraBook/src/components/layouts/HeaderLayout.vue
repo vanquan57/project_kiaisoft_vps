@@ -4,8 +4,8 @@
             <div class="top-header__container">
                 <div class="sale-banner">
                     <p class="sale-banner__text">
-                        Khuyến Mãi Đọc Sách: Giảm Giá Lên Đến 50% Cho Tất Cả Gói Thành Viên và Đăng Ký Miễn Phí!
-                        <span class="promo-link">Mua Ngay tại</span>
+                        Kiai - Trao tri thức, nhận thành công: Mượn Sách Miễn Phí, đọc sách hôm nay, thành công mai sau.
+                        <span class="promo-link">Mượn ngay tại</span>
                     </p>
                 </div>
                 <div class="language">

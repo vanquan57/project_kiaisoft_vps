@@ -31,27 +31,5 @@ const handleSwitch = (index) => {
 </script>
 
 <style lang="scss" scoped>
-@import "@/assets/scss/_variables.scss";
-
-.carousel-indicators {
-    position: absolute;
-    transform: translateX(-50%);
-    left: 50%;
-    bottom: 1.5em;
-    z-index: 2;
-}
-.carousel-indicator-item {
-    width: 12px;
-    height: 12px;
-    border: none;
-    background: #FFFFFF;
-    opacity: 0.5;
-    margin: 0.2em;
-    border-radius: 50%;
-    cursor: pointer;
-}
-.active {
-    background: $primary-color;
-    opacity: 1;
-}
+@import '@/assets/scss/components/carousel/carousel_indicators.scss';
 </style>
