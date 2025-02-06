@@ -38,15 +38,15 @@ class FeedbackSearchRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'limit.integer' => 'The number limit must be an integer',
-            'limit.min' => 'The number limit must be at least 1',
-            'book_id.required' => 'Book id is required',
-            'book_id.integer' => 'Book id must be an integer',
-            'book_id.exists' => 'Book id does not exist',
-            'column.string' => 'Column must be a string',
-            'column.in' => 'Column must be one of the following: star, created_at',
-            'order.string' => 'Order must be a string',
-            'order.in' => 'Order must be one of the following: asc, desc',
+            'limit.integer' => 'Giới hạn số lương phải là số nguyên',
+            'limit.min' => 'Giới hạn số lượng phải lớn hơn hoặc bằng 1',
+            'book_id.required' => 'Sách không được để trống',
+            'book_id.integer' => 'Sách phải là số nguyên',
+            'book_id.exists' => 'Sách không tồn tại',
+            'column.string' => 'Tên trường phải là một chuỗi ký tự',
+            'column.in' => 'Tên trường phải thuộc star, created_at',
+            'order.string' => 'Trường sắp xếp phải là một chuỗi ký tự',
+            'order.in' => 'Trường sắp xếp phải thuộc asc hoặc desc',
         ];
     }
 }

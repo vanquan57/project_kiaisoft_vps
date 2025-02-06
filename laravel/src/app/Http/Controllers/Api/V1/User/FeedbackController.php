@@ -12,11 +12,13 @@ use Illuminate\Http\Response;
 class FeedbackController extends Controller
 {
     /**
-     * The Constructor 
-    */
+     * The Constructor
+     * 
+     * @param FeedbackService $feedbackService
+     */
     public function __construct(
         protected FeedbackService $feedbackService
-    ){}
+    ) {}
 
     /**
      * Get feedbacks by book id.
@@ -27,11 +29,15 @@ class FeedbackController extends Controller
      */
     public function getFeedbacksByBookId(FeedbackSearchRequest $request): JsonResponse
     {
-        if($feedbacks = $this->feedbackService->getFeedbacksByBookId($request->validated())){
-            return response()->json($feedbacks);
+        if (!$feedbacks = $this->feedbackService->getFeedbacksByBookId($request->validated())) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Không thể xử lý yêu cầu vui lòng thử lại sau'
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed.'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI($feedbacks);
     }
 
     /**
@@ -45,14 +51,19 @@ class FeedbackController extends Controller
     {
         $user = auth('api')->user();
 
-        if(!$user){
-            return response()->json(['error' => 'You are not unauthorized.'], Response::HTTP_UNAUTHORIZED);
+        if (!$this->feedbackService->store($request->validated(), $user)) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Có lỗi xảy ra, vui lòng thử lại sau.'
+            );
         }
 
-        if($feedback = $this->feedbackService->store($request->validated(), $user)){
-            return response()->json($feedback, Response::HTTP_CREATED);
-        }
-
-        return response()->json(['error' => 'The request could not be processed.'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI(
+            [
+                'message' => 'Gửi phản hồi thành công. Đang chờ xác nhận từ quản trị viên.'
+            ],
+            Response::HTTP_CREATED
+        );
     }
 }

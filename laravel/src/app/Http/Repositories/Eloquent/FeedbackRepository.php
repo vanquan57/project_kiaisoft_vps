@@ -7,7 +7,6 @@ use App\Models\Book;
 use App\Models\Feedback;
 use App\Models\User;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Log;
 
 class FeedbackRepository extends BaseRepository implements FeedbackRepositoryInterface
 {
@@ -78,24 +77,35 @@ class FeedbackRepository extends BaseRepository implements FeedbackRepositoryInt
      */
     public function getFeedbacksByBookId(Book $book, array $data): ?LengthAwarePaginator
     {
-        try {
-            if (!$book) {
-                return null;
-            }
+        $query = $book->feedbacks()
+            ->where('feedbacks.status', Feedback::STATUS_ACTIVE)
+            ->where('users.role', User::ROLE_USER);
 
-            $query = $book->feedbacks()
-                ->where('feedbacks.status', Feedback::STATUS_ACTIVE)
-                ->where('users.role', User::ROLE_USER);
-    
-            if (!empty($data['column']) && !empty($data['order'])) {
-                $query->orderBy('feedbacks.'.$data['column'], $data['order']);
-            }
-    
-            return $query->paginate($data['limit'] ?? config('constants.DEFAULT_LIMIT'));
-        } catch (\Exception $e) {
-            Log::error($e->getMessage());
-    
-            return null;
+        if (!empty($data['column']) && !empty($data['order'])) {
+            $query->orderBy('feedbacks.' . $data['column'], $data['order']);
         }
-    }    
+
+        return $query->paginate($data['limit'] ?? config('constants.DEFAULT_LIMIT'));
+    }
+
+    /**
+     * Store a new feedback
+     * 
+     * @param array $data
+     * 
+     * @param int $userId
+     * 
+     * @param Book $book
+     * 
+     * @return bool
+     */
+    public function storeFeedback(array $data, int $userId, Book $book): bool
+    {
+        $book->feedbacks()->attach($userId, [
+            'content' => $data['content'],
+            'star' => $data['star'],
+        ]);
+    
+        return true;
+    }
 }

@@ -37,14 +37,14 @@ class StoreFeedbackRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'book_id.required' => 'Book id is required',
-            'book_id.integer' => 'Book id must be an integer',
-            'book_id.exists' => 'Book id does not exist',
-            'content.required' => 'Content is required',
-            'content.string' => 'Content must be a string',
-            'content.max' => 'Content must be at most 255 characters long',
-            'star.required' => 'Star rating is required',
-            'star.integer' => 'Star rating must be an integer',
+            'book_id.required' => 'Sách không được để trống',
+            'book_id.integer' => 'Mã định danh phải là một số nguyên',
+            'book_id.exists' => 'Sách không tồn tại',
+            'content.required' => 'Vui lòng nhập nội dung đánh giá',
+            'content.string' => 'Nội dung phải là một chuỗi ký tự',
+            'content.max' => 'Nội dung không được vượt quá 255 ký tự',
+            'star.required' => 'Vui lòng nhập số sao',
+            'star.integer' => 'Số sao phải là một số nguyên',
         ];
     }
 }

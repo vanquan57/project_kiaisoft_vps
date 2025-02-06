@@ -15,6 +15,10 @@ class FeedbackService
 {
     /**
      * Constructor
+     * 
+     * @param BookRepositoryInterface $bookRepository
+     * 
+     * @param FeedbackRepositoryInterface $feedbackRepository
      */
     public function __construct(
         protected BookRepositoryInterface $bookRepository,
@@ -74,12 +78,7 @@ class FeedbackService
                 return false;
             }
 
-            $user->feedbacks()->attach($book->id, [
-                'content' => $data['content'],
-                'star' => $data['star'],
-            ]);
-
-            return true;
+            return $this->feedbackRepository->storeFeedback($data, $user->id, $book);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 
