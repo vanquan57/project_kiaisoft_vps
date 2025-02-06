@@ -269,4 +269,65 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
                 'address' => $data['address']
             ]);
     }
+
+    /**
+     * Check book is in wish list
+     * 
+     * @param User $user
+     * 
+     * @param int $bookId
+     * 
+     * returns boolean
+    */
+    public function checkBookInWishList(User $user, int $bookId): bool
+    {
+        return $user->wishLists()->where('book_id', $bookId)->exists();
+    }
+
+    /**
+     * Get wish list of user
+     * 
+     * @param User $user
+     *
+     * @return Collection|null
+    */
+    public function getBooksInMyWishList(User $user): ?Collection
+    {
+        $books = $user->wishLists()->with([
+            'author:id,name',
+            'publisher:id,name',
+        ])->withCount('feedbacks')->get();
+
+        return $books;
+    }
+
+    /**
+     * Add book to my wish list
+     * 
+     * @param User $user
+     * 
+     * @param int $bookId
+     * 
+     * @return boolean
+    */
+    public function addBookToWishList(User $user, int $bookId): bool
+    {
+        $user->wishLists()->attach($bookId);
+
+        return true;
+    }
+
+    /**
+     * Remove book from my wish list
+     * 
+     * @param User $user
+     * 
+     * @param int $bookId
+     * 
+     * @return boolean
+    */
+    public function destroyBookFromWishList(User $user, int $bookId): bool
+    {
+        return $user->wishLists()->detach($bookId) > 0;
+    }
 }

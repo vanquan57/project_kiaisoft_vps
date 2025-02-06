@@ -155,4 +155,46 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
      * @return bool
      */
     public function updateInformation(int $userId, array $data): bool;
+
+     /**
+     * Get wish list of user
+     * 
+     * @param User $user
+     *
+     * @return Collection|null
+    */
+    public function getBooksInMyWishList(User $user): ?Collection;
+
+    /**
+     * Check book is in wish list
+     * 
+     * @param User $user
+     * 
+     * @param int $bookId
+     * 
+     * @return boolean
+    */
+    public function checkBookInWishList(User $user, int $bookId): bool;
+
+    /**
+     * Add book to my wish list
+     * 
+     * @param User $user
+     * 
+     * @param int $bookId
+     * 
+     * @return boolean
+    */
+    public function addBookToWishList(User $user, int $bookId): bool;
+
+    /**
+     * Remove book from my wish list
+     * 
+     * @param User $user
+     * 
+     * @param int $bookId
+     * 
+     * @return boolean
+    */
+    public function destroyBookFromWishList(User $user, int $bookId): bool;
 }

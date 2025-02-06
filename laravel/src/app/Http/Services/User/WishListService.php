@@ -3,17 +3,24 @@
 namespace App\Http\Services\User;
 
 use App\Http\Repositories\BookRepositoryInterface;
+use App\Http\Repositories\UserRepositoryInterface;
 use App\Models\Book;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 
 class WishListService
 {
     /**
      * The constructor
+     * 
+     * @param BookRepositoryInterface $bookRepository
+     * 
+     * @param UserRepositoryInterface $userRepository
      */
     public function __construct(
-        protected BookRepositoryInterface $bookRepository
+        protected BookRepositoryInterface $bookRepository,
+        protected UserRepositoryInterface $userRepository,
     ) {}
 
     /**
@@ -26,18 +33,7 @@ class WishListService
         try {
             $user = auth('api')->user();
 
-            if (!$user) {
-                return null;
-            }
-
-            $books =  $user->wishLists()->with([
-                'author:id,name',
-                'publisher:id,name',
-            ])->withCount('feedbacks')->get();
-
-            foreach ($books as $book) {
-                $book->average_star = $book->averageStar();
-            }
+            $books = $this->userRepository->getBooksInMyWishList($user);
 
             return $books;
         } catch (\Exception $e) {
@@ -52,34 +48,41 @@ class WishListService
      * 
      * @param array $data
      * 
-     * @return bool
+     * @return array
      */
-    public function store(array $data): bool
+    public function store(array $data): array
     {
         try {
             $user = auth('api')->user();
 
-            if (!$user) {
-                return null;
-            }
-
             $book = $this->bookRepository->find($data['book_id']);
 
             if (!$book) {
-                return null;
+                throw new \Exception('Không tìm thấy sách.', Response::HTTP_NOT_FOUND);
             }
 
-            if ($user->wishLists()->where('book_id', $data['book_id'])->exists()) {
-                return false;
+            if ($this->userRepository->checkBookInWishList($user, $data['book_id'])) {
+                throw new \Exception('Sách đã có trong danh sách yêu thích.', Response::HTTP_BAD_REQUEST);
             }
 
-            $user->wishLists()->attach($book->id);
+            $this->userRepository->addBookToWishList($user, $data['book_id']);
 
-            return true;
+            return [
+                'message' => 'Đã thêm sách vào danh sách yêu thích thành công.',
+                'code' => Response::HTTP_CREATED,
+            ];
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 
-            return null;
+            return [
+                'error' => $e->getMessage(),
+                'error_code' => match ($e->getCode()) {
+                        Response::HTTP_BAD_REQUEST => ERROR_BAD_REQUEST,
+                        Response::HTTP_NOT_FOUND => ERROR_CODE_NOT_FOUND,
+                        default => ERROR_CODE_INTERNAL_SERVER_ERROR
+                },
+                'code' => $e->getCode(),
+            ];
         }
     }
 
@@ -96,16 +99,14 @@ class WishListService
             $user = auth('api')->user();
 
             if (!$user) {
+               return false;
+            }
+
+            if (!$this->userRepository->checkBookInWishList($user, $bookId)) {
                 return false;
             }
 
-            $bookInWishList = $user->wishLists()->wherePivot('book_id', $bookId)->first();
-
-            if (!$bookInWishList) {
-                return false;
-            }
-
-            $user->wishLists()->detach($bookId);
+            $this->userRepository->destroyBookFromWishList($user, $bookId);
 
             return true;
         } catch (\Exception $e) {

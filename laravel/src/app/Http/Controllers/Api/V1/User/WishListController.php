@@ -14,8 +14,8 @@ class WishListController extends Controller
      * The constructor
      * 
      * @param WishListService $wishListService
-    */
-    public function __construct(protected WishListService $wishListService){}
+     */
+    public function __construct(protected WishListService $wishListService) {}
 
     /**
      * Display a listing my wish list.
@@ -24,11 +24,15 @@ class WishListController extends Controller
      */
     public function index(): JsonResponse
     {
-        if($wishlists = $this->wishListService->getAll()){
-            return response()->json($wishlists);
+        if (!$wishlists = $this->wishListService->getAll()) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                Response::HTTP_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI($wishlists);
     }
 
     /**
@@ -40,11 +44,19 @@ class WishListController extends Controller
      */
     public function store(StoreWishListRequest $request): JsonResponse
     {
-        if($wishList = $this->wishListService->store($request->validated())){
-            return response()->json($wishList , Response::HTTP_CREATED);
+        $result = $this->wishListService->store($request->validated());
+
+        if ($result['code'] !== Response::HTTP_CREATED) {
+            return responseErrorAPI(
+                $result['code'],
+                $result['error_code'],
+                $result['error']
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI([
+            'message' => $result['message']
+        ], $result['code']);
     }
 
     /**
@@ -56,10 +68,16 @@ class WishListController extends Controller
      */
     public function destroy(int $bookId): JsonResponse
     {
-        if($this->wishListService->destroy($bookId)){
-            return response()->json(true, Response::HTTP_OK);
+        if (!$this->wishListService->destroy($bookId)) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                Response::HTTP_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI([
+            'message' => 'Đã xóa sách khỏi danh sách yêu thích thành công.'
+        ]);
     }
 }

@@ -34,8 +34,8 @@ class StoreWishListRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'book_id.required' => 'The book id field is required.',
-            'book_id.exists' => 'The selected book id is invalid.',
+            'book_id.required' => 'Vui lòng nhập mã sách.',
+            'book_id.exists' => 'Sách không tồn tại.',
         ];
     }
 }
