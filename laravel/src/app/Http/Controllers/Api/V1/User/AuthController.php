@@ -17,7 +17,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
-use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -176,20 +175,17 @@ class AuthController extends Controller
      */
     public function sendEmail(EmailRequest $request): JsonResponse
     {
-        if ($this->userService->sendEmail($request->validated())) {
-            return response()->json(
-                [
-                    'message' => 'Email sent successfully',
-                ]
+        if (!$this->userService->sendEmail($request->validated())) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau'
             );
         }
 
-        return response()->json(
-            [
-                'error' => 'The request could not be processed.',
-            ],
-            Response::HTTP_BAD_REQUEST
-        );
+        return responseOkAPI([
+            'message' => 'Gửi email thành công, vui lòng kiểm tra email của bạn.'
+        ]);
     }
 
     /**
@@ -201,19 +197,20 @@ class AuthController extends Controller
      */
     public function resetPassword(ResetPasswordRequest $request): JsonResponse
     {
-        if ($this->userService->resetPassword($request->validated())) {
-            return response()->json(
-                [
-                    'message' => 'Password reset successfully',
-                ]
+        $result = $this->userService->resetPassword($request->validated());
+
+        if ($result['code'] !== Response::HTTP_OK) {
+            return responseErrorAPI(
+                $result['code'],
+                $result['error_code'],
+                $result['error']
             );
         }
 
-        return response()->json(
+        return responseOkAPI(
             [
-                'error' => 'The request could not be processed.',
-            ],
-            Response::HTTP_BAD_REQUEST
+                'message' => $result['message']
+            ]
         );
     }
 
@@ -226,24 +223,20 @@ class AuthController extends Controller
      */
     public function changePassword(ChangePasswordRequest $request): JsonResponse
     {
-        $user = auth('api')->user();
+        $result = $this->userService->changePassword($request->validated());
 
-        if (
-            Hash::check($request->current_password, $user->password) &&
-            $this->userService->changePassword($request->validated(), $user->id)
-        ) {
-            return response()->json(
-                [
-                    'message' => 'Password changed successfully',
-                ]
+        if ($result['code'] !== Response::HTTP_OK) {
+            return responseErrorAPI(
+                $result['code'],
+                $result['error_code'],
+                $result['error']
             );
         }
 
-        return response()->json(
+        return responseOkAPI(
             [
-                'error' => 'The request could not be processed.',
-            ],
-            Response::HTTP_BAD_REQUEST
+                'message' => $result['message']
+            ]
         );
     }
 

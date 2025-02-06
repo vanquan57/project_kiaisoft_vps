@@ -115,4 +115,15 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
      * @return Model|null
      */
     public function findByEmail(string $email): ?Model;
+
+    /**
+     * Update password user
+     *
+     * @param int $userId
+     * 
+     * @param string $password
+     *
+     * @return bool
+     */
+    public function updatePassword(int $userId, string $password): bool;
 }

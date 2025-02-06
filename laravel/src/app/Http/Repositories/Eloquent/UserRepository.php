@@ -203,4 +203,21 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
             ->where('role', User::ROLE_USER)
             ->first();
     }
+
+    /**
+     * Update password user
+     *
+     * @param int $userId
+     * 
+     * @param string $password
+     *
+     * @return bool
+     */
+    public function updatePassword(int $userId, string $password): bool
+    {
+        return $this->model->where('id', $userId)
+            ->update([
+                'password' => bcrypt($password)
+            ]);
+    }
 }

@@ -36,16 +36,16 @@ class ChangePasswordRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'current_password.required' => 'The field current password is required.',
-            'current_password.string' => 'The field current password must be a string.',
-            'current_password.min' => 'The field current password must be at least 8 characters.',
-            'current_password.regex' => 'The field current password must contain at least one uppercase letter and one special character.',
-            'password.required' => 'The field password is required.',
-            'password.string' => 'The field password must be a string.',
-            'password.min' => 'The field password must be at least 8 characters.',
-            'password.regex' => 'The field password must contain at least one uppercase letter and one special character.',
-            'confirm_password.required' => 'The field confirm password is required.',
-            'confirm_password.same' => 'The field confirm password and password must match.',
+            'current_password.required' => 'Vui lòng nhập mật khẩu hiện tại.',
+            'current_password.string' => 'Vui lòng nhập mật khẩu hiện tại dưới dạng chuỗi ký tự.',
+            'current_password.min' => 'Vui lòng nhập mật khẩu hiện tại có ít nhất 8 ký tự.',
+            'current_password.regex' => 'Vui lòng nhập mật khẩu hiện tại có ít nhất một chữ cái viết hoa và một ký tự đặc biệt.',
+            'password.required' => 'Vui lòng nhập mật khẩu.',
+            'password.string' => 'Vui lòng nhập mật khẩu dưới dạng chuỗi ký tự.',
+            'password.min' => 'Vui lòng nhập mật khẩu có ít nhất 8 ký tự.',
+            'password.regex' => 'Vui lòng nhập mật khẩu có ít nhất một chữ cái viết hoa và một ký tự đặc biệt.',
+            'confirm_password.required' => 'Vui lòng nhập xác nhận mật khẩu.',
+            'confirm_password.same' => 'Mật khẩu không trùng khớp với mật khẩu.',
         ];
     }
 }

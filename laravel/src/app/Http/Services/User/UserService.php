@@ -7,13 +7,14 @@ use App\Http\Repositories\PasswordResetRepositoryInterface;
 use App\Http\Repositories\UserRepositoryInterface;
 use App\Mail\SendTokenResetPassword;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;
-
+use Illuminate\Support\Facades\Hash;
 
 class UserService
 {
@@ -21,6 +22,10 @@ class UserService
      * Constructor
      *
      * @param UserRepositoryInterface $userRepository
+     * 
+     * @param EmployeeCodeRepositoryInterface $employeeCodeRepository
+     * 
+     * @param PasswordResetRepositoryInterface $passwordResetRepository
      *
      * @return void
      */
@@ -179,7 +184,7 @@ class UserService
             }
 
             // Send email with token
-            Mail::to($user->email)->send(new SendTokenResetPassword($token));
+            Mail::to($user->email)->queue(new SendTokenResetPassword($token));
 
             return true;
         } catch (\Exception $e) {
@@ -194,21 +199,21 @@ class UserService
      *
      * @param array $data
      *
-     * @return bool
+     * @return array
      */
-    public function resetPassword(array $data): bool
+    public function resetPassword(array $data): array
     {
         try {
             $user = $this->userRepository->findByEmail($data['email']);
 
             if (!$user) {
-                return false;
+                throw new \Exception('Không tìm thấy tài khoản của bạn.', Response::HTTP_NOT_FOUND);
             }
 
-            $token = $this->passwordResetRepository->getPasswordResetToken($data['email'], $data['token']);
+            $token = $this->passwordResetRepository->getPasswordResetToken($data['email']);
 
             if (!$token) {
-                return false;
+                throw new \Exception('Token không đúng vui lòng kiểm tra lại.', Response::HTTP_NOT_FOUND);
             }
 
             $tokenCreatedTime = Carbon::parse($token->created_at);
@@ -216,20 +221,31 @@ class UserService
             if ($tokenCreatedTime->diffInMinutes(now()) > 30) {
                 $this->passwordResetRepository->destroyByEmail($token->email);
                 
-                return false;
+                throw new \Exception('Token đã hết hạn vui lòng thực hiện lại yêu cầu.', Response::HTTP_BAD_REQUEST);
             }
 
-            if (!$this->userRepository->update($user->id, ['password' => bcrypt($data['password'])])) {
-                return false;
+            if (!$this->userRepository->updatePassword($user->id, $data['password'])) {
+                throw new \Exception('Có lỗi xảy ra vui lòng thử lại sau', Response::HTTP_BAD_REQUEST);
             }
 
             $this->passwordResetRepository->destroyByEmail($token->email);
 
-            return  true;
+            return [
+                'message' => 'Đât lại mật khẩu thành công',
+                'code' => Response::HTTP_OK,
+            ];
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 
-            return false;
+            return [
+                'error' => $e->getMessage(),
+                'error_code' => match ($e->getCode()) {
+                        Response::HTTP_BAD_REQUEST => ERROR_BAD_REQUEST,
+                        Response::HTTP_NOT_FOUND => ERROR_CODE_NOT_FOUND,
+                        default => ERROR_CODE_INTERNAL_SERVER_ERROR
+                },
+                'code' => $e->getCode(),
+            ];
         }
     }
 
@@ -238,18 +254,41 @@ class UserService
      * 
      * @param array $data
      * 
-     * @return bool
+     * @return array
      */
-    public function changePassword(array $data): bool
+    public function changePassword(array $data): array
     {
         try {
             $user = auth('api')->user();
 
-            return $this->userRepository->update($user->id, ['password' => bcrypt($data['password'])]);
+            if (!$user){
+                throw new \Exception('Bạn không có quyền truy cập vào trang web này', Response::HTTP_UNAUTHORIZED);
+            }
+            
+            if (!Hash::check($data['current_password'], $user->password)) {
+                throw new \Exception('Mật khẩu hiện tại không chính xác', Response::HTTP_BAD_REQUEST);
+            }
+
+            if(!$this->userRepository->updatePassword($user->id, $data['password'])) {
+                throw new \Exception('Có lỗi xảy ra, vui lòng thử lại sau.', Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+
+            return [
+                'message' => 'Đổi mật khẩu thành công',
+                'code' => Response::HTTP_OK,
+            ];
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 
-            return false;
+            return [
+                'error' => $e->getMessage(),
+                'error_code' => match ($e->getCode()) {
+                        Response::HTTP_BAD_REQUEST => ERROR_BAD_REQUEST,
+                        Response::HTTP_UNAUTHORIZED => ERROR_CODE_AUTHENTICATE,
+                        default => ERROR_CODE_INTERNAL_SERVER_ERROR
+                },
+                'code' => $e->getCode(),
+            ];
         }
     }
 }

@@ -28,7 +28,7 @@ class SendTokenResetPassword extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Send Token Reset Password',
+            subject: 'Email đặt lại mật khẩu',
         );
     }
 

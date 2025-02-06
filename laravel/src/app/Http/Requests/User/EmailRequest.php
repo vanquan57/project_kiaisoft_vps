@@ -34,10 +34,10 @@ class EmailRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.required' => 'Email is required',
-            'email.email' => 'Email must be a valid email address',
-            'email.regex' => 'You are not employees kiaisoft ?',
-            'email.exists' => 'Email does not exist',
+            'email.required' => 'Vui lòng nhập email.',
+            'email.email' => 'Vui lòng nhập một địa chỉ email hợp lệ.',
+            'email.regex' => 'Bạn không phải là nhân viên của Kiaisoft?',
+            'email.exists' => 'Email không tồn tại.',
         ];
     }
 }

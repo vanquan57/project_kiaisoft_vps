@@ -37,18 +37,18 @@ class ResetPasswordRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.required' => 'Email is required',
-            'email.email' => 'Email must be a valid email address',
-            'email.exists' => 'Email does not exist',
-            'token.required' => 'Token is required',
-            'token.string' => 'Token must be a string',
-            'token.exists' => 'Token does not exist',
-            'password.required' => 'Password is required',
-            'password.string' => 'Password must be a string',
-            'password.min' => 'Password must be at least 8 characters',
-            'password.regex' => 'Password must contain at least one uppercase letter and one special character',
-            'confirm_password.required' => 'Confirm password is required',
-            'confirm_password.same' => 'Password and confirm password must match',
+            'email.required' => 'Vui lòng nhập email.',
+            'email.email' => 'Vui lòng nhập một địa chỉ email hợp lệ.',
+            'email.exists' => 'Email không tồn tại.',
+            'token.required' => 'Vui lòng nhập token.',
+            'token.string' => 'Token phải là một chuỗi ký tự.',
+            'token.exists' => 'Token không tồn tại.',
+            'password.required' => 'Vui lòng nhập mật khẩu.',
+            'password.string' => 'Mật khẩu phải là một chuỗi ký tự.',
+            'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự.',
+            'password.regex' => 'Mật khẩu phải chứa ít nhất một chữ cái viết hoa và một ký tự đặc biệt.',
+            'confirm_password.required' => 'Vui lòng nhập xác nhận mật khẩu.',
+            'confirm_password.same' => 'Mật khẩu và xác nhận mật khẩu phải trùng khớp.',
         ];
     }
 }
