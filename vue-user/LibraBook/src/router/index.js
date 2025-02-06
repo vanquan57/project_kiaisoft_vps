@@ -15,6 +15,7 @@ import DetailsView from '@/views/DetailsView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
 import ListBookView from '@/views/ListBookView.vue';
 import { useAuthStore } from '@/stores/auth';
+
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
@@ -123,7 +124,8 @@ router.beforeEach(async (to, from, next) => {
     if (to.meta.isLogin && await authStore.checkTokenValidity()) {
         next('/');
     }
-    if (to.meta.requireAuth && !authStore.checkTokenValidity()) {
+
+    if (to.meta.requireAuth && !await authStore.checkTokenValidity()) {
         next('/auth/login');
     } else {
         next();

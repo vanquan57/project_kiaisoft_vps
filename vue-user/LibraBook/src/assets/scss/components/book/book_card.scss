@@ -11,7 +11,10 @@
         border-radius: 4px;
         &:hover {
             .book-card__image__btn-add {
-                display: block;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 8px;
             }
         }
         img {
@@ -51,6 +54,9 @@
                 }
                 &.disabled {
                     cursor: not-allowed;
+                }
+                &.is-wishlist {
+                    padding: 5px;
                 }
             }
         }

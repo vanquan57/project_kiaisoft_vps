@@ -9,7 +9,7 @@
                     class="btn btn-move-all-to-cart"
                     @click="handleMoveAllToCart"
                 >
-                    Thêm tất cả vào giỏ hàng
+                    Thêm tất cả vào giỏ mượn
                 </button>
             </div>
         </div>
@@ -57,14 +57,13 @@
 <script setup>
 import BookCardComponent from '@/components/book/BookCardComponent.vue';
 import axiosInstance from '@/config/axios';
-import HTTP_STATUS_CODE from '@/config/statusCode';
 import { useAuthStore } from '@/stores/auth';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { ElNotification } from 'element-plus';
 import { useWishListStore } from '@/stores/wishList';
 import { useCounterCartAndWishList } from '@/stores/counterCartAndWishList';
 import DEFAULT_CONSTANTS from '@/config/constants';
+import { showNotificationError, showNotificationSuccess } from '@/helpers/notification';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -73,6 +72,11 @@ const counterCartAndWishList = useCounterCartAndWishList();
 const wishlist = ref([]);
 const newBooks = ref([]);
 
+/**
+ * Mounted
+ *
+ * @returns {Promise<void>}
+*/
 onMounted(async () => {
     if (!authStore.checkTokenValidity()) {
         router.push('/auth/login');
@@ -83,57 +87,100 @@ onMounted(async () => {
     }
 });
 
+/**
+ * Get wishlist
+ *
+ * @returns {Promise<void>}
+*/
 const getWishlist = async () => {
     const response = await axiosInstance.get('/wish-list');
 
-    if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+    if (response.success) {
         wishlist.value = response.data;
         counterCartAndWishList.setWishList(wishlist.value.length);
     }
 };
 
+/**
+ * Get cart
+ *
+ * @returns {Promise<void>}
+*/
 const getCart = async () => {
     const response = await axiosInstance.get('/cart');
-    if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+
+    if (response.success) {
         counterCartAndWishList.setCart(response.data.length);
     }
 };
 
+/**
+ * Handle add book to cart
+ *
+ * @param {number} id - The book id
+ *
+ * @returns {Promise<void>}
+*/
 const handleAddBookToCart = async (id) => {
-    if (authStore.checkTokenValidity()) {
-        try {
-            const response = await axiosInstance.post('/cart', {
-                cart: [
-                    {
-                        book_id: id,
-                        quantity: 1
-                    }
-                ]
-            });
-            if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-                ElNotification.success('Thêm vào giỏ hàng thành công');
-                counterCartAndWishList.incrementCounterCart();
+    if (!await authStore.checkTokenValidity()) {
+        router.push({ name: 'auth-login' });
+
+        return;
+    }
+
+    try {
+        const response = await axiosInstance.post('/cart', {
+            cart: [
+                {
+                    book_id: id,
+                    quantity: 1
+                }
+            ]
+        });
+
+        if (response.success) {
+            await getCart();
+
+            const { success, error } = response.data.message;
+
+            if (success) {
+                showNotificationSuccess(success);
             }
 
-        } catch (error) {
-            ElNotification.error('Thêm vào giỏ hàng thất bại');
+            if (error) {
+                const showError = () => {
+                    showNotificationError(error);
+                };
+
+                success ? setTimeout(showError, 2000) : showError();
+            }
         }
-    } else {
-        router.push({ name: 'auth-login' });
+    } catch (error) {
+        showNotificationError(error);
     }
 };
 
+/**
+ * Handle move all to cart
+ *
+ * @returns {Promise<void>}
+*/
 const handleMoveAllToCart = async () => {
-    const inStockBooks = [];
+    if (!await authStore.checkTokenValidity()) {
+        router.push({ name: 'auth-login' });
+
+        return;
+    }
+
     let outOfStockBooks = [];
 
     const dataAddToCart = wishlist.value
         .filter((item) => {
             if (item.quantity > 1) {
-                inStockBooks.push(item.name);
                 return true;
             } else {
                 outOfStockBooks.push(item.name);
+
                 return false;
             }
         })
@@ -143,10 +190,7 @@ const handleMoveAllToCart = async () => {
         }));
 
     if (outOfStockBooks.length > 0) {
-        ElNotification.error({
-            message: `Các sách ${outOfStockBooks.join(', ')} đã hết hàng`,
-            duration: 2000
-        });
+        showNotificationError(`Các sách ${outOfStockBooks.join(', ')} đã hết.`);
     }
 
     if (dataAddToCart.length > 0) {
@@ -155,31 +199,55 @@ const handleMoveAllToCart = async () => {
                 cart: dataAddToCart
             });
 
-            if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+            if (response.success) {
                 await getCart();
-                ElNotification.success({
-                    message: `Đã thêm ${inStockBooks.join(', ')} vào giỏ hàng`,
-                    duration: 2000
-                });
+
+                const { success, error } = response.data.message;
+
+                if (success) {
+                    showNotificationSuccess(success);
+                }
+
+                if (error) {
+                    const showError = () => {
+                        showNotificationError(error);
+                    };
+
+                    success ? setTimeout(showError, 2000) : showError();
+                }
             }
         } catch (error) {
-            setTimeout(() => {
-                ElNotification.error('Thêm tất cả vào giỏ hàng thất bại');
-            }, 2000);
+            showNotificationError(error);
         }
     }
 };
 
+/**
+ * Handle remove book from wishlist
+ *
+ * @param {number} bookId - The book id
+ *
+ * @returns {Promise<void>}
+*/
 const handleRemoveBookFromWishlist = async (bookId) => {
+    if (!await authStore.checkTokenValidity()) {
+        router.push({ name: 'auth-login' });
+
+        return;
+    }
+
     try {
         const response = await axiosInstance.delete(`/wish-list/${bookId}`);
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-            await getWishlist();
+
+        if (response.success) {
+            wishlist.value = wishlist.value.filter((item) => item.id !== bookId);
+            counterCartAndWishList.setWishList(wishlist.value.length);
             wishListStore.removeFromWishList(bookId);
-            ElNotification.success('Xóa sách khỏi danh sách yêu thích thành công');
+
+            showNotificationSuccess(response.data.message);
         }
     } catch (error) {
-        ElNotification.error('Xóa sách khỏi danh sách yêu thích thất bại');
+        showNotificationError(error);
     }
 };
 
@@ -218,6 +286,7 @@ const handleRedirectToListBook = ({ ...props }) => {
             ([key, value]) => value !== undefined && value !== null
         )
     );
+
     router.push({
         name: 'list-book',
         query: query
@@ -242,97 +311,5 @@ const handleQuickView = (id) => {
 </script>
 
 <style lang="scss" scoped>
-.wishlist-container {
-    .wishlist-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        @media (min-width: 1024px) {
-            margin-top: 80px;
-        }
-
-        .breadcrumb-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            h2 {
-                font-size: clamp(16px, 2vw, 20px);
-                font-weight: 400;
-                font-family: "Poppins", sans-serif;
-            }
-        }
-        .wishlist-header__action {
-            .btn-move-all-to-cart {
-                border: 1px solid #000;
-                border-radius: 5px;
-                background-color: transparent;
-                font-size: 16px;
-                font-weight: 500;
-                font-family: "Poppins", sans-serif;
-                color: #000;
-                width: 223px;
-                height: 56px;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                &:hover {
-                    background-color: #000;
-                    color: #fff;
-                }
-            }
-        }
-    }
-    .wishlist-body {
-        .wishlist-body__item {
-            width: 100%;
-            display: grid;
-            row-gap: 80px;
-        }
-    }
-}
-
-@media (max-width: 768px) {
-    .wishlist-container {
-        padding: 60px 0;
-    }
-    .wishlist-body {
-        width: 100%;
-        padding: 0 10px;
-    }
-    .wishlist-body__item {
-        margin-top: 40px;
-        row-gap: 40px;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-    }
-}
-@media (min-width: 768px) and (max-width: 1024px) {
-    .wishlist-container {
-        max-width: 1170px;
-        margin: 0 auto;
-    }
-    .wishlist-body {
-        width: 100%;
-        padding: 0 10px;
-    }
-    .wishlist-body__item {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
-    }
-}
-@media (min-width: 1024px) {
-    .wishlist-container {
-        max-width: 1170px;
-        margin: 0 auto;
-    }
-    .wishlist-body {
-        max-width: 1170px;
-        margin: 0 auto;
-        margin-top: 60px;
-        margin-bottom: 140px;
-    }
-    .wishlist-body__item {
-        grid-template-columns: repeat(4, 1fr);
-        gap: 30px;
-    }
-}
+@import '@/assets/scss/views/wish_list_view.scss';
 </style>

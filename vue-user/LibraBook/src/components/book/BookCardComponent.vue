@@ -20,6 +20,7 @@
                 <div
                     v-if="isWishlist"
                     class="book-card__image__action__item"
+                    :class="{'is-wishlist': isWishlist}"
                     @click="handleRemoveBookFromWishlist(book.id)"
                 >
                     <IconDelete />
@@ -36,6 +37,11 @@
                 class="book-card__image__btn-add"
                 @click="handleAddBookToCart(book.id)"
             >
+                <IconCart
+                    v-if="isWishlist"
+                    class="book-card__image__btn-add__icon"
+                    color="white"
+                />
                 Thêm vào giỏ mượn
             </button>
         </div>
@@ -68,6 +74,7 @@ import IconStar from '@/components/icons/IconStar.vue';
 import IconQuickView from '@/components/icons/IconQuickView.vue';
 import IconDelete from '@/components/icons/IconDelete.vue';
 import IconWishlist from '@/components/icons/IconWishlist.vue';
+import IconCart from '@/components/icons/IconCart.vue';
 import { useWishListStore } from '@/stores/wishList';
 
 const wishListStore = useWishListStore();
