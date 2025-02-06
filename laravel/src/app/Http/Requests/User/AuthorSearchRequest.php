@@ -24,7 +24,7 @@ class AuthorSearchRequest extends FormRequest
     {
         return [
             'search' => 'nullable|string|max:255',
-            'limit' => 'nullable|integer'
+            'limit' => 'nullable|integer|min:1',
         ];
     }
 
@@ -36,9 +36,10 @@ class AuthorSearchRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'search.max' => 'The search must be at most 255 characters.',
-            'search.string' => 'The search must be a string.',
-            'limit.integer' => 'The limit must be an integer.',
+            'search.max' => 'Tác giả không được vượt quá 255 ký tự.',
+            'search.string' => 'Tác giả phải là một chuỗi ký tự.',
+            'limit.min' => 'Giới hạn số lượng phải lớn hơn hoặc bằng 1.',
+            'limit.integer' => 'Giới hạn số lượng phải là số nguyên.',
         ];
     }
 }

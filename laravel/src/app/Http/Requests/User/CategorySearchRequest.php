@@ -37,10 +37,10 @@ class CategorySearchRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'search.string' => 'The search field must be a string.',
-            'search.max' => 'The search field may not be greater than 255 characters.',
-            'limit.integer' => 'The limit field must be an integer.',
-            'limit.min' => 'The limit field must be at least 1.',
+            'search.string' => 'Danh mục phải là một chuỗi ký tự.',
+            'search.max' => 'Danh mục không được vượt quá 255 ký tự.',
+            'limit.integer' => 'Giới hạn số lượng phải là 1 số nguyên.',
+            'limit.min' => 'Giới hạn số lượng phải lớn hơn hoặc bằng 1.',
         ];
     }
 }

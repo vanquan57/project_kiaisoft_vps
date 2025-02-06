@@ -29,10 +29,14 @@ class AuthorController extends Controller
      */
     public function index(AuthorSearchRequest $request): JsonResponse
     {
-        if ($authors = $this->authorService->getAllByPaginate($request->validated())) {
-            return response()->json($authors);
+        if (!$authors = $this->authorService->getAllByPaginate($request->validated())) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau'
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI($authors);
     }
 }

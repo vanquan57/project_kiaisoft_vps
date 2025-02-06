@@ -24,7 +24,7 @@ class AuthorService
      *
      * @return LengthAwarePaginator
      */
-    public function getAllByPaginate(array $dataSearch): LengthAwarePaginator
+    public function getAllByPaginate(array $dataSearch): ?LengthAwarePaginator
     {
         try {
             $data = [

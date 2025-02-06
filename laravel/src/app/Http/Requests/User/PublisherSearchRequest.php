@@ -36,10 +36,10 @@ class PublisherSearchRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'search.string' => 'The search keyword must be a string.',
-            'search.max' => 'The search keyword must not be greater than 255 characters.',
-            'limit.integer' => 'The limit must be an integer.',
-            'limit.min' => 'The limit must be at least 1.',
+            'search.string' => 'Nhà xuất bản phải là một chuỗi ký tự.',
+            'search.max' => 'Nhà xuất bản không được vượt quá 255 ký tự.',
+            'limit.integer' => 'Giới hạn số lượng phải là số nguyên.',
+            'limit.min' => 'Giới hạn số lượng phải lớn hơn hoặc bằng 1.',
         ];
     }
 }

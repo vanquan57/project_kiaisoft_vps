@@ -26,10 +26,14 @@ class CategoryController extends Controller
      */
     public function index(CategorySearchRequest $request): JsonResponse
     {
-        if ($categories = $this->categoryService->getAllByPagination($request->validated())) {
-            return response()->json($categories);
+        if (!$categories = $this->categoryService->getAllByPagination($request->validated())) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI($categories);
     }
 }
