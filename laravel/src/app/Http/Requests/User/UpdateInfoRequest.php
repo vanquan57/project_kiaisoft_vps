@@ -39,22 +39,22 @@ class UpdateInfoRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'name.required' => 'The field name is required.',
-            'name.string' => 'The field name must be a string.',
-            'name.max' => 'The field name must be a maximum of 255 characters.',
-            'email.required' => 'The field email is required.',
-            'email.email' => 'The field email must be a valid email address.',
-            'email.regex' => 'You are not employees of Kiaisoft ?',
-            'email.unique' => 'The field email has already been taken.',
-            'province_id.required' => 'The field province_id is required.',
-            'province_id.exists' => 'The field province_id does not exist.',
-            'district_id.required' => 'The field district_id is required.',
-            'district_id.exists' => 'The field district_id does not exist.',
-            'ward_id.required' => 'The field ward_id is required.',
-            'ward_id.exists' => 'The field ward_id does not exist.',
-            'address.required' => 'The field address is required.',
-            'address.string' => 'The field address must be a string.',
-            'address.max' => 'The field address must be a maximum of 255 characters.',
+            'name.required' => 'Vui lòng nhập tên.',
+            'name.string' => 'Tên phải là một chuỗi ký tự.',
+            'name.max' => 'Tên không được vượt quá 255 ký tự.',
+            'email.required' => 'Vui lòng nhập email.',
+            'email.email' => 'Vui lòng nhập một địa chỉ email hợp lệ.',
+            'email.regex' => 'Bạn không phải là nhân viên của Kiaisoft?',
+            'email.unique' => 'Email này đã được sử dụng.',
+            'province_id.required' => 'Vui lòng chọn tỉnh/thành phố.',
+            'province_id.exists' => 'Tỉnh/thành phố không tồn tại.',
+            'district_id.required' => 'Vui lòng chọn quận/huyện.',
+            'district_id.exists' => 'Quận/huyện không tồn tại.',
+            'ward_id.required' => 'Vui lòng chọn phường/xã.',
+            'ward_id.exists' => 'Phường/xã không tồn tại.',
+            'address.required' => 'Vui lòng nhập địa chỉ.',
+            'address.string' => 'Địa chỉ phải là một chuỗi ký tự.',
+            'address.max' => 'Địa chỉ không được vượt quá 255 ký tự.',
         ];
     }
 }

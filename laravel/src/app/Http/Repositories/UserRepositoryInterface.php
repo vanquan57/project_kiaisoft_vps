@@ -144,4 +144,15 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
      * @return Model|null
      */
     public function showDetails(int $id): ?Model;
+
+    /**
+     * Update information user
+     *
+     * @param int $userId
+     * 
+     * @param array $data
+     *
+     * @return bool
+     */
+    public function updateInformation(int $userId, array $data): bool;
 }

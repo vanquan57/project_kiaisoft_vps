@@ -6,6 +6,7 @@ use App\Http\Repositories\EmployeeCodeRepositoryInterface;
 use App\Http\Repositories\UserRepositoryInterface;
 use App\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
@@ -82,8 +83,6 @@ class UserService
             ];
         }
     }
-
-    
 
     /**
      * Find the user with google id
@@ -303,7 +302,7 @@ class UserService
     }
 
     /**
-     * The create token request and send to email address
+     * The method update information user
      *
      * @param array $data
      *
@@ -312,7 +311,7 @@ class UserService
     public function update(array $data, int $id): bool
     {
         try {
-            return $this->userRepository->update($id, $data);
+            return $this->userRepository->updateInformation($id, $data);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 

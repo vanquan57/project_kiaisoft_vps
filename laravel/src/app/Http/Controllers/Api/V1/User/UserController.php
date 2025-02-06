@@ -27,14 +27,22 @@ class UserController extends Controller
         $user = auth('api')->user();
 
         if (!$user) {
-            return response()->json(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+            return responseErrorAPI(
+                Response::HTTP_UNAUTHORIZED,
+                ERROR_CODE_AUTHENTICATE,
+                'Bạn không có quyền truy cập vào trang web này'
+            );
         }
 
-        if ($userDetails = $this->userService->show($user->id)) {
-            return response()->json($userDetails, Response::HTTP_OK);
+        if (!$userDetails = $this->userService->show($user->id)) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Có lỗi xảy ra vui lòng thử lại sau'
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed.'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI($userDetails);
     }
 
     /**
@@ -49,13 +57,23 @@ class UserController extends Controller
         $user = auth('api')->user();
 
         if (!$user) {
-            return response()->json(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+            return responseErrorAPI(
+                Response::HTTP_UNAUTHORIZED,
+                ERROR_CODE_AUTHENTICATE,
+                'Bạn không có quyền truy cập vào trang web này'
+            );
         }
 
-        if ($this->userService->update($request->validated(), $user->id)) {
-            return response()->json(['message' => 'Update successfully'], Response::HTTP_OK);
+        if (!$this->userService->update($request->validated(), $user->id)) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Có lỗi xảy ra vui lòng thử lại sau'
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed.'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI([
+            'message' => 'Cập nhật thông tin thành công'
+        ]);
     }
 }
