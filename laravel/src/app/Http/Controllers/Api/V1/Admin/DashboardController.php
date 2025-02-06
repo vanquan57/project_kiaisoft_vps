@@ -30,26 +30,34 @@ class DashboardController extends Controller
     {
         $result  = [];
 
-        if($topUsers = $this->dashboardService->getTopUsersMostOder($request->validated())) {
+        if ($topUsers = $this->dashboardService->getTopUsersMostOder($request->validated())) {
             $result['topUsers'] = $topUsers;
         }
 
-        if($topBooks = $this->dashboardService->getTopBooksMostPopular($request->validated())) {
+        if ($topBooks = $this->dashboardService->getTopBooksMostPopular($request->validated())) {
             $result['topBooks'] = $topBooks;
         }
 
-        if($totalOrders = $this->dashboardService->getTotalOrdersByMonth()) {
+        if ($totalOrders = $this->dashboardService->getTotalOrdersByMonth()) {
             $result['totalOrders'] = $totalOrders;
         }
 
-        if($totalBooksInCategories = $this->dashboardService->getTotalBooksInCategories()) {
+        if ($totalBooksInCategories = $this->dashboardService->getTotalBooksInCategories()) {
             $result['totalBooksInCategories'] = $totalBooksInCategories;
         }
 
-        if($topMostLikesBook = $this->dashboardService->getTopMostLikesBook($request->validated())) {
+        if ($topMostLikesBook = $this->dashboardService->getTopMostLikesBook($request->validated())) {
             $result['topMostLikesBook'] = $topMostLikesBook;
         }
 
-        return response()->json($result);
+        if (empty($result)) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                "Không thể xử lý yêu cầu, vui lòng thử lại sau."
+            );
+        }
+
+        return responseOkAPI($result);
     }
 }

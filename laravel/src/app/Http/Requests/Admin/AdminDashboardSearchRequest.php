@@ -35,10 +35,10 @@ class AdminDashboardSearchRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'limit.integer' => 'The number of records to take must be an integer',
-            'limit.min' => 'The minimum value must be greater than 1',
-            'order_by_type.in' => 'The order by type must be asc or desc',
-            'order_by_type.string' => 'The order by type must be a string',
+            'limit.integer' => 'Số lượng bản ghi phải là một số nguyên.',
+            'limit.min' => 'Giá trị tối thiểu phải lớn hơn 1.',
+            'order_by_type.in' => 'Kiểu sắp xếp phải là phải tăng dần hoặc giảm dần".',
+            'order_by_type.string' => 'Kiểu sắp xếp phải là một chuỗi.',
         ];
     }
 }

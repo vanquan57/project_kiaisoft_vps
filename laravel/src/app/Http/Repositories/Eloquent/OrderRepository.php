@@ -166,40 +166,20 @@ class OrderRepository extends BaseRepository implements OrderRepositoryInterface
     }
 
     /**
-     * Get data total orders by month
+     * Get total orders by specific month and year
      * 
-     * @return array
+     * @param int $month
+     * 
+     * @param int $year
+     * 
+     * @return object|null
      */
-    public function getTotalOrdersByMonth(): ?array
+    public function getTotalOrdersByMonthAndYear(int $month, int $year): ?object
     {
-        $currentMonth = Carbon::now();
-
-        $result = [];
-
-        for ($i = 0; $i < 12; $i++) {
-            $month = $currentMonth->copy()->subMonths($i);
-            $monthFormatted = $month->format('m-Y');
-
-            $orderCount = $this->model->selectRaw('DATE_FORMAT(created_at, "%m-%Y") as month, count(id) as total')
-                ->whereMonth('created_at', $month->month)
-                ->whereYear('created_at', $month->year)
-                ->groupBy('month')
-                ->first();
-
-            if (!$orderCount) {
-                $orderCount = (object) [
-                    'month' => $monthFormatted,
-                    'total' => 0
-                ];
-            }
-
-            $result[] = [
-                'month_year' => $orderCount->month,
-                'total_orders' => $orderCount->total
-            ];
-        }
-        $result = array_reverse($result);
-
-        return $result;
+        return $this->model->selectRaw('DATE_FORMAT(created_at, "%m-%Y") as month, count(id) as total')
+            ->whereMonth('created_at', $month)
+            ->whereYear('created_at', $year)
+            ->groupBy('month')
+            ->first();
     }
 }

@@ -4,19 +4,24 @@ namespace App\Http\Services;
 
 use App\Http\Repositories\BookRepositoryInterface;
 use App\Http\Repositories\CategoryRepositoryInterface;
-use App\Http\Repositories\DashboardRepositoryInterface;
-use App\Http\Repositories\Eloquent\UserRepository;
 use App\Http\Repositories\OrderRepositoryInterface;
 use App\Http\Repositories\UserRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class DashboardService
 {
     /**
      * Constructor
      *
-     * @param DashboardRepositoryInterface $dashboardRepository
+     * @param UserRepositoryInterface $dashboardRepository
+     * 
+     * @param BookRepositoryInterface $bookRepository
+     * 
+     * @param OrderRepositoryInterface $orderRepository
+     * 
+     * @param CategoryRepositoryInterface $categoryRepository
      */
     public function __construct(
         protected UserRepositoryInterface $userRepository,
@@ -79,10 +84,24 @@ class DashboardService
     public function getTotalOrdersByMonth(): ?array
     {
         try {
-            return $this->orderRepository->getTotalOrdersByMonth();
+            $currentMonth = Carbon::now();
+            $result = [];
+
+            for ($i = 0; $i < 12; $i++) {
+                $month = $currentMonth->copy()->subMonths($i);
+                $monthFormatted = $month->format('m-Y');
+
+                $orderCount = $this->orderRepository->getTotalOrdersByMonthAndYear($month->month, $month->year);
+
+                $result[] = [
+                    'month_year' => $monthFormatted,
+                    'total_orders' => $orderCount->total ?? 0
+                ];
+            }
+
+            return array_reverse($result);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
-
             return null;
         }
     }
