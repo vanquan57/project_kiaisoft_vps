@@ -208,14 +208,17 @@ const logout = async () => {
 const handleSearch = () => {
     let query = searchQuery.value.trim();
     let currentQuery = new URLSearchParams(route.query);
+
     if (query) {
         currentQuery.set('search', query);
-    }
 
-    router.push({
-        path: '/list-book',
-        query: Object.fromEntries(currentQuery)
-    });
+        router.push({
+            path: '/list-book',
+            query: Object.fromEntries(currentQuery)
+        });
+    } else {
+        router.replace('/list-book');
+    }
 };
 </script>
 
