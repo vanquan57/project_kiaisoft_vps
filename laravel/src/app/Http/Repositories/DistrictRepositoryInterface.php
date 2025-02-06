@@ -2,17 +2,17 @@
 
 namespace App\Http\Repositories;
 
+use App\Models\Province;
 use Illuminate\Database\Eloquent\Collection;
 
 interface DistrictRepositoryInterface extends BaseRepositoryInterface
 {
-
     /**
-     * Get all ward by district id
+     * Get all district by province
      *
-     * @param int $districtId
+     * @param Province $province
      *
-     * @return Collection
+     * @return Collection|null
      */
-    public function getWardByDistrictId(int $districtId): Collection;
+    public function getDistrictByProvince(Province $province): ?Collection;
 }

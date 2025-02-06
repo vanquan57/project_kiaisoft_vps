@@ -9,6 +9,11 @@ use Illuminate\Http\Response;
 
 class LocationController extends Controller
 {
+    /**
+     * The constructor
+     * 
+     * @param LocationService $locationService
+     */
     public function __construct(
         protected LocationService $locationService
     ) {}
@@ -17,15 +22,19 @@ class LocationController extends Controller
     /**
      * Get all provinces
      *
-     * @return Collection|null
+     * @return JsonResponse
      */
     public function getAllProvinces(): JsonResponse
     {
-        if ($provinces = $this->locationService->getAllProvinces()) {
-            return response()->json($provinces);
+        if (!$provinces = $this->locationService->getAllProvinces()) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                Response::HTTP_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+            );
         }
-
-        return response()->json(['error' => 'The request could not be processed'], Response::HTTP_BAD_REQUEST);
+        
+        return responseOkAPI($provinces);
     }
 
     /**
@@ -33,15 +42,19 @@ class LocationController extends Controller
      *
      * @param int $provinceId
      *
-     * @return Collection|null
+     * @return JsonResponse
      */
     public function getDistrictsByProvinceId(int $provinceId): JsonResponse
     {
-        if ($districts = $this->locationService->getDistrictsByProvinceId($provinceId)) {
-            return response()->json($districts);
+        if (!$districts = $this->locationService->getDistrictsByProvinceId($provinceId)) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                Response::HTTP_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI($districts);
     }
 
     /**
@@ -49,14 +62,18 @@ class LocationController extends Controller
      *
      * @param int $districtId
      *
-     * @return Collection|null
+     * @return JsonResponse
      */
     public function getWardsByDistrictId(int $districtId): JsonResponse
     {
-        if ($wards = $this->locationService->getWardsByDistrictId($districtId)) {
-            return response()->json($wards);
+        if (!$wards = $this->locationService->getWardsByDistrictId($districtId)) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                Response::HTTP_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI($wards);
     }
 }

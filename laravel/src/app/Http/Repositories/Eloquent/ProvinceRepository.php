@@ -17,17 +17,4 @@ class ProvinceRepository extends BaseRepository implements ProvinceRepositoryInt
     {
         return Province::class;
     }
-
-    /**
-     * Get all district by province id
-     *
-     * @param int $provinceId
-     *
-     * @return Collection
-     */
-    public function getDistrictByProvinceId(int $provinceId): Collection
-    {
-        return $this->model->find($provinceId)->districts;
-    }
-
 }

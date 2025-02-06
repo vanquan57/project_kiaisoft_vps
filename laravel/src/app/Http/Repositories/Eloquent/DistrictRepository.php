@@ -3,11 +3,9 @@
 namespace App\Http\Repositories\Eloquent;
 
 use App\Http\Repositories\DistrictRepositoryInterface;
-use App\Models\Author;
 use App\Models\District;
+use App\Models\Province;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 class DistrictRepository extends BaseRepository implements DistrictRepositoryInterface
 {
@@ -22,14 +20,14 @@ class DistrictRepository extends BaseRepository implements DistrictRepositoryInt
     }
 
     /**
-     * Get all ward by district id
+     * Get all district by province
      *
-     * @param int $districtId
+     * @param Province $province
      *
      * @return Collection
      */
-    public function getWardByDistrictId(int $districtId): Collection
+    public function getDistrictByProvince(Province $province): Collection
     {
-        return $this->model->find($districtId)->wards;
+        return $province->districts;
     }
 }

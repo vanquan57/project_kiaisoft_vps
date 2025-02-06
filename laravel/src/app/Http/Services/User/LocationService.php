@@ -4,6 +4,7 @@ namespace App\Http\Services\User;
 
 use App\Http\Repositories\DistrictRepositoryInterface;
 use App\Http\Repositories\ProvinceRepositoryInterface;
+use App\Http\Repositories\WardRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 
@@ -15,11 +16,13 @@ class LocationService
      * @param ProvinceRepositoryInterface $provinceRepository
      * 
      * @param DistrictRepositoryInterface $districtRepository
+     * 
+     * @param WardRepositoryInterface $wardRepository
      */
     public function __construct(
         protected ProvinceRepositoryInterface $provinceRepository,
         protected DistrictRepositoryInterface $districtRepository,
-        
+        protected WardRepositoryInterface $wardRepository
     ) {}
 
     /**
@@ -48,7 +51,13 @@ class LocationService
     public function getDistrictsByProvinceId(int $provinceId): ?Collection
     {
         try {
-            return $this->provinceRepository->getDistrictByProvinceId($provinceId);
+            $province = $this->provinceRepository->find($provinceId);
+
+            if(!$province) {
+                return null;
+            }
+
+            return $this->districtRepository->getDistrictByProvince($province);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 
@@ -61,12 +70,18 @@ class LocationService
      *
      * @param int $districtId
      *
-     * @return Collection
+     * @return Collection|null
      */
-    public function getWardsByDistrictId(int $districtId): Collection
+    public function getWardsByDistrictId(int $districtId): ?Collection
     {
         try {
-            return $this->districtRepository->getWardByDistrictId($districtId);
+            $district = $this->districtRepository->find($districtId);
+
+            if (!$district) {
+                return null;
+            }
+
+            return $this->wardRepository->getWardByDistrict($district);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 
