@@ -53,8 +53,6 @@ class AuthorService
     public function store(array $attributes): ?Author
     {
         try {
-            $attributes['slug'] = $attributes['name'];
-
             return $this->authorRepository->store($attributes);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
@@ -98,8 +96,6 @@ class AuthorService
             if (!$category) {
                 return false;
             }
-
-            $attributes['slug'] = $attributes['name'];
 
             return $this->authorRepository->update($id, $attributes);
         } catch (\Exception $e) {
