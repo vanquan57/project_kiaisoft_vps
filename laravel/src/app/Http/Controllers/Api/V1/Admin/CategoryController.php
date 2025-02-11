@@ -27,11 +27,16 @@ class CategoryController extends Controller
      */
     public function index(CategorySearchRequest $request): JsonResponse
     {
-        if ($categories = $this->categoryService->getAllByPagination($request->validated())) {
-            return response()->json($categories);
+        
+        if (!$categories = $this->categoryService->getAllByPagination($request->validated())) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+            );
         }
 
-        return response()->json(['error' => 'The request could not be processed'], Response::HTTP_BAD_REQUEST);
+        return responseOkAPI($categories);
     }
 
     /**
@@ -43,11 +48,15 @@ class CategoryController extends Controller
      */
     public function store(StoreUpdateCategoryRequest $request): JsonResponse
     {
-        if ($category = $this->categoryService->store($request->validated())) {
-            return response()->json($category, Response::HTTP_CREATED);
+        if (!$category = $this->categoryService->store($request->validated())) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+            );
         }
-
-        return response()->json(['error' => 'The request could not be processed'], Response::HTTP_BAD_REQUEST);
+        
+        return responseOkAPI($category, Response::HTTP_CREATED);
     }
 
     /**
@@ -59,11 +68,15 @@ class CategoryController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        if ($category = $this->categoryService->show($id)) {
-            return response()->json($category);
+        if (!$category = $this->categoryService->show($id)) {
+            return responseErrorAPI(
+                Response::HTTP_NOT_FOUND,
+                ERROR_CODE_NOT_FOUND,
+                'Danh mục không tồn tại.'
+            );
         }
-
-        return response()->json(['error' => 'The request could not be processed'], Response::HTTP_BAD_REQUEST);
+        
+        return responseOkAPI($category);
     }
 
     /**
@@ -77,11 +90,17 @@ class CategoryController extends Controller
      */
     public function update(StoreUpdateCategoryRequest $request, int $id): JsonResponse
     {
-        if ($this->categoryService->update($request->validated(), $id)) {
-            return response()->json(['message' => 'Category updated successfully']);
+        if (!$this->categoryService->update($request->validated(), $id)) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+            );
         }
-
-        return response()->json(['error' => 'The request could not be processed'], Response::HTTP_BAD_REQUEST);
+        
+        return responseOkAPI([
+            'message' => 'Cập nhật danh mục thành công.'
+        ]);
     }
 
     /**
@@ -93,12 +112,14 @@ class CategoryController extends Controller
      */
     public function destroy(int $id)
     {
-        $result = $this->categoryService->destroy($id);
-
-        if($result['code'] >= 200 && $result['code'] < 300) {
-            return response()->json(['message' => $result['message']], $result['code']);
+        if (!$this->categoryService->destroy($id)) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Danh mục có sách đăng ký, không thể xóa.'
+            );
         }
-
-        return response()->json(['error' => $result['error']], $result['code']);
+        
+        return responseOkAPI(['message' => 'Xóa danh mục thành công.']);
     }
 }

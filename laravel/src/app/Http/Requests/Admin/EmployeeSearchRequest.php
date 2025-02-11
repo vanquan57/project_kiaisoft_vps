@@ -34,8 +34,8 @@ class EmployeeSearchRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'limit.integer' => 'Limit must be an integer',
-            'limit.min' => 'Limit must be greater than 0',
+            'limit.integer' => 'Giới hạn phải là số nguyên',
+            'limit.min' => 'Giới hạn phải lớn hơn hoặc bằng 1',
         ];
     }
 }

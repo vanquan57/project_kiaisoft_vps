@@ -30,15 +30,14 @@ class AuthController extends Controller
         $credentials['role'] = User::ROLE_ADMIN;
 
         if (!$token = auth('api')->attempt($credentials)) {
-            return response()->json(
-                [
-                    'error' => 'Unauthorized',
-                ],
-                Response::HTTP_UNAUTHORIZED
+            return responseErrorAPI(
+                Response::HTTP_UNAUTHORIZED,
+                Response::HTTP_UNAUTHORIZED,
+                'Email hoặc mật khẩu không chính xác.',
             );
         }
 
-        return $this->respondWithToken($token);
+        return responseOkAPI($this->respondWithToken($token));
     }
 
     /**
@@ -51,11 +50,9 @@ class AuthController extends Controller
         auth('api')->logout();
         auth('api')->invalidate(auth('api')->getToken());
 
-        return response()->json(
-            [
-                'message' => 'Successfully logged out',
-            ]
-        );
+        return responseOkAPI([
+            'message' => 'Đăng xuất thành công.'
+        ]);
     }
 
     /**
@@ -63,14 +60,14 @@ class AuthController extends Controller
      *
      * @param string $token
      *
-     * @return JsonResponse
+     * @return array
      */
-    protected function respondWithToken($token): JsonResponse
+    protected function respondWithToken($token): array
     {
-        return response()->json([
+        return [
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth('api')->factory()->getTTL() * 60,
-        ]);
+        ];
     }
 }

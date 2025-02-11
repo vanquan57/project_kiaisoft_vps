@@ -29,13 +29,15 @@ class UserController extends Controller
      */
     public function index(UserSearchRequest $request): JsonResponse
     {
-        if ($users = $this->userService->getAllByPagination($request->validated())) {
-            return response()->json($users);
+        if (!$users = $this->userService->getAllByPagination($request->validated())) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+            );
         }
-
-        return response()->json([
-            'error' => 'The request could not be processed',
-        ], Response::HTTP_BAD_REQUEST);
+        
+        return responseOkAPI($users);
     }
 
     /**
@@ -49,12 +51,16 @@ class UserController extends Controller
      */
     public function update(UpdateStatusUserRequest $request, int $id): JsonResponse
     {
-        if ($this->userService->updateStatus($request->validated(), $id)) {
-            return response()->json(true);
+        if (!$this->userService->updateStatus($request->validated(), $id)) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Cập nhật trạng thái thất bại.'
+            );
         }
-
-        return response()->json([
-            'error' => 'The request could not be processed',
-        ], Response::HTTP_BAD_REQUEST);
+        
+        return responseOkAPI([
+            'message' => 'Cập nhật trạng thái người dùng thành công.'
+        ]);
     }
 }

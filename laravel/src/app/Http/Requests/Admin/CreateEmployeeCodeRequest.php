@@ -34,9 +34,9 @@ class CreateEmployeeCodeRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'file.required' => 'File is required',
-            'file.file' => 'File must be a file',
-            'file.mimes' => 'File must be a file of type: csv',
+            'file.required' => 'Vui lòng chọn file',
+            'file.file' => 'File không hợp lệ',
+            'file.mimes' => 'File không đúng định dạng',
         ];
     }
 }

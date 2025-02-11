@@ -118,29 +118,16 @@ class CategoryService
      *
      * @param int $id
      *
-     * @return array
+     * @return bool
      */
-    public function destroy(int $id): array
+    public function destroy(int $id): bool
     {
         try {
-            if ($this->categoryRepository->destroy($id)) {
-                return [
-                    'message' => 'Category deleted successfully',
-                    'code' => Response::HTTP_OK
-                ];
-            }
-
-            return [
-                'error' => 'Categories with registered books cannot be deleted',
-                'code' => Response::HTTP_BAD_REQUEST
-            ];
+            return $this->categoryRepository->destroy($id);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 
-            return [
-                'error' => 'The request could not be processed',
-                'code' => Response::HTTP_INTERNAL_SERVER_ERROR
-            ];
+            return false;
         }
     }
 }
