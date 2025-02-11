@@ -24,7 +24,7 @@ class UserSearchRequest extends FormRequest
     public function rules(): array
     {
         $columns = DB::getSchemaBuilder()->getColumnListing('users');
-        
+
         return [
             'key_word' => 'nullable|string|max:255',
             'column' => 'nullable|string|in:' . implode(',', $columns),
@@ -45,6 +45,6 @@ class UserSearchRequest extends FormRequest
             'key_word.max' => 'Từ khóa tìm kiếm không được vượt quá 255 ký tự.',
             'limit.integer' => 'Giới hạn phải là một số nguyên.',
             'limit.min' => 'Giới hạn phải lớn hơn 0.',
-        ];        
+        ];
     }
 }

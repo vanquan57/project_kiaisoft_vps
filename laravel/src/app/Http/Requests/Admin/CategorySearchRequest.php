@@ -24,7 +24,7 @@ class CategorySearchRequest extends FormRequest
     public function rules(): array
     {
         $columns = DB::getSchemaBuilder()->getColumnListing('categories');
-        
+
         return [
             'name' => 'nullable|string|max:255',
             'limit' => 'nullable|integer|min:1',
@@ -49,6 +49,6 @@ class CategorySearchRequest extends FormRequest
             'order.in' => 'Trường sắp xếp phải là asc hoặc desc.',
             'column.string' => 'Trường cột phải là một chuỗi.',
             'column.in' => 'Trường cột không hợp lệ.',
-        ];        
+        ];
     }
 }

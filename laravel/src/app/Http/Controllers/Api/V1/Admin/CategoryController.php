@@ -112,18 +112,14 @@ class CategoryController extends Controller
      */
     public function destroy(int $id)
     {
-        $result = $this->categoryService->destroy($id);
-
-        if ($result['code'] !== Response::HTTP_OK) {
+        if (!$this->categoryService->destroy($id)) {
             return responseErrorAPI(
-                $result['code'],
-                $result['error_code'],
-                $result['error']
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Danh mục có sách đăng ký, không thể xóa.'
             );
         }
         
-        return responseOkAPI([
-            'message' => $result['message']
-        ]);
+        return responseOkAPI(['message' => 'Xóa danh mục thành công.']);
     }
 }

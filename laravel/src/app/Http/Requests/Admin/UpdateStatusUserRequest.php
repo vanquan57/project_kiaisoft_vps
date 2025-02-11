@@ -38,6 +38,6 @@ class UpdateStatusUserRequest extends FormRequest
             'status.required' => 'Trạng thái là bắt buộc.',
             'status.integer' => 'Trạng thái phải là một số nguyên.',
             'status.in' => 'Trạng thái không hợp lệ.',
-        ];        
+        ];
     }
 }

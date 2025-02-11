@@ -46,6 +46,6 @@ class LoginRequest extends FormRequest
             'password.required' => 'Mật khẩu là bắt buộc.',
             'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự.',
             'password.regex' => 'Mật khẩu phải chứa ít nhất một chữ cái viết hoa và một ký tự đặc biệt.',
-        ];        
+        ];
     }
 }

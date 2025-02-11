@@ -49,6 +49,6 @@ class StoreUpdateCategoryRequest extends FormRequest
             'name.unique' => 'Tên danh mục đã tồn tại.',
             'description.string' => 'Mô tả phải là một chuỗi.',
             'description.max' => 'Mô tả không được vượt quá 255 ký tự.',
-        ];        
+        ];
     }
 }

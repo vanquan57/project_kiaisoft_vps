@@ -118,31 +118,16 @@ class CategoryService
      *
      * @param int $id
      *
-     * @return array
+     * @return bool
      */
-    public function destroy(int $id): array
+    public function destroy(int $id): bool
     {
         try {
-            if ($this->categoryRepository->destroy($id)) {
-                return [
-                    'message' => 'Xóa danh mục thành công',
-                    'code' => Response::HTTP_OK
-                ];
-            }
-
-            return [
-                'error' => 'Danh mục có sách, không thể xóa',
-                'error_code' => ERROR_BAD_REQUEST,
-                'code' => Response::HTTP_BAD_REQUEST
-            ];
+            return $this->categoryRepository->destroy($id);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 
-            return [
-                'error' => 'Không thể xử lý yêu cầu, vui lòng thử lại sau',
-                'error_code' => ERROR_CODE_INTERNAL_SERVER_ERROR,
-                'code' => Response::HTTP_INTERNAL_SERVER_ERROR
-            ];
+            return false;
         }
     }
 }
