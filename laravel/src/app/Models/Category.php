@@ -26,7 +26,27 @@ class Category extends Model
      */
     public function setSlugAttribute($value)
     {
-        $this->attributes['slug'] = Str::slug($value);
+        $this->attributes['slug'] = $this->generateUniqueSlug($value);
+    }
+
+    /**
+     * Generate a unique slug for a category based on the given title.
+     *
+     * @param string $title The title of the category.
+     * 
+     * @return string The unique slug for the category.
+     */
+    private function generateUniqueSlug($title) {
+        $slug = Str::slug($title);
+        $originalSlug = $slug;
+        $count = 1;
+
+        while (self::where('slug', $slug)->exists()) {
+            $slug = $originalSlug . '-' . $count;
+            $count++;
+        }
+
+        return $slug;
     }
 
     /**

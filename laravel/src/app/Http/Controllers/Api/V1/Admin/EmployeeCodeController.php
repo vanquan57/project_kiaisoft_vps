@@ -30,15 +30,15 @@ class EmployeeCodeController extends Controller
      */
     public function index(EmployeeSearchRequest $request): JsonResponse
     {
-        if ($employees = $this->userService->getAllEmployeesCodes($request->validated())) {
-            return $this->responseOkAPI($employees);
+        if (!$employees = $this->userService->getAllEmployeesCodes($request->validated())) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+            );
         }
-
-        return $this->responseErrorAPI(
-            Response::HTTP_BAD_REQUEST,
-            Response::HTTP_BAD_REQUEST,
-            'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
-        );
+        
+        return responseOkAPI($employees);
     }
 
     /**
@@ -50,16 +50,16 @@ class EmployeeCodeController extends Controller
      */
     public function store(CreateEmployeeCodeRequest $request): JsonResponse
     {
-        if ($this->userService->storeEmployeeCode($request->validated())) {
-            return $this->responseOkAPI([
-                'message' => 'Thêm thông tin nhân viên thành công'
-            ]);
+        if (!$this->userService->storeEmployeeCode($request->validated())) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Dữ liệu không hợp lệ, vui lòng kiểm tra lại'
+            );
         }
-
-        return $this->responseErrorAPI(
-            Response::HTTP_BAD_REQUEST,
-            Response::HTTP_BAD_REQUEST,
-            'Dữ liệu không hợp lệ, vui lòng kiểm tra lại'
-        );
+        
+        return responseOkAPI([
+            'message' => 'Thêm thông tin nhân viên thành công'
+        ]);
     }
 }

@@ -132,6 +132,7 @@ class CategoryService
 
             return [
                 'error' => 'Danh mục có sách, không thể xóa',
+                'error_code' => ERROR_BAD_REQUEST,
                 'code' => Response::HTTP_BAD_REQUEST
             ];
         } catch (\Exception $e) {
@@ -139,6 +140,7 @@ class CategoryService
 
             return [
                 'error' => 'Không thể xử lý yêu cầu, vui lòng thử lại sau',
+                'error_code' => ERROR_CODE_INTERNAL_SERVER_ERROR,
                 'code' => Response::HTTP_INTERNAL_SERVER_ERROR
             ];
         }

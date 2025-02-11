@@ -27,15 +27,16 @@ class CategoryController extends Controller
      */
     public function index(CategorySearchRequest $request): JsonResponse
     {
-        if ($categories = $this->categoryService->getAllByPagination($request->validated())) {
-            return $this->responseOkAPI($categories);
+        
+        if (!$categories = $this->categoryService->getAllByPagination($request->validated())) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+            );
         }
 
-        return $this->responseErrorAPI(
-            Response::HTTP_BAD_REQUEST,
-            Response::HTTP_BAD_REQUEST,
-            'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
-        );
+        return responseOkAPI($categories);
     }
 
     /**
@@ -47,15 +48,15 @@ class CategoryController extends Controller
      */
     public function store(StoreUpdateCategoryRequest $request): JsonResponse
     {
-        if ($category = $this->categoryService->store($request->validated())) {
-            return $this->responseOkAPI($category, Response::HTTP_CREATED);
+        if (!$category = $this->categoryService->store($request->validated())) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+            );
         }
-
-        return $this->responseErrorAPI(
-            Response::HTTP_BAD_REQUEST,
-            Response::HTTP_BAD_REQUEST,
-            'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
-        );
+        
+        return responseOkAPI($category, Response::HTTP_CREATED);
     }
 
     /**
@@ -67,15 +68,15 @@ class CategoryController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        if ($category = $this->categoryService->show($id)) {
-            return $this->responseOkAPI($category);
+        if (!$category = $this->categoryService->show($id)) {
+            return responseErrorAPI(
+                Response::HTTP_NOT_FOUND,
+                ERROR_CODE_NOT_FOUND,
+                'Danh mục không tồn tại.'
+            );
         }
-
-        return $this->responseErrorAPI(
-            Response::HTTP_NOT_FOUND,
-            Response::HTTP_NOT_FOUND,
-            'Danh mục không tồn tại.'
-        );
+        
+        return responseOkAPI($category);
     }
 
     /**
@@ -89,17 +90,17 @@ class CategoryController extends Controller
      */
     public function update(StoreUpdateCategoryRequest $request, int $id): JsonResponse
     {
-        if ($this->categoryService->update($request->validated(), $id)) {
-            return $this->responseOkAPI([
-                'message' => 'Cập nhật danh mục thành công.'
-            ]);
+        if (!$this->categoryService->update($request->validated(), $id)) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
+            );
         }
-
-        return $this->responseErrorAPI(
-            Response::HTTP_BAD_REQUEST,
-            Response::HTTP_BAD_REQUEST,
-            'Không thể xử lý yêu cầu, vui lòng thử lại sau.'
-        );
+        
+        return responseOkAPI([
+            'message' => 'Cập nhật danh mục thành công.'
+        ]);
     }
 
     /**
@@ -113,16 +114,16 @@ class CategoryController extends Controller
     {
         $result = $this->categoryService->destroy($id);
 
-        if ($result['code'] == Response::HTTP_OK) {
-            return $this->responseOkAPI([
-                'message' => $result['message']
-            ]);
+        if ($result['code'] !== Response::HTTP_OK) {
+            return responseErrorAPI(
+                $result['code'],
+                $result['error_code'],
+                $result['error']
+            );
         }
-
-        return $this->responseErrorAPI(
-            $result['code'],
-            $result['code'],
-            $result['error']
-        );
+        
+        return responseOkAPI([
+            'message' => $result['message']
+        ]);
     }
 }

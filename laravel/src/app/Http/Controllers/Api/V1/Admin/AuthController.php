@@ -30,14 +30,14 @@ class AuthController extends Controller
         $credentials['role'] = User::ROLE_ADMIN;
 
         if (!$token = auth('api')->attempt($credentials)) {
-            return $this->responseErrorAPI(
+            return responseErrorAPI(
                 Response::HTTP_UNAUTHORIZED,
                 Response::HTTP_UNAUTHORIZED,
                 'Email hoặc mật khẩu không chính xác.',
             );
         }
 
-        return $this->responseOkAPI($this->respondWithToken($token));
+        return responseOkAPI($this->respondWithToken($token));
     }
 
     /**
@@ -50,7 +50,7 @@ class AuthController extends Controller
         auth('api')->logout();
         auth('api')->invalidate(auth('api')->getToken());
 
-        return $this->responseOkAPI([
+        return responseOkAPI([
             'message' => 'Đăng xuất thành công.'
         ]);
     }
