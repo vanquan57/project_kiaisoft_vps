@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\Admin\UserController;
 use App\Http\Controllers\Api\V1\Admin\CategoryController;
 use App\Models\Category;
 use App\Http\Controllers\Api\V1\Admin\AuthorController;
+use App\Http\Controllers\Api\V1\Admin\PublisherController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'v1'], function () {
@@ -25,6 +26,10 @@ Route::group(['prefix' => 'v1'], function () {
                 'edit',
             ]);
             Route::resource('author', AuthorController::class)->except([
+                'create',
+                'edit',
+            ]);
+            Route::resource('publisher', PublisherController::class)->except([
                 'create',
                 'edit',
             ]);
