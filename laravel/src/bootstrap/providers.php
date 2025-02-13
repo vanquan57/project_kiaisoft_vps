@@ -8,5 +8,6 @@ return [
     App\Providers\PublisherServiceProvider::class,
     App\Providers\BookServiceProvider::class,
     App\Providers\ImageServiceProvider::class,
+    App\Providers\OrderServiceProvider::class,
     App\Providers\UserServiceProvider::class,
 ];

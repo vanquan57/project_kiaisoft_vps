@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Http\Controllers\Api\V1\Admin\AuthorController;
 use App\Http\Controllers\Api\V1\Admin\PublisherController;
 use App\Http\Controllers\Api\V1\Admin\BookController;
+use App\Http\Controllers\Api\V1\Admin\OrderController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'v1'], function () {
@@ -38,6 +39,11 @@ Route::group(['prefix' => 'v1'], function () {
                 'create',
                 'edit'
             ]);
+            Route::group(['prefix' => 'order'], function () {
+                Route::get('/', [OrderController::class, 'index']);
+                Route::get('/{id}', [OrderController::class, 'show']);
+                Route::put('/{id}', [OrderController::class, 'update']);
+            });
         });
     });
 });
