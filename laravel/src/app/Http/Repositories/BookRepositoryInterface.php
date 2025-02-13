@@ -36,4 +36,13 @@ interface BookRepositoryInterface extends BaseRepositoryInterface
      * return bool
      */
     public function updateBookInCategory(int $bookId, int $categoryId): bool;
+
+    /**
+     * Get all id of books by query like name
+     * 
+     * @param string $name
+     * 
+     * @return array
+    */
+    public function getIdsByName(string $name): array;
 }

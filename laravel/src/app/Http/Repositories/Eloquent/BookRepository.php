@@ -196,4 +196,16 @@ class BookRepository extends BaseRepository implements BookRepositoryInterface
             ... $attributes,
         ]);
     }
+
+    /**
+     * Get all id of books by query like name
+     * 
+     * @param string $name
+     * 
+     * @return array
+     */
+    public function getIdsByName(string $name): array
+    {
+        return $this->model->where('name', 'like', '%'. $name. '%')->pluck('id')->toArray();
+    }
 }

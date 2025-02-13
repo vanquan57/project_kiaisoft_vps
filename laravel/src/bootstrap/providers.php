@@ -9,5 +9,6 @@ return [
     App\Providers\BookServiceProvider::class,
     App\Providers\ImageServiceProvider::class,
     App\Providers\OrderServiceProvider::class,
+    App\Providers\FeedbackServiceProvider::class,
     App\Providers\UserServiceProvider::class,
 ];
