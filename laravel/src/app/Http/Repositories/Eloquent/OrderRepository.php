@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Facades\Mail;
 
 class OrderRepository extends BaseRepository implements OrderRepositoryInterface
 {
@@ -137,13 +136,13 @@ class OrderRepository extends BaseRepository implements OrderRepositoryInterface
     }
 
     /**
-     * Progress check and update order status
+     * Get all order overdue
      *
-     * @return void
+     * @return Collection
      */
-    public function progressCheckAndUpdateOrderStatus(): void
+    public function getAllOrderOverdue(): Collection
     {
-        $orders = $this->model->where('status', '!=', Order::STATUS_RETURNED)
+        return $this->model->where('status', '!=', Order::STATUS_RETURNED)
             ->with([
                 'orderDetails' => function ($query) {
                     $query->where('status', '!=', OrderDetail::STATUS_RETURNED)
@@ -151,30 +150,33 @@ class OrderRepository extends BaseRepository implements OrderRepositoryInterface
                 }
             ])
             ->get();
+    }
 
-        $idsOrder = [];
+    /**
+     * Update status multiple book in order
+     * 
+     * @param Order $order
+     * 
+     * @param array $overdueDetails
+     * 
+     * @return void
+    */
+    public function updateStatusMultipleBookOverdueInOrder(Order $order, array $overdueDetails ): void
+    {
+        $order->orderDetails()->syncWithoutDetaching(array_fill_keys($overdueDetails, [
+            'status' => OrderDetail::STATUS_OVERDUE,
+        ]));
+    }
 
-        foreach ($orders as $order) {
-            $overdueDetails = $order->orderDetails->pluck('id')->toArray();
-            $overdueBooks = [];
-
-            foreach ($order->orderDetails as $detail) {
-                $overdueBooks[] = $detail;
-            }
-
-            if (!empty($overdueDetails)) {
-                $order->orderDetails()->syncWithoutDetaching(array_fill_keys($overdueDetails, [
-                    'status' => OrderDetail::STATUS_OVERDUE,
-                ]));
-
-                $idsOrder[] = $order->id;
-
-                Mail::to($order->email)->send(new OverdueBooksNotification($order, $overdueBooks));
-            }
-        }
-
-        if (!empty($idsOrder)) {
-            $this->model->whereIn('id', $idsOrder)->update(['status' => Order::STATUS_OVERDUE]);
-        }
+    /**
+     * Update status multiple order is overdue
+     * 
+     * @param array $idsOrder
+     * 
+     * @return void
+     */
+    public function updateStatusMultipleOrderIsOverdue(array $idsOrder): void
+    {
+        $this->model->whereIn('id', $idsOrder)->update(['status' => Order::STATUS_OVERDUE]);
     }
 }

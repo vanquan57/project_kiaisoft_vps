@@ -60,9 +60,29 @@ interface OrderRepositoryInterface extends BaseRepositoryInterface
     public function updateStatusBookInOrder(Book $book, array $data): bool;
 
     /**
-     * Progress check and update order status
+     * Get all order overdue
      *
+     * @return Collection
+     */
+    public function getAllOrderOverdue(): Collection;
+
+    /**
+     * Update status multiple book in order
+     * 
+     * @param Order $order
+     * 
+     * @param array $overdueDetails
+     * 
+     * @return void
+    */
+    public function updateStatusMultipleBookOverdueInOrder(Order $order, array $overdueDetails ): void;
+
+    /**
+     * Update status multiple order is overdue
+     * 
+     * @param array $idsOrder
+     * 
      * @return void
      */
-    public function progressCheckAndUpdateOrderStatus(): void;
+    public function updateStatusMultipleOrderIsOverdue(array $idsOrder): void;
 }
