@@ -2,6 +2,7 @@
 
 namespace App\Http\Repositories;
 
+use App\Models\Book;
 use App\Models\Order;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -46,4 +47,15 @@ interface OrderRepositoryInterface extends BaseRepositoryInterface
      * @return Collection
      */
     public function getOverallOrderStatus(int $orderId): Collection;
+
+    /**
+     * Update status book in order
+     * 
+     * @param Book $book
+     * 
+     * @param array $data
+     * 
+     * @return bool
+    */
+    public function updateStatusBookInOrder(Book $book, array $data): bool;
 }

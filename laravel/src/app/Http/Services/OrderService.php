@@ -176,17 +176,12 @@ class OrderService
 
         // If book is missing, update with note
         if ($data['status'] === OrderDetail::STATUS_MISSING) {
-            $book->pivot->status = OrderDetail::STATUS_MISSING;
-            $book->pivot->note = $data['note'];
-
-            return $book->pivot->save();
+            return $this->orderRepository->updateStatusBookInOrder($book, $data);
         }
 
         // If status is different current status, update status
         if ($book->pivot->status !== $data['status']) {
-            $book->pivot->status = $data['status'];
-
-            return $book->pivot->save();
+            return $this->orderRepository->updateStatusBookInOrder($book, $data);
         }
 
         return true;

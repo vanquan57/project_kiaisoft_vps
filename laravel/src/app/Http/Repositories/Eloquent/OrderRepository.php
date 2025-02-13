@@ -3,6 +3,7 @@
 namespace App\Http\Repositories\Eloquent;
 
 use App\Http\Repositories\OrderRepositoryInterface;
+use App\Models\Book;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use Illuminate\Database\Eloquent\Model;
@@ -107,5 +108,28 @@ class OrderRepository extends BaseRepository implements OrderRepositoryInterface
         $order = $this->model->findOrFail($orderId);
 
         return $order->orderDetails->pluck('pivot.status');
+    }
+
+    /**
+     * Update status book in order
+     * 
+     * @param Book $book
+     * 
+     * @param array $data
+     * 
+     * @return bool
+    */
+    public function updateStatusBookInOrder(Book $book, array $data): bool
+    {
+        if ($data['status'] == OrderDetail::STATUS_MISSING){
+            $book->pivot->status = OrderDetail::STATUS_MISSING;
+            $book->pivot->note = $data['note'];
+
+            return $book->pivot->save();
+        }
+
+        $book->pivot->status = $data['status'];
+        
+        return $book->pivot->save();
     }
 }
