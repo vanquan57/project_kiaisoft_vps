@@ -3,6 +3,7 @@
 namespace App\Http\Repositories;
 
 use App\Models\Order;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -33,9 +34,9 @@ interface OrderRepositoryInterface extends BaseRepositoryInterface
      *
      * @param int $orderId
      *
-     * @return bool
+     * @return Model|null
      */
-    public function updateStatusBookInOrder(array $data, int $orderId): bool;
+    public function getBookInOrder(array $data, int $orderId): ?Model;
 
     /**
      * Get overall order status

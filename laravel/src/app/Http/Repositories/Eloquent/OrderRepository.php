@@ -5,6 +5,7 @@ namespace App\Http\Repositories\Eloquent;
 use App\Http\Repositories\OrderRepositoryInterface;
 use App\Models\Order;
 use App\Models\OrderDetail;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -80,51 +81,18 @@ class OrderRepository extends BaseRepository implements OrderRepositoryInterface
      *
      * @param int $orderId
      *
-     * @return bool
+     * @return Model|null
      */
-    public function updateStatusBookInOrder(array $data, int $orderId): bool
+    public function getBookInOrder(array $data, int $orderId): ?Model
     {
         $order = $this->model->findOrFail($orderId);
         $book = $order->orderDetails()->where('book_id', $data['book_id'])->first();
 
         if (!$book) {
-            return false;
+            return null;
         }
 
-        // If book is already returned, do not update status
-        if ($book->pivot->status === OrderDetail::STATUS_RETURNED) {
-            return false;
-        }
-
-        // If current order status is overdue, do not update status to borrowing
-        if (
-            $book->pivot->status === OrderDetail::STATUS_OVERDUE &&
-            $data['status'] === OrderDetail::STATUS_BORROWING
-        ) {
-            return false;
-        }
-
-        // If book is missing, do not update status to other status except returned
-        if ($book->pivot->status === OrderDetail::STATUS_MISSING && $data['status'] !== OrderDetail::STATUS_RETURNED) {
-            return false;
-        }
-
-        // If book is missing, update with note
-        if ($data['status'] === OrderDetail::STATUS_MISSING) {
-            $book->pivot->status = OrderDetail::STATUS_MISSING;
-            $book->pivot->note = $data['note'];
-
-            return $book->pivot->save();
-        }
-
-        // If status is different current status, update status
-        if ($book->pivot->status !== $data['status']) {
-            $book->pivot->status = $data['status'];
-
-            return $book->pivot->save();
-        }
-
-        return true;
+        return $book;
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace App\Http\Services;
 
 use App\Http\Repositories\OrderRepositoryInterface;
+use App\Models\Book;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use Illuminate\Http\JsonResponse;
@@ -38,9 +39,9 @@ class OrderService
                 'start_date' => $dataSearch['start_date'] ?? null,
                 'end_date' => $dataSearch['end_date'] ?? null,
                 'status' => $dataSearch['status'] ?? null,
-                'limit' => $dataSearch['limit']?? config('constants.DEFAULT_LIMIT'),
-                'column' => $dataSearch['column']?? null,
-                'order' => $dataSearch['order']?? null,
+                'limit' => $dataSearch['limit'] ?? config('constants.DEFAULT_LIMIT'),
+                'column' => $dataSearch['column'] ?? null,
+                'order' => $dataSearch['order'] ?? null,
             ];
 
             return $this->orderRepository->getAllByPaginate($data);
@@ -83,7 +84,13 @@ class OrderService
         try {
             DB::beginTransaction();
 
-            if (!$this->orderRepository->updateStatusBookInOrder($data, $id)) {
+            $book = $this->orderRepository->getBookInOrder($data, $id);
+
+            if (!$book) {
+                throw new \Exception('Không tìm thấy sách trong đơn mượn');
+            }
+
+            if (!$this->updateStatusBookInOrder($book, $data)) {
                 throw new \Exception('Lỗi cập nhật trạng thái sách trong đơn mượn thất bại');
             }
 
@@ -136,5 +143,52 @@ class OrderService
         }
 
         return Order::STATUS_RETURNED;
+    }
+
+    /**
+     * Update the status of a book in an order.
+     *
+     * @param Book $book The book to update.
+     * 
+     * @param array $data The data containing the new status and note.
+     *
+     * @return bool
+     */
+    private function updateStatusBookInOrder(Book $book, array $data): bool
+    {
+        // If book is already returned, do not update status
+        if ($book->pivot->status === OrderDetail::STATUS_RETURNED) {
+            return false;
+        }
+
+        // If current order status is overdue, do not update status to borrowing
+        if (
+            $book->pivot->status === OrderDetail::STATUS_OVERDUE &&
+            $data['status'] === OrderDetail::STATUS_BORROWING
+        ) {
+            return false;
+        }
+
+        // If book is missing, do not update status to other status except returned
+        if ($book->pivot->status === OrderDetail::STATUS_MISSING && $data['status'] !== OrderDetail::STATUS_RETURNED) {
+            return false;
+        }
+
+        // If book is missing, update with note
+        if ($data['status'] === OrderDetail::STATUS_MISSING) {
+            $book->pivot->status = OrderDetail::STATUS_MISSING;
+            $book->pivot->note = $data['note'];
+
+            return $book->pivot->save();
+        }
+
+        // If status is different current status, update status
+        if ($book->pivot->status !== $data['status']) {
+            $book->pivot->status = $data['status'];
+
+            return $book->pivot->save();
+        }
+
+        return true;
     }
 }
