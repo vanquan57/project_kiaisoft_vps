@@ -6,5 +6,7 @@ return [
     App\Providers\CategoryServiceProvider::class,
     App\Providers\AuthorServiceProvider::class,
     App\Providers\PublisherServiceProvider::class,
+    App\Providers\BookServiceProvider::class,
+    App\Providers\ImageServiceProvider::class,
     App\Providers\UserServiceProvider::class,
 ];

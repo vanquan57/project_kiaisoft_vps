@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\Admin\CategoryController;
 use App\Models\Category;
 use App\Http\Controllers\Api\V1\Admin\AuthorController;
 use App\Http\Controllers\Api\V1\Admin\PublisherController;
+use App\Http\Controllers\Api\V1\Admin\BookController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'v1'], function () {
@@ -32,6 +33,10 @@ Route::group(['prefix' => 'v1'], function () {
             Route::resource('publisher', PublisherController::class)->except([
                 'create',
                 'edit',
+            ]);
+            Route::resource('book', BookController::class)->except([
+                'create',
+                'edit'
             ]);
         });
     });
