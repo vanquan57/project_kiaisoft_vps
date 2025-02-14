@@ -5,6 +5,7 @@ namespace App\Http\Repositories\Eloquent;
 use App\Http\Repositories\UserRepositoryInterface;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class UserRepository extends BaseRepository implements UserRepositoryInterface
@@ -118,5 +119,74 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     {
         return $this->model->where('code', $code)
             ->orWhere('email', $email)->exists();
+    }
+
+    /**
+     * Update info password when mapping account google
+     * 
+     * @param User $user
+     * 
+     * @param array $data
+     * 
+     * @return bool
+    */
+    public function updateInfoWhenMappingAccountGoogle(User $user, array $data): bool
+    {
+        $user->name = $data['name'];
+        $user->password = bcrypt($data['password']);
+
+        return $user->save();
+    }
+
+    /**
+     * Update info when mapping account register with email password
+     * 
+     * @param User $user
+     * 
+     * @param string $googleId
+     * 
+     * @return bool
+    */
+    public function updateInfoWhenMappingAccountEmailPassword(User $user, string $googleId): bool
+    {
+        $user->google_id = $googleId;
+
+        return $user->save();
+    }
+
+    /**
+     * The function store account information
+     * 
+     * @param array $data
+     * 
+     * @return Model
+     */
+    public function store(array $data): Model
+    {
+        return $this->model->create([
+            'code' => $data['code'],
+            'name'=> $data['name'],
+            'email' => $data['email'],
+            'password' => bcrypt($data['password']),
+        ]);
+    }
+
+    /**
+     * Register google account information
+     * 
+     * @param string $code
+     *
+     * @param object $userGoogle
+     * 
+     * @return Model
+    */
+    public function registerGoogle(string $code, object $userGoogle): Model
+    {
+        return $this->model->create([
+            'code'=> $code,
+            'email' => $userGoogle->user['email'],
+            'name' => $userGoogle->user['name'],
+            'google_id' => $userGoogle->user['sub'],
+        ]);
     }
 }

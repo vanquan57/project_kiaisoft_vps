@@ -12,6 +12,7 @@ use Google_Client;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
@@ -113,35 +114,36 @@ class AuthController extends Controller
      */
     public function loginGoogle(Request $request): JsonResponse
     {
-        $userGoogle = Socialite::driver('google')->userFromToken($request->input('access_token'));
+        try {
+            $userGoogle = Socialite::driver('google')->userFromToken($request->input('access_token'));
 
-        if (!$userGoogle) {
+            if (!$userGoogle) {
+                throw new \Exception('Không tìm thấy thông tin tài khoản. Vui lòng thử lại', Response::HTTP_UNAUTHORIZED);
+            }
+
+            $user = $this->userService->findByGoogleId($userGoogle->user['sub']);
+
+            if (!$user) {
+                throw new \Exception('Vui lòng đăng ký tài khoản trước khi đăng nhập.', Response::HTTP_UNAUTHORIZED);
+            }
+
+            if (!$token = auth('api')->login($user)) {
+                throw new \Exception('Bạn không có quyền truy cập vào trang web này.', Response::HTTP_UNAUTHORIZED);
+            }
+
+            return responseOkAPI($this->respondWithToken($token));
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+
             return responseErrorAPI(
-                Response::HTTP_UNAUTHORIZED,
-                ERROR_CODE_AUTHENTICATE,
-                'Không tìm thấy thông tin tài khoản. Vui lòng thử lại'
+                $e->getCode(),
+                match ($e->getCode()) {
+                    Response::HTTP_UNAUTHORIZED => ERROR_CODE_AUTHENTICATE,
+                    default => ERROR_CODE_INTERNAL_SERVER_ERROR
+                },
+                $e->getMessage()
             );
         }
-
-        $user = $this->userService->findByGoogleId($userGoogle->user['sub']);
-
-        if (!$user) {
-            return responseErrorAPI(
-                Response::HTTP_UNAUTHORIZED,
-                ERROR_CODE_AUTHENTICATE,
-                'Vui lòng đăng ký tài khoản trước khi đăng nhập'
-            );
-        }
-
-        if (!$token = auth('api')->login($user)) {
-            return responseErrorAPI(
-                Response::HTTP_UNAUTHORIZED,
-                ERROR_CODE_AUTHENTICATE,
-                'Bạn không có quyền truy cập vào trang web này'
-            );
-        }
-
-        return responseOkAPI($this->respondWithToken($token));
     }
 
     /**

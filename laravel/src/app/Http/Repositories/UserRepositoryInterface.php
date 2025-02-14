@@ -73,4 +73,37 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
      * @return bool
     */
     public function checkExistsAccountRegister(string $employeeCode, string $email): bool;
+
+    /**
+     * Update info password when mapping account google
+     * 
+     * @param User $user
+     * 
+     * @param array $data
+     * 
+     * @return bool
+    */
+    public function updateInfoWhenMappingAccountGoogle(User $user, array $data): bool;
+
+    /**
+     * Update info when mapping account register with email password
+     * 
+     * @param User $user
+     * 
+     * @param string $googleId
+     * 
+     * @return bool
+    */
+    public function updateInfoWhenMappingAccountEmailPassword(User $user, string $googleId): bool;
+
+    /**
+     * Register google account information
+     * 
+     * @param string $code
+     * 
+     * @param object $userGoogle
+     * 
+     * @return Model
+    */
+    public function registerGoogle(string $code, object $userGoogle): Model;
 }
