@@ -11,4 +11,5 @@ return [
     App\Providers\OrderServiceProvider::class,
     App\Providers\FeedbackServiceProvider::class,
     App\Providers\UserServiceProvider::class,
+    App\Providers\OrderDetailsServiceProvider::class,
 ];

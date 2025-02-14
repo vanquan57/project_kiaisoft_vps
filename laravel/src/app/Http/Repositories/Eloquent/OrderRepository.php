@@ -4,10 +4,12 @@ namespace App\Http\Repositories\Eloquent;
 
 use App\Http\Repositories\OrderRepositoryInterface;
 use App\Models\Book;
+use App\Mail\OverdueBooksNotification;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class OrderRepository extends BaseRepository implements OrderRepositoryInterface
@@ -131,5 +133,34 @@ class OrderRepository extends BaseRepository implements OrderRepositoryInterface
         $book->pivot->status = $data['status'];
         
         return $book->pivot->save();
+    }
+
+    /**
+     * Get all order overdue
+     *
+     * @return Collection
+     */
+    public function getAllOrderOverdue(): Collection
+    {
+        return $this->model->where('status', '!=', Order::STATUS_RETURNED)
+            ->with([
+                'orderDetails' => function ($query) {
+                    $query->where('status', '!=', OrderDetail::STATUS_RETURNED)
+                        ->whereDate('return_date', '<', Carbon::now());
+                }
+            ])
+            ->get();
+    }
+
+    /**
+     * Update status multiple order is overdue
+     * 
+     * @param array $idsOrder
+     * 
+     * @return bool
+     */
+    public function updateStatusMultipleOrderIsOverdue(array $idsOrder): bool
+    {
+        return $this->model->whereIn('id', $idsOrder)->update(['status' => Order::STATUS_OVERDUE]);
     }
 }
