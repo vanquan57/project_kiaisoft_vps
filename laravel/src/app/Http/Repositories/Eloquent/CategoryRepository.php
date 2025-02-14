@@ -4,6 +4,7 @@ namespace App\Http\Repositories\Eloquent;
 
 use App\Http\Repositories\CategoryRepositoryInterface;
 use App\Models\Category;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class CategoryRepository extends BaseRepository implements CategoryRepositoryInterface
@@ -51,5 +52,17 @@ class CategoryRepository extends BaseRepository implements CategoryRepositoryInt
         }
 
         return false;
+    }
+
+    /**
+     * Get data for pie chart categories
+     * 
+     * @return Collection|null
+     */
+    public function getTotalBooksInCategories(): ?Collection
+    {
+        return $this->model->select([
+            'name',
+        ])->withCount('books')->get();
     }
 }

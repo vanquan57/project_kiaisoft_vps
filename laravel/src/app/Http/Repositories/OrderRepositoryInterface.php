@@ -4,6 +4,7 @@ namespace App\Http\Repositories;
 
 use App\Models\Book;
 use App\Models\Order;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -74,4 +75,15 @@ interface OrderRepositoryInterface extends BaseRepositoryInterface
      * @return bool
      */
     public function updateStatusMultipleOrderIsOverdue(array $idsOrder): bool;
+
+    /**
+     * Get total orders month and year
+     * 
+     * @param Carbon $startMonth
+     * 
+     * @param Carbon $currentMonth
+     * 
+     * @return array|null
+     */
+    public function getTotalOrdersByMonthAndYear(Carbon $startMonth, Carbon $currentMonth): ?array;
 }

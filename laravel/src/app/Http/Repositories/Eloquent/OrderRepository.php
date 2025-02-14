@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Carbon\Carbon;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Mail;
 
 class OrderRepository extends BaseRepository implements OrderRepositoryInterface
 {
@@ -162,5 +163,25 @@ class OrderRepository extends BaseRepository implements OrderRepositoryInterface
     public function updateStatusMultipleOrderIsOverdue(array $idsOrder): bool
     {
         return $this->model->whereIn('id', $idsOrder)->update(['status' => Order::STATUS_OVERDUE]);
+    }
+
+    /**
+     * Get total orders by specific month and year
+     * 
+     * @param Carbon $startMonth
+     * 
+     * @param Carbon $currentMonth
+     * 
+     * @return array|null
+     */
+    public function getTotalOrdersByMonthAndYear(Carbon $startMonth, Carbon $currentMonth): ?array
+    {
+        return $this->model->selectRaw('DATE_FORMAT(created_at, "%m-%Y") as month_year, COUNT(id) as total_orders')
+        ->whereBetween('created_at', [$startMonth, $currentMonth])
+        ->groupBy('month_year')
+        ->orderByRaw('MIN(created_at)')
+        ->get()
+        ->pluck('total_orders', 'month_year')
+        ->toArray();
     }
 }

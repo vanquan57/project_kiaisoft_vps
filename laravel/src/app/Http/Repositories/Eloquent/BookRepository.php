@@ -5,6 +5,7 @@ namespace App\Http\Repositories\Eloquent;
 use App\Http\Repositories\BookRepositoryInterface;
 use App\Models\Book;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class BookRepository extends BaseRepository implements BookRepositoryInterface
@@ -207,5 +208,34 @@ class BookRepository extends BaseRepository implements BookRepositoryInterface
     public function getIdsByName(string $name): array
     {
         return $this->model->where('name', 'like', '%'. $name. '%')->pluck('id')->toArray();
+    }
+
+    /**
+     * Get top books most popular
+     * 
+     * @param array $data
+     *
+     * @return Collection|null
+     */
+    public function getTopBooksMostPopular(array $data): ?Collection
+    {
+        return $this->model->select(['name', 'borrowing_number'])->orderBy('borrowing_number', $data['order_by_type'])
+            ->take($data['limit'])
+            ->get();
+    }
+
+     /**
+     * Get data for line chart top books most likely
+     * 
+     * @param array $data
+     * 
+     * @return Collection|null
+     */
+    public function getTopMostLikesBook($data):?Collection
+    {
+        return $this->model->withCount('wishLists')
+        ->orderBy('wish_lists_count', $data['order_by_type'])
+        ->take($data['limit'])
+        ->get(['id', 'name']);
     }
 }

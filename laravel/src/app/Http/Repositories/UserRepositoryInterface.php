@@ -2,6 +2,7 @@
 
 namespace App\Http\Repositories;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 interface UserRepositoryInterface extends BaseRepositoryInterface
@@ -30,4 +31,13 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
         string $code,
         string $email,
     );
+
+    /**
+     * Get top user most orders
+     * 
+     * @param array $data
+     * 
+     * @return Collection|null
+     */
+    public function getTopUsersMostOder(array $data): ?Collection;
 }
