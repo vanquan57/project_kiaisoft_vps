@@ -9,6 +9,7 @@ use App\Http\Repositories\UserRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 
 class DashboardService
 {
@@ -84,24 +85,30 @@ class DashboardService
     public function getTotalOrdersByMonth(): ?array
     {
         try {
+            $results = [];
+            $startMonth = Carbon::now()->subMonths(11)->startOfMonth();
             $currentMonth = Carbon::now();
-            $result = [];
+            $period = CarbonPeriod::create($startMonth, '1 month', $currentMonth);
+            
+            $totalOrdersByMonthAndYear  = $this->orderRepository->getTotalOrdersByMonthAndYear($startMonth, $currentMonth);
 
-            for ($i = 0; $i < 12; $i++) {
-                $month = $currentMonth->copy()->subMonths($i);
-                $monthFormatted = $month->format('m-Y');
+            if(!$totalOrdersByMonthAndYear) {
+                return null;
+            }
+            
+            foreach ($period as $monthYear) {
+                $monthYearFormatted = $monthYear->format('m-Y');
 
-                $orderCount = $this->orderRepository->getTotalOrdersByMonthAndYear($month->month, $month->year);
-
-                $result[] = [
-                    'month_year' => $monthFormatted,
-                    'total_orders' => $orderCount->total ?? 0
+                $results[] = [
+                    'month_year' => $monthYearFormatted,
+                    'total_orders' => $totalOrdersByMonthAndYear[$monthYearFormatted] ?? 0,
                 ];
             }
 
-            return array_reverse($result);
+            return $results;
         } catch (\Exception $e) {
             Log::error($e->getMessage());
+
             return null;
         }
     }

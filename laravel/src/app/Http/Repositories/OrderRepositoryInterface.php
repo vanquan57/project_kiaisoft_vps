@@ -4,6 +4,7 @@ namespace App\Http\Repositories;
 
 use App\Models\Book;
 use App\Models\Order;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -78,11 +79,11 @@ interface OrderRepositoryInterface extends BaseRepositoryInterface
     /**
      * Get total orders month and year
      * 
-     * @param int $month
+     * @param Carbon $startMonth
      * 
-     * @param int $year
+     * @param Carbon $currentMonth
      * 
-     * @return object|null
+     * @return array|null
      */
-    public function getTotalOrdersByMonthAndYear(int $month, int $year): ?object;
+    public function getTotalOrdersByMonthAndYear(Carbon $startMonth, Carbon $currentMonth): ?array;
 }
