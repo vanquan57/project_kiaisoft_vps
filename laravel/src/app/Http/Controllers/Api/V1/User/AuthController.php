@@ -72,7 +72,9 @@ class AuthController extends Controller
         }
 
         return responseOkAPI(
-            $result['message'],
+            [
+                'message' => $result['message']
+            ],
             $result['code']
         );
     }
