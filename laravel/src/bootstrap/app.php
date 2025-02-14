@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\Admin\CheckAdmin;
+use App\Http\Middleware\User\CheckUser;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -18,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'authentication.admin' => CheckAdmin::class,
+            'authentication.user' => CheckUser::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
