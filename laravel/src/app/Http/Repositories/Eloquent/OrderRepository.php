@@ -153,30 +153,14 @@ class OrderRepository extends BaseRepository implements OrderRepositoryInterface
     }
 
     /**
-     * Update status multiple book in order
-     * 
-     * @param Order $order
-     * 
-     * @param array $overdueDetails
-     * 
-     * @return void
-    */
-    public function updateStatusMultipleBookOverdueInOrder(Order $order, array $overdueDetails ): void
-    {
-        $order->orderDetails()->syncWithoutDetaching(array_fill_keys($overdueDetails, [
-            'status' => OrderDetail::STATUS_OVERDUE,
-        ]));
-    }
-
-    /**
      * Update status multiple order is overdue
      * 
      * @param array $idsOrder
      * 
-     * @return void
+     * @return bool
      */
-    public function updateStatusMultipleOrderIsOverdue(array $idsOrder): void
+    public function updateStatusMultipleOrderIsOverdue(array $idsOrder): bool
     {
-        $this->model->whereIn('id', $idsOrder)->update(['status' => Order::STATUS_OVERDUE]);
+        return $this->model->whereIn('id', $idsOrder)->update(['status' => Order::STATUS_OVERDUE]);
     }
 }

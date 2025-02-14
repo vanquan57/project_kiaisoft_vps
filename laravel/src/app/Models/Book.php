@@ -127,6 +127,7 @@ class Book extends Model
     public function orderDetails()
     {
         return $this->belongsToMany(Order::class, 'order_details')->withPivot(
+            'id',
             'borrow_date',
             'return_date',
             'quantity',
