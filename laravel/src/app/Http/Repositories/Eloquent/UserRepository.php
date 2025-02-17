@@ -220,4 +220,16 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
                 'password' => bcrypt($password)
             ]);
     }
+
+    /**
+     * Commit a transaction
+     *
+     * @param User $user
+     * 
+     * @return void
+     */
+    public function commitChanges(User $user): void
+    {
+        $user->save();
+    }
 }

@@ -3,18 +3,16 @@
 namespace App\Http\Services\User;
 
 use App\Http\Repositories\EmployeeCodeRepositoryInterface;
-use App\Http\Repositories\PasswordResetRepositoryInterface;
 use App\Http\Repositories\UserRepositoryInterface;
-use App\Mail\SendTokenResetPassword;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Auth\Events\PasswordReset;
 
 class UserService
 {
@@ -24,15 +22,12 @@ class UserService
      * @param UserRepositoryInterface $userRepository
      * 
      * @param EmployeeCodeRepositoryInterface $employeeCodeRepository
-     * 
-     * @param PasswordResetRepositoryInterface $passwordResetRepository
      *
      * @return void
      */
     public function __construct(
         protected UserRepositoryInterface $userRepository,
         protected EmployeeCodeRepositoryInterface $employeeCodeRepository,
-        protected PasswordResetRepositoryInterface $passwordResetRepository
     ) {}
 
 
@@ -173,18 +168,13 @@ class UserService
                 return false;
             }
 
-            $token = Str::random(60);
+            $status = Password::sendResetLink([
+                'email' => $data['email']
+            ]);
 
-            if (!$this->passwordResetRepository->store([
-                'email' => $data['email'],
-                'token' => $token,
-                'created_at' => now(),
-            ])) {
+            if ($status !== Password::RESET_LINK_SENT) {
                 return false;
             }
-
-            // Send email with token
-            Mail::to($user->email)->queue(new SendTokenResetPassword($token));
 
             return true;
         } catch (\Exception $e) {
@@ -204,34 +194,34 @@ class UserService
     public function resetPassword(array $data): array
     {
         try {
-            $user = $this->userRepository->findByEmail($data['email']);
+            $status = Password::reset([
+                'email' => $data['email'],
+                'token' => $data['token'],
+                'password' => $data['password'],
+            ], function (User $user, string $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password)
+                ])->setRememberToken(Str::random(60));
+     
+                $this->userRepository->commitChanges($user);
+     
+                event(new PasswordReset($user));
+            });
 
-            if (!$user) {
+            if ($status === Password::INVALID_USER) {
                 throw new \Exception('Không tìm thấy tài khoản của bạn.', Response::HTTP_NOT_FOUND);
             }
 
-            $token = $this->passwordResetRepository->getPasswordResetToken($data['email']);
-
-            if (!$token) {
-                throw new \Exception('Token không đúng vui lòng kiểm tra lại.', Response::HTTP_NOT_FOUND);
+            if ($status === Password::INVALID_TOKEN){
+                throw new \Exception('Token không đúng hoặc đã hết hạn vui lòng kiểm tra lại.', Response::HTTP_BAD_REQUEST);
             }
 
-            $tokenCreatedTime = Carbon::parse($token->created_at);
-
-            if ($tokenCreatedTime->diffInMinutes(now()) > 30) {
-                $this->passwordResetRepository->destroyByEmail($token->email);
-                
-                throw new \Exception('Token đã hết hạn vui lòng thực hiện lại yêu cầu.', Response::HTTP_BAD_REQUEST);
+            if ($status !== Password::PASSWORD_RESET) {
+                throw new \Exception('Có lỗi xảy ra vui lòng thử lại sau', Response::HTTP_INTERNAL_SERVER_ERROR);
             }
-
-            if (!$this->userRepository->updatePassword($user->id, $data['password'])) {
-                throw new \Exception('Có lỗi xảy ra vui lòng thử lại sau', Response::HTTP_BAD_REQUEST);
-            }
-
-            $this->passwordResetRepository->destroyByEmail($token->email);
 
             return [
-                'message' => 'Đât lại mật khẩu thành công',
+                'message' => 'Đặt lại mật khẩu thành công',
                 'code' => Response::HTTP_OK,
             ];
         } catch (\Exception $e) {

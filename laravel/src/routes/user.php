@@ -12,7 +12,7 @@ Route::group(['prefix' => 'v1'], function () {
             Route::post('/google/callback', [AuthController::class, 'loginGoogle']);
             Route::post('/google/callback/register', [AuthController::class, 'registerGoogle']);
             Route::post('/verify-email', [AuthController::class, 'sendEmail']);
-            Route::post('/reset-password', [AuthController::class, 'resetPassword']);
+            Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.reset');
             Route::group(['middleware' => 'authentication.user'], function () {
                 Route::put('/change-password', [AuthController::class, 'changePassword']);
             });

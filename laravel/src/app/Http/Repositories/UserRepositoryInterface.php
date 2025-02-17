@@ -126,4 +126,13 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
      * @return bool
      */
     public function updatePassword(int $userId, string $password): bool;
+
+    /**
+     * Commit a transaction
+     *
+     * @param User $user
+     * 
+     * @return void
+     */
+    public function commitChanges(User $user): void;
 }

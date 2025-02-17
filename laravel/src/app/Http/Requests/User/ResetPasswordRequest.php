@@ -23,7 +23,7 @@ class ResetPasswordRequest extends FormRequest
     {
         return [
             'email' => 'required|email|exists:password_reset_tokens,email',
-            'token' => 'required|string|exists:password_reset_tokens,token',
+            'token' => 'required|string',
             'password' => 'required|string|min:8|regex:/^(?=.*[A-Z])(?=.*[!@#$%^&*])/',
             'confirm_password' => 'required|same:password',
         ];
@@ -42,7 +42,6 @@ class ResetPasswordRequest extends FormRequest
             'email.exists' => 'Email không tồn tại.',
             'token.required' => 'Vui lòng nhập token.',
             'token.string' => 'Token phải là một chuỗi ký tự.',
-            'token.exists' => 'Token không tồn tại.',
             'password.required' => 'Vui lòng nhập mật khẩu.',
             'password.string' => 'Mật khẩu phải là một chuỗi ký tự.',
             'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự.',
