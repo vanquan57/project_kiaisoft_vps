@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\V1\User\AuthController;
 use App\Http\Controllers\Api\V1\User\UserController;
+use App\Http\Controllers\Api\V1\User\FeedbackController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'v1'], function () {
@@ -21,6 +22,8 @@ Route::group(['prefix' => 'v1'], function () {
         Route::group(['middleware' => 'authentication.user'], function () {
             Route::get('profile', [UserController::class, 'show']);
             Route::put('profile', [UserController::class, 'update']);
+            Route::post('/feedback', [FeedbackController::class, 'store']);
         });
+        Route::get('/feedbacks', [FeedbackController::class, 'getFeedbacksByBookId']);
     });
 });
