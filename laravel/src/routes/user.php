@@ -3,6 +3,9 @@
 use App\Http\Controllers\Api\V1\User\AuthController;
 use App\Http\Controllers\Api\V1\User\UserController;
 use App\Http\Controllers\Api\V1\User\FeedbackController;
+use App\Http\Controllers\Api\V1\User\AuthorController;
+use App\Http\Controllers\Api\V1\User\CategoryController;
+use App\Http\Controllers\Api\V1\User\PublisherController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'v1'], function () {
@@ -25,5 +28,8 @@ Route::group(['prefix' => 'v1'], function () {
             Route::post('/feedback', [FeedbackController::class, 'store']);
         });
         Route::get('/feedbacks', [FeedbackController::class, 'getFeedbacksByBookId']);
+        Route::get('categories', [CategoryController::class, 'index']);
+        Route::get('publishers', [PublisherController::class, 'index']);
+        Route::get('authors', [AuthorController::class, 'index']);
     });
 });
