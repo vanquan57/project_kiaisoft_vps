@@ -35,17 +35,4 @@ interface FeedbackRepositoryInterface extends BaseRepositoryInterface
      * @return LengthAwarePaginator|null
      */
     public function getFeedbacksByBookId(Book $book, array $data): ?LengthAwarePaginator;
-
-    /**
-     * Store a new feedback
-     * 
-     * @param array $data
-     * 
-     * @param int $userId
-     * 
-     * @param Book $book
-     * 
-     * @return bool
-     */
-    public function storeFeedback(array $data, int $userId, Book $book): bool;
 }

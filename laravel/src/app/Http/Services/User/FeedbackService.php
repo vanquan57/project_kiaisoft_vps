@@ -78,7 +78,14 @@ class FeedbackService
                 return false;
             }
 
-            return $this->feedbackRepository->storeFeedback($data, $user->id, $book);
+            $data['book_id'] = $book->id;
+            $data['user_id'] = $user->id;
+            
+            if (!$this->feedbackRepository->store($data)){
+                return false;
+            }
+
+            return true;
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 

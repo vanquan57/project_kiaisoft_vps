@@ -6,6 +6,7 @@ use App\Http\Repositories\FeedbackRepositoryInterface;
 use App\Models\Book;
 use App\Models\Feedback;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 class FeedbackRepository extends BaseRepository implements FeedbackRepositoryInterface
@@ -93,19 +94,15 @@ class FeedbackRepository extends BaseRepository implements FeedbackRepositoryInt
      * 
      * @param array $data
      * 
-     * @param int $userId
-     * 
-     * @param Book $book
-     * 
-     * @return bool
+     * @return Model
      */
-    public function storeFeedback(array $data, int $userId, Book $book): bool
+    public function store(array $data): Model
     {
-        $book->feedbacks()->attach($userId, [
+        return $this->model->create([
+            'book_id' => $data['book_id'],
+            'user_id' => $data['user_id'],
             'content' => $data['content'],
             'star' => $data['star'],
         ]);
-    
-        return true;
     }
 }
