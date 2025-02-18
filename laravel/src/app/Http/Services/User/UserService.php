@@ -172,7 +172,7 @@ class UserService
                 'email' => $data['email']
             ]);
 
-            if ($status !== Password::RESET_LINK_SENT) {
+            if ($status !== Password::ResetLinkSent) {
                 return false;
             }
 
@@ -208,15 +208,15 @@ class UserService
                 event(new PasswordReset($user));
             });
 
-            if ($status === Password::INVALID_USER) {
+            if ($status === Password::InvalidUser) {
                 throw new \Exception('Không tìm thấy tài khoản của bạn.', Response::HTTP_NOT_FOUND);
             }
 
-            if ($status === Password::INVALID_TOKEN){
+            if ($status === Password::InvalidToken){
                 throw new \Exception('Token không đúng hoặc đã hết hạn vui lòng kiểm tra lại.', Response::HTTP_BAD_REQUEST);
             }
 
-            if ($status !== Password::PASSWORD_RESET) {
+            if ($status !== Password::PasswordReset) {
                 throw new \Exception('Có lỗi xảy ra vui lòng thử lại sau', Response::HTTP_INTERNAL_SERVER_ERROR);
             }
 
