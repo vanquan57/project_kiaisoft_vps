@@ -277,7 +277,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
      * 
      * @param int $bookId
      * 
-     * returns boolean
+     * @return bool
     */
     public function checkBookInWishList(User $user, int $bookId): bool
     {
@@ -308,13 +308,14 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
      * 
      * @param int $bookId
      * 
-     * @return boolean
+     * @return bool
     */
     public function addBookToWishList(User $user, int $bookId): bool
     {
         $user->wishLists()->attach($bookId);
+        $user->refresh();
 
-        return true;
+        return $user->wishLists()->where('book_id', $bookId)->exists();
     }
 
     /**
@@ -324,10 +325,10 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
      * 
      * @param int $bookId
      * 
-     * @return boolean
+     * @return int
     */
-    public function destroyBookFromWishList(User $user, int $bookId): bool
+    public function destroyBookFromWishList(User $user, int $bookId): int
     {
-        return $user->wishLists()->detach($bookId) > 0;
+        return $user->wishLists()->detach($bookId);
     }
 }

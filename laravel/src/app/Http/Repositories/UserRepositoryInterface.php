@@ -172,7 +172,7 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
      * 
      * @param int $bookId
      * 
-     * @return boolean
+     * @return bool
     */
     public function checkBookInWishList(User $user, int $bookId): bool;
 
@@ -183,7 +183,7 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
      * 
      * @param int $bookId
      * 
-     * @return boolean
+     * @return bool
     */
     public function addBookToWishList(User $user, int $bookId): bool;
 
@@ -194,7 +194,7 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
      * 
      * @param int $bookId
      * 
-     * @return boolean
+     * @return int
     */
-    public function destroyBookFromWishList(User $user, int $bookId): bool;
+    public function destroyBookFromWishList(User $user, int $bookId): int;
 }

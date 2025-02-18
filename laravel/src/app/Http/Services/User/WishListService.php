@@ -65,7 +65,9 @@ class WishListService
                 throw new \Exception('Sách đã có trong danh sách yêu thích.', Response::HTTP_BAD_REQUEST);
             }
 
-            $this->userRepository->addBookToWishList($user, $data['book_id']);
+            if (!$this->userRepository->addBookToWishList($user, $data['book_id'])) {
+                throw new \Exception('Thêm sách vào danh sách yêu thích thất bại.', Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
 
             return [
                 'message' => 'Đã thêm sách vào danh sách yêu thích thành công.',
@@ -98,15 +100,13 @@ class WishListService
         try {
             $user = auth('api')->user();
 
-            if (!$user) {
-               return false;
-            }
-
             if (!$this->userRepository->checkBookInWishList($user, $bookId)) {
                 return false;
             }
 
-            $this->userRepository->destroyBookFromWishList($user, $bookId);
+            if (!$this->userRepository->destroyBookFromWishList($user, $bookId)) {
+                return false;
+            }
 
             return true;
         } catch (\Exception $e) {
