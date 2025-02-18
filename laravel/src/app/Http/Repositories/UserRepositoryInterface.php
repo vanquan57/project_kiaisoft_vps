@@ -106,4 +106,33 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
      * @return Model
     */
     public function registerGoogle(string $code, object $userGoogle): Model;
+
+    /**
+     * Find the user with email
+     *
+     * @param string $email
+     *
+     * @return Model|null
+     */
+    public function findByEmail(string $email): ?Model;
+
+    /**
+     * Update password user
+     *
+     * @param int $userId
+     * 
+     * @param string $password
+     *
+     * @return bool
+     */
+    public function updatePassword(int $userId, string $password): bool;
+
+    /**
+     * Commit a transaction
+     *
+     * @param User $user
+     * 
+     * @return void
+     */
+    public function commitChanges(User $user): void;
 }

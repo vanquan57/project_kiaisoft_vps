@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Api\V1\User;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\User\ChangePasswordRequest;
+use App\Http\Requests\User\EmailRequest;
 use App\Http\Requests\User\RegisterGoogleRequest;
 use App\Http\Requests\User\RegisterRequest;
+use App\Http\Requests\User\ResetPasswordRequest;
 use App\Http\Services\User\UserService;
 use App\Models\User;
 use Google_Client;
@@ -161,6 +164,80 @@ class AuthController extends Controller
         return responseOkAPI([
             'message' => 'Đăng xuất thành công.'
         ]);
+    }
+
+    /**
+     * Reset password send email notification with token.
+     *
+     * @param EmailRequest $request
+     *
+     * @return JsonResponse
+     */
+    public function sendEmail(EmailRequest $request): JsonResponse
+    {
+        if (!$this->userService->sendEmail($request->validated())) {
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Không thể xử lý yêu cầu, vui lòng thử lại sau'
+            );
+        }
+
+        return responseOkAPI([
+            'message' => 'Gửi email thành công, vui lòng kiểm tra email của bạn.'
+        ]);
+    }
+
+    /**
+     * Reset password with token.
+     *
+     * @param ResetPasswordRequest $request
+     *
+     * @return JsonResponse
+     */
+    public function resetPassword(ResetPasswordRequest $request): JsonResponse
+    {
+        $result = $this->userService->resetPassword($request->validated());
+
+        if ($result['code'] !== Response::HTTP_OK) {
+            return responseErrorAPI(
+                $result['code'],
+                $result['error_code'],
+                $result['error']
+            );
+        }
+
+        return responseOkAPI(
+            [
+                'message' => $result['message']
+            ]
+        );
+    }
+
+    /**
+     * Change password.
+     *
+     * @param ChangePasswordRequest $request
+     *
+     * @return JsonResponse
+     */
+    public function changePassword(ChangePasswordRequest $request): JsonResponse
+    {
+        $result = $this->userService->changePassword($request->validated());
+
+        if ($result['code'] !== Response::HTTP_OK) {
+            return responseErrorAPI(
+                $result['code'],
+                $result['error_code'],
+                $result['error']
+            );
+        }
+
+        return responseOkAPI(
+            [
+                'message' => $result['message']
+            ]
+        );
     }
 
     /**

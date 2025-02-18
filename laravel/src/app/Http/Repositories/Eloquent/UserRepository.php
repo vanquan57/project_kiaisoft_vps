@@ -189,4 +189,47 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
             'google_id' => $userGoogle->user['sub'],
         ]);
     }
+
+    /**
+     * Find the user with email
+     *
+     * @param string $email
+     *
+     * @return User|null
+     */
+    public function findByEmail(string $email): ?User
+    {
+        return $this->model->where('email', $email)
+            ->where('role', User::ROLE_USER)
+            ->first();
+    }
+
+    /**
+     * Update password user
+     *
+     * @param int $userId
+     * 
+     * @param string $password
+     *
+     * @return bool
+     */
+    public function updatePassword(int $userId, string $password): bool
+    {
+        return $this->model->where('id', $userId)
+            ->update([
+                'password' => bcrypt($password)
+            ]);
+    }
+
+    /**
+     * Commit a transaction
+     *
+     * @param User $user
+     * 
+     * @return void
+     */
+    public function commitChanges(User $user): void
+    {
+        $user->save();
+    }
 }
