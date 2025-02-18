@@ -26,14 +26,6 @@ class UserController extends Controller
     {
         $user = auth('api')->user();
 
-        if (!$user) {
-            return responseErrorAPI(
-                Response::HTTP_UNAUTHORIZED,
-                ERROR_CODE_AUTHENTICATE,
-                'Bạn không có quyền truy cập vào trang web này'
-            );
-        }
-
         if (!$userDetails = $this->userService->show($user->id)) {
             return responseErrorAPI(
                 Response::HTTP_BAD_REQUEST,
@@ -55,14 +47,6 @@ class UserController extends Controller
     public function update(UpdateInfoRequest $request): JsonResponse
     {
         $user = auth('api')->user();
-
-        if (!$user) {
-            return responseErrorAPI(
-                Response::HTTP_UNAUTHORIZED,
-                ERROR_CODE_AUTHENTICATE,
-                'Bạn không có quyền truy cập vào trang web này'
-            );
-        }
 
         if (!$this->userService->update($request->validated(), $user->id)) {
             return responseErrorAPI(
