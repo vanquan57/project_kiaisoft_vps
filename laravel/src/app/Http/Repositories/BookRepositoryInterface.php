@@ -2,6 +2,7 @@
 
 namespace App\Http\Repositories;
 
+use App\Models\Book;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 
@@ -16,6 +17,15 @@ interface BookRepositoryInterface extends BaseRepositoryInterface
      */
     public function getAllByPagination(array $data): ?LengthAwarePaginator;
 
+    /**
+     * Get all books by paginate for site user
+     *
+     * @param array $data
+     *
+     * @return LengthAwarePaginator|null
+     */
+    public function getAllByPaginationForSiteUser(array $data): ?LengthAwarePaginator;
+    
     /**
      * Add a book to category
      *
@@ -64,4 +74,13 @@ interface BookRepositoryInterface extends BaseRepositoryInterface
      * @return Collection|null
      */
     public function getTopMostLikesBook(array $data): ?Collection;
+
+    /**
+     * Update view book 
+     * 
+     * @param Book $book
+     * 
+     * @return void
+     */
+    public function updateBookViewCount(Book $book): void;
 }
