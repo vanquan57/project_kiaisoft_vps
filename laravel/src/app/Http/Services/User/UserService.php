@@ -6,6 +6,7 @@ use App\Http\Repositories\EmployeeCodeRepositoryInterface;
 use App\Http\Repositories\UserRepositoryInterface;
 use App\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
@@ -279,6 +280,42 @@ class UserService
                 },
                 'code' => $e->getCode(),
             ];
+        }
+    }
+
+    /**
+     * Show details information of user
+     *
+     * @param int $id
+     *
+     * @return Model|null
+     */
+    public function show(int $id): ?Model
+    {
+        try {
+            return $this->userRepository->showDetails($id);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+
+            return null;
+        }
+    }
+
+    /**
+     * The method update information user
+     *
+     * @param array $data
+     *
+     * @return bool
+     */
+    public function update(array $data, int $id): bool
+    {
+        try {
+            return $this->userRepository->updateInformation($id, $data);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+
+            return false;
         }
     }
 }

@@ -232,4 +232,41 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     {
         $user->save();
     }
+
+    /**
+     * Show details information of user
+     *
+     * @param int $id
+     *
+     * @return User|null
+     */
+    public function showDetails(int $id): ?User
+    {
+        return $this->model->with([
+            'province:id,name',
+            'district:id,name',
+            'ward:id,name',
+        ])->find($id);
+    }
+
+    /**
+     * Update information user
+     *
+     * @param int $userId
+     * 
+     * @param array $data
+     *
+     * @return bool
+     */
+    public function updateInformation(int $userId, array $data): bool
+    {
+        return $this->model->where('id', $userId)
+            ->update([
+                'name' => $data['name'],
+                'province_id' => $data['province_id'],
+                'district_id' => $data['district_id'],
+                'ward_id' => $data['ward_id'],
+                'address' => $data['address']
+            ]);
+    }
 }
