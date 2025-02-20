@@ -132,9 +132,9 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
      *
      * @param User $user
      * 
-     * @return void
+     * @return bool
      */
-    public function commitChanges(User $user): void;
+    public function commitChanges(User $user): bool;
 
     /**
      * Show details information of user

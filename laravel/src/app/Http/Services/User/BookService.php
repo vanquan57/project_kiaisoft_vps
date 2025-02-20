@@ -88,9 +88,7 @@ class BookService
                 return false;
             }
 
-            $this->bookRepository->updateBookViewCount($book);
-
-            return true;
+            return $this->bookRepository->updateBookViewCount($book);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 

@@ -114,6 +114,23 @@ class OrderRepository extends BaseRepository implements OrderRepositoryInterface
     }
 
     /**
+     * Update status book in order with note
+     * 
+     * @param Book $book
+     * 
+     * @param string $note
+     * 
+     * @return bool
+    */
+    public function updateStatusBookInOrderWithNote(Book $book, string $note): bool
+    {
+        $book->pivot->status = OrderDetail::STATUS_MISSING;
+        $book->pivot->note = $note;
+
+        return $book->pivot->save();
+    }
+
+    /**
      * Update status book in order
      * 
      * @param Book $book
@@ -124,13 +141,6 @@ class OrderRepository extends BaseRepository implements OrderRepositoryInterface
     */
     public function updateStatusBookInOrder(Book $book, array $data): bool
     {
-        if ($data['status'] == OrderDetail::STATUS_MISSING){
-            $book->pivot->status = OrderDetail::STATUS_MISSING;
-            $book->pivot->note = $data['note'];
-
-            return $book->pivot->save();
-        }
-
         $book->pivot->status = $data['status'];
         
         return $book->pivot->save();
