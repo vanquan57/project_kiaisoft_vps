@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\User\AuthorController;
 use App\Http\Controllers\Api\V1\User\CategoryController;
 use App\Http\Controllers\Api\V1\User\PublisherController;
 use App\Http\Controllers\Api\V1\User\BookController;
+use App\Http\Controllers\Api\V1\User\WishListController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'v1'], function () {
@@ -27,6 +28,9 @@ Route::group(['prefix' => 'v1'], function () {
             Route::get('profile', [UserController::class, 'show']);
             Route::put('profile', [UserController::class, 'update']);
             Route::post('/feedback', [FeedbackController::class, 'store']);
+            Route::get('wish-list', [WishListController::class, 'index']);
+            Route::post('wish-list', [WishListController::class, 'store']);
+            Route::delete('wish-list/{bookId}', [WishListController::class, 'destroy']);
         });
         Route::get('/feedbacks', [FeedbackController::class, 'getFeedbacksByBookId']);
         Route::get('categories', [CategoryController::class, 'index']);
