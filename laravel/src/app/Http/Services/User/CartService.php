@@ -60,6 +60,7 @@ class CartService
             $bookIsAddedToCart = [];
             $bookIsNotAddedToCart = [];
             $bookIds = array_column($cartItems, 'book_id');
+
             $books = $this->bookRepository->findManyByIds($bookIds)->keyBy('id');
             $userCartBooks = $this->userRepository->getAllBookInCart($user)->keyBy('id');
 
@@ -158,6 +159,7 @@ class CartService
             $bookInCartIsUpdated = [];
             $bookInCartCannotUpdate = [];
             $bookIds = array_column($cartItems, 'book_id');
+
             $books = $this->bookRepository->findManyByIds($bookIds)->keyBy('id');
             $userCartBooks = $this->userRepository->getAllBookInCart($user)->keyBy('id');
 

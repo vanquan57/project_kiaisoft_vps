@@ -343,7 +343,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     */
     public function getAllBookInCart(User $user): ?Collection
     {
-        return $user->books()->get();
+        return $user->books()->withPivot('quantity')->get();
     }
 
     /**
