@@ -361,41 +361,6 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     }
 
     /**
-     * Add book to cart of user
-     * 
-     * @param User $user
-     * 
-     * @param int $bookId
-     * 
-     * @param int $quantity
-     * 
-     * @return bool
-     */
-    public function addBookToCart(User $user, int $bookId, int $quantity): bool
-    {
-        $user->books()->attach($bookId, ['quantity' => $quantity]);
-        $user->refresh();
-
-        return $user->books()->wherePivot('book_id', $bookId)->exists();
-    }
-
-    /**
-     * Update book exiting in cart of user
-     * 
-     * @param User $user
-     * 
-     * @param int $bookId
-     * 
-     * @param int $newQuantity
-     * 
-     * @return int
-     */
-    public function updateBookExitingInCart(User $user, int $bookId, int $newQuantity): int
-    {
-        return $user->books()->updateExistingPivot($bookId, ['quantity' => $newQuantity]);
-    }
-
-    /**
      * Delete book in cart of user
      * 
      * @param User $user

@@ -3,8 +3,10 @@
 namespace App\Http\Services\User;
 
 use App\Http\Repositories\BookRepositoryInterface;
+use App\Http\Repositories\CartRepositoryInterface;
 use App\Http\Repositories\UserRepositoryInterface;
 use App\Models\Book;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -21,7 +23,8 @@ class CartService
      */
     public function __construct(
         protected BookRepositoryInterface $bookRepository,
-        protected UserRepositoryInterface $userRepository
+        protected UserRepositoryInterface $userRepository,
+        protected CartRepositoryInterface $cartRepository
     ) {}
 
     /**
@@ -60,6 +63,8 @@ class CartService
             $bookIsAddedToCart = [];
             $bookIsNotAddedToCart = [];
             $bookIds = array_column($cartItems, 'book_id');
+            $dataCartInsert = [];
+            $dataCartUpdate = [];
 
             $books = $this->bookRepository->findManyByIds($bookIds)->keyBy('id');
             $userCartBooks = $this->userRepository->getAllBookInCart($user)->keyBy('id');
@@ -101,19 +106,38 @@ class CartService
 
                 // If the book already exists in the cart, add the quantity
                 if ($existingBook) {
-                    $newQuantity = $currentQuantity + $quantity;
-
-                    if (!$this->userRepository->updateBookExitingInCart($user, $bookId, $newQuantity)) {
-                        throw new \Exception('Có lỗi xảy ra vui lòng thử lại sau.', Response::HTTP_BAD_REQUEST);
-                    }
-                    
-                    $bookIsAddedToCart[] = $book->name;
+                    $dataCartUpdate[] = [
+                        'user_id' => $user->id,
+                        'book_id' => $bookId,
+                        'quantity' => $currentQuantity + $quantity,
+                        'updated_at' => Carbon::now(),
+                    ];
                 } else {
-                    if (!$this->userRepository->addBookToCart($user, $bookId, $quantity)){
-                        throw new \Exception('Có lỗi xảy ra vui lòng thử lại sau.', Response::HTTP_BAD_REQUEST);
-                    }
+                    $dataCartInsert[] = [
+                        'user_id' => $user->id,
+                        'book_id' => $bookId,
+                        'quantity' => $quantity,
+                        'created_at' => Carbon::now(),
+                        'updated_at' => Carbon::now(),
+                    ];
+                }
 
-                    $bookIsAddedToCart[] = $book->name;
+                $bookIsAddedToCart[] = $book->name;
+            }
+
+            if (empty($dataCartInsert) && empty($dataCartUpdate)) {
+                throw new \Exception('Không có sách nào được thêm vào giỏ.', Response::HTTP_BAD_REQUEST);
+            }
+
+            if (!empty($dataCartInsert)) {
+                if (!$this->cartRepository->upsert($dataCartInsert)) {
+                    throw new \Exception('Có lỗi xảy ra vui lòng thử lại sau.', Response::HTTP_BAD_REQUEST);
+                }
+            }
+
+            if (!empty($dataCartUpdate)) {
+                if (!$this->cartRepository->upsert($dataCartUpdate)) {
+                    throw new \Exception('Có lỗi xảy ra vui lòng thử lại sau.', Response::HTTP_BAD_REQUEST);
                 }
             }
 
@@ -159,6 +183,7 @@ class CartService
             $bookInCartIsUpdated = [];
             $bookInCartCannotUpdate = [];
             $bookIds = array_column($cartItems, 'book_id');
+            $dataCartUpdate = [];
 
             $books = $this->bookRepository->findManyByIds($bookIds)->keyBy('id');
             $userCartBooks = $this->userRepository->getAllBookInCart($user)->keyBy('id');
@@ -172,11 +197,11 @@ class CartService
                 }
 
                 $existingBook = $userCartBooks[$bookId] ?? null;
-                
+
                 if (!$existingBook) {
                     continue;
                 }
-                
+
                 $book = $books[$bookId] ?? null;
 
                 if (!$book) {
@@ -187,9 +212,7 @@ class CartService
                     continue;
                 }
 
-                if (
-                    $book->quantity < $quantity
-                ) {
+                if ($book->quantity < $quantity) {
                     if (count($cartItems) === 1) {
                         throw new \Exception('Số lượng sách không đủ hoặc đã vượt quá số lượng cho phép.', Response::HTTP_BAD_REQUEST);
                     }
@@ -199,11 +222,21 @@ class CartService
                     continue;
                 }
 
-                if (!$this->userRepository->updateBookExitingInCart($user, $bookId, $quantity)){
+                $dataCartUpdate[] = [
+                    'user_id' => $user->id,
+                    'book_id' => $bookId,
+                    'quantity' => $quantity,
+                    'updated_at' => Carbon::now(),
+                ];
+                $bookInCartIsUpdated[] = $book->name;
+            }
+
+            if (!empty($dataCartUpdate)) {
+                if (!$this->cartRepository->upsert($dataCartUpdate)) {
                     throw new \Exception('Có lỗi xảy ra vui lòng thử lại sau.', Response::HTTP_BAD_REQUEST);
                 }
-
-                $bookInCartIsUpdated[] = $book->name;
+            } else {
+                throw new \Exception('Không có sách nào được cập nhật.', Response::HTTP_BAD_REQUEST);
             }
 
             DB::commit();
@@ -248,7 +281,7 @@ class CartService
                 return false;
             }
 
-            if (!$this->userRepository->destroyBookInCart($user, $bookId)){
+            if (!$this->userRepository->destroyBookInCart($user, $bookId)) {
                 return false;
             }
 

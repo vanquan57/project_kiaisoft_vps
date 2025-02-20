@@ -221,32 +221,6 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
     public function getBookExitingInCart(User $user, int $bookId): ?Model;
 
     /**
-     * Add book to cart of user
-     * 
-     * @param User $user
-     * 
-     * @param int $bookId
-     * 
-     * @param int $quantity
-     * 
-     * @return bool
-     */
-    public function addBookToCart(User $user, int $bookId, int $quantity): bool;
-
-    /**
-     * Update book exiting in cart of user
-     * 
-     * @param User $user
-     * 
-     * @param int $bookId
-     * 
-     * @param int $newQuantity
-     * 
-     * @return int
-     */
-    public function updateBookExitingInCart(User $user, int $bookId, int $newQuantity): int;
-
-    /**
      * Delete book in cart of user
      * 
      * @param User $user
