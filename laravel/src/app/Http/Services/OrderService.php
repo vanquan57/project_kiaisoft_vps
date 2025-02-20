@@ -176,7 +176,7 @@ class OrderService
 
         // If book is missing, update with note
         if ($data['status'] === OrderDetail::STATUS_MISSING) {
-            return $this->orderRepository->updateStatusBookInOrder($book, $data);
+            return $this->orderRepository->updateStatusBookInOrderWithNote($book, $data['note']);
         }
 
         // If status is different current status, update status

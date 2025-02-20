@@ -50,6 +50,17 @@ interface OrderRepositoryInterface extends BaseRepositoryInterface
     public function getOverallOrderStatus(int $orderId): Collection;
 
     /**
+     * Update status book in order with note
+     * 
+     * @param Book $book
+     * 
+     * @param string $note
+     * 
+     * @return bool
+    */
+    public function updateStatusBookInOrderWithNote(Book $book, string $note): bool;
+
+    /**
      * Update status book in order
      * 
      * @param Book $book

@@ -226,11 +226,11 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
      *
      * @param User $user
      * 
-     * @return void
+     * @return bool
      */
-    public function commitChanges(User $user): void
+    public function commitChanges(User $user): bool
     {
-        $user->save();
+        return $user->save();
     }
 
     /**

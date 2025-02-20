@@ -80,7 +80,7 @@ interface BookRepositoryInterface extends BaseRepositoryInterface
      * 
      * @param Book $book
      * 
-     * @return void
+     * @return bool
      */
-    public function updateBookViewCount(Book $book): void;
+    public function updateBookViewCount(Book $book): bool;
 }

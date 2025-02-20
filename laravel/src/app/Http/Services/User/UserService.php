@@ -44,7 +44,9 @@ class UserService
         try {
             if ($user = $this->userRepository->getRegisteredAccount($data['code'], $data['email'])) {
                 if(!empty($user->google_id) && empty($user->password)) {
-                    $this->userRepository->updateInfoWhenMappingAccountGoogle($user, $data);
+                    if(!$this->userRepository->updateInfoWhenMappingAccountGoogle($user, $data)) {
+                        throw new \Exception('Có lỗi xảy ra vui lòng thử lại sau.', Response::HTTP_INTERNAL_SERVER_ERROR);
+                    }
 
                     return [
                         'message' => 'Đăng ký tài khoản thành công',
@@ -122,7 +124,9 @@ class UserService
 
             // Check if the user has registered an account but not mapping with google id
             if ($userRegistered && empty($userRegistered->google_id)) {
-                $this->userRepository->updateInfoWhenMappingAccountEmailPassword($userRegistered, $userGoogle->user['sub']);
+                if(!$this->userRepository->updateInfoWhenMappingAccountEmailPassword($userRegistered, $userGoogle->user['sub'])){
+                    return null;
+                }
 
                 return $userRegistered;
             }
@@ -204,7 +208,9 @@ class UserService
                     'password' => Hash::make($password)
                 ])->setRememberToken(Str::random(60));
      
-                $this->userRepository->commitChanges($user);
+                if(!$this->userRepository->commitChanges($user)){
+                    throw new \Exception('Có lỗi xảy ra vui lòng thử lại sau.', Response::HTTP_INTERNAL_SERVER_ERROR);
+                }
      
                 event(new PasswordReset($user));
             });
@@ -251,10 +257,6 @@ class UserService
     {
         try {
             $user = auth('api')->user();
-
-            if (!$user){
-                throw new \Exception('Bạn không có quyền truy cập vào trang web này', Response::HTTP_UNAUTHORIZED);
-            }
             
             if (!Hash::check($data['current_password'], $user->password)) {
                 throw new \Exception('Mật khẩu hiện tại không chính xác', Response::HTTP_BAD_REQUEST);

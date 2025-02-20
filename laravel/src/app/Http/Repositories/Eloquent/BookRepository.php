@@ -308,10 +308,10 @@ class BookRepository extends BaseRepository implements BookRepositoryInterface
      * 
      * @param Book $book
      * 
-     * @return void
+     * @return bool
      */
-    public function updateBookViewCount(Book $book): void
+    public function updateBookViewCount(Book $book): bool
     {
-        $book->increment('views');
+        return $book->increment('views') > 0;
     }
 }
