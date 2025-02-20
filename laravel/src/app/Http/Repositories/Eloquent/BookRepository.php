@@ -308,10 +308,22 @@ class BookRepository extends BaseRepository implements BookRepositoryInterface
      * 
      * @param Book $book
      * 
-     * @return bool
+     * @return int
      */
-    public function updateBookViewCount(Book $book): bool
+    public function updateBookViewCount(Book $book): int
     {
-        return $book->increment('views') > 0;
+        return $book->increment('views');
+    }
+
+    /**
+     * Find many book by ids
+     * 
+     * @param array $ids
+     * 
+     * @return Collection
+    */
+    public function findManyByIds(array $ids): Collection
+    {
+        return $this->model->whereIn('id', $ids)->get();
     }
 }

@@ -347,20 +347,6 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     }
 
     /**
-     * Get book quantity in my cart
-     *
-     * @param User $user 
-     * 
-     * @param int $bookId
-     *
-     * @return int
-     */
-    public function getTotalQuantityBookInMyCart(User $user, int $bookId): int
-    {
-        return $user->books()->wherePivot('book_id', $bookId)->sum('carts.quantity');
-    }
-
-    /**
      * Get book exiting in cart of user
      *
      * @param User $user 

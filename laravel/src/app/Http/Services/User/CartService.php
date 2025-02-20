@@ -59,6 +59,9 @@ class CartService
             $cartItems = $data['cart'] ?? [];
             $bookIsAddedToCart = [];
             $bookIsNotAddedToCart = [];
+            $bookIds = array_column($cartItems, 'book_id');
+            $books = $this->bookRepository->findManyByIds($bookIds)->keyBy('id');
+            $userCartBooks = $this->userRepository->getAllBookInCart($user)->keyBy('id');
 
             foreach ($cartItems as $item) {
                 $bookId = $item['book_id'] ?? null;
@@ -68,8 +71,8 @@ class CartService
                     continue;
                 }
 
-                $book = $this->bookRepository->find($bookId);
-                
+                $book = $books[$bookId] ?? null;
+
                 if (!$book) {
                     if (count($cartItems) === 1) {
                         throw new \Exception('Sách không tồn tại.', Response::HTTP_BAD_REQUEST);
@@ -78,10 +81,13 @@ class CartService
                     continue;
                 }
 
+                $existingBook = $userCartBooks[$bookId] ?? null;
+                $currentQuantity = $existingBook ? $existingBook->pivot->quantity : 0;
+
                 // Check if the book exists, if the quantity is available, and if the user has not exceeded the quantity limit for the book
                 if (
                     $book->quantity < $quantity ||
-                    $this->userRepository->getTotalQuantityBookInMyCart($user, $book->id) + $quantity > $book->quantity
+                    $currentQuantity + $quantity > $book->quantity
                 ) {
                     if (count($cartItems) === 1) {
                         throw new \Exception('Số lượng sách không đủ hoặc đã vượt quá số lượng cho phép.', Response::HTTP_BAD_REQUEST);
@@ -92,11 +98,9 @@ class CartService
                     continue;
                 }
 
-                $existingBook = $this->userRepository->getBookExitingInCart($user, $bookId);
-
                 // If the book already exists in the cart, add the quantity
                 if ($existingBook) {
-                    $newQuantity = $existingBook->pivot->quantity + $quantity;
+                    $newQuantity = $currentQuantity + $quantity;
 
                     if (!$this->userRepository->updateBookExitingInCart($user, $bookId, $newQuantity)) {
                         throw new \Exception('Có lỗi xảy ra vui lòng thử lại sau.', Response::HTTP_BAD_REQUEST);
@@ -153,6 +157,9 @@ class CartService
             $cartItems = $data['cart'] ?? [];
             $bookInCartIsUpdated = [];
             $bookInCartCannotUpdate = [];
+            $bookIds = array_column($cartItems, 'book_id');
+            $books = $this->bookRepository->findManyByIds($bookIds)->keyBy('id');
+            $userCartBooks = $this->userRepository->getAllBookInCart($user)->keyBy('id');
 
             foreach ($cartItems as $item) {
                 $bookId = $item['book_id'] ?? null;
@@ -162,13 +169,13 @@ class CartService
                     continue;
                 }
 
-                $bookInCart = $this->userRepository->getBookExitingInCart($user, $bookId);
-
-                if (!$bookInCart) {
+                $existingBook = $userCartBooks[$bookId] ?? null;
+                
+                if (!$existingBook) {
                     continue;
                 }
-
-                $book = $this->bookRepository->find($bookId);
+                
+                $book = $books[$bookId] ?? null;
 
                 if (!$book) {
                     if (count($cartItems) === 1) {
@@ -179,8 +186,7 @@ class CartService
                 }
 
                 if (
-                    $book->quantity < $quantity ||
-                    $this->userRepository->getTotalQuantityBookInMyCart($user, $book->id) + $quantity > $book->quantity
+                    $book->quantity < $quantity
                 ) {
                     if (count($cartItems) === 1) {
                         throw new \Exception('Số lượng sách không đủ hoặc đã vượt quá số lượng cho phép.', Response::HTTP_BAD_REQUEST);

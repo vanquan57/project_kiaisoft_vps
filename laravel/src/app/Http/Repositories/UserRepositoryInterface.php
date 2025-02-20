@@ -210,17 +210,6 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
     public function getAllBookInCart(User $user): ?Collection;
 
     /**
-     * Get book quantity in my cart
-     *
-     * @param User $user 
-     * 
-     * @param int $bookId
-     *
-     * @return int
-     */
-    public function getTotalQuantityBookInMyCart(User $user, int $bookId): int;
-
-    /**
      * Get book exiting in cart of user
      *
      * @param User $user 
