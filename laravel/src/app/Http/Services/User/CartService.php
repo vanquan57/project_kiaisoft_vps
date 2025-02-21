@@ -59,7 +59,7 @@ class CartService
 
             $user = auth('api')->user();
 
-            $cartItems = $data['cart'] ?? [];
+            $cartItems = $data['cart'];
             $bookIsAddedToCart = [];
             $bookIsNotAddedToCart = [];
             $bookIds = array_column($cartItems, 'book_id');
@@ -70,23 +70,9 @@ class CartService
             $userCartBooks = $this->userRepository->getAllBookInCart($user)->keyBy('id');
 
             foreach ($cartItems as $item) {
-                $bookId = $item['book_id'] ?? null;
-                $quantity = $item['quantity'] ?? null;
-
-                if (!$bookId || !$quantity) {
-                    continue;
-                }
-
-                $book = $books[$bookId] ?? null;
-
-                if (!$book) {
-                    if (count($cartItems) === 1) {
-                        throw new \Exception('Sách không tồn tại.', Response::HTTP_BAD_REQUEST);
-                    }
-
-                    continue;
-                }
-
+                $bookId = $item['book_id'];
+                $quantity = $item['quantity'];
+                $book = $books[$bookId];
                 $existingBook = $userCartBooks[$bookId] ?? null;
                 $currentQuantity = $existingBook ? $existingBook->pivot->quantity : 0;
 
@@ -125,20 +111,13 @@ class CartService
                 $bookIsAddedToCart[] = $book->name;
             }
 
-            if (empty($dataCartInsert) && empty($dataCartUpdate)) {
-                throw new \Exception('Không có sách nào được thêm vào giỏ.', Response::HTTP_BAD_REQUEST);
+
+            if (!empty($dataCartInsert) && !$this->cartRepository->upsert($dataCartInsert)) {
+                throw new \Exception('Có lỗi xảy ra vui lòng thử lại sau.', Response::HTTP_BAD_REQUEST);
             }
 
-            if (!empty($dataCartInsert)) {
-                if (!$this->cartRepository->upsert($dataCartInsert)) {
-                    throw new \Exception('Có lỗi xảy ra vui lòng thử lại sau.', Response::HTTP_BAD_REQUEST);
-                }
-            }
-
-            if (!empty($dataCartUpdate)) {
-                if (!$this->cartRepository->upsert($dataCartUpdate)) {
-                    throw new \Exception('Có lỗi xảy ra vui lòng thử lại sau.', Response::HTTP_BAD_REQUEST);
-                }
+            if (!empty($dataCartUpdate) && !$this->cartRepository->upsert($dataCartUpdate)) {
+                throw new \Exception('Có lỗi xảy ra vui lòng thử lại sau.', Response::HTTP_BAD_REQUEST);
             }
 
             DB::commit();
@@ -179,7 +158,7 @@ class CartService
 
             $user = auth('api')->user();
 
-            $cartItems = $data['cart'] ?? [];
+            $cartItems = $data['cart'];
             $bookInCartIsUpdated = [];
             $bookInCartCannotUpdate = [];
             $bookIds = array_column($cartItems, 'book_id');
@@ -189,12 +168,8 @@ class CartService
             $userCartBooks = $this->userRepository->getAllBookInCart($user)->keyBy('id');
 
             foreach ($cartItems as $item) {
-                $bookId = $item['book_id'] ?? null;
-                $quantity = $item['quantity'] ?? null;
-
-                if (!$bookId || !$quantity) {
-                    continue;
-                }
+                $bookId = $item['book_id'];
+                $quantity = $item['quantity'];
 
                 $existingBook = $userCartBooks[$bookId] ?? null;
 
@@ -202,15 +177,7 @@ class CartService
                     continue;
                 }
 
-                $book = $books[$bookId] ?? null;
-
-                if (!$book) {
-                    if (count($cartItems) === 1) {
-                        throw new \Exception('Sách không tồn tại.', Response::HTTP_BAD_REQUEST);
-                    }
-
-                    continue;
-                }
+                $book = $books[$bookId];
 
                 if ($book->quantity < $quantity) {
                     if (count($cartItems) === 1) {
@@ -231,12 +198,8 @@ class CartService
                 $bookInCartIsUpdated[] = $book->name;
             }
 
-            if (!empty($dataCartUpdate)) {
-                if (!$this->cartRepository->upsert($dataCartUpdate)) {
-                    throw new \Exception('Có lỗi xảy ra vui lòng thử lại sau.', Response::HTTP_BAD_REQUEST);
-                }
-            } else {
-                throw new \Exception('Không có sách nào được cập nhật.', Response::HTTP_BAD_REQUEST);
+            if (!empty($dataCartUpdate) && !$this->cartRepository->upsert($dataCartUpdate)) {
+                throw new \Exception('Có lỗi xảy ra vui lòng thử lại sau.', Response::HTTP_BAD_REQUEST);
             }
 
             DB::commit();
