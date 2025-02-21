@@ -20,6 +20,8 @@ class CartService
      * @param BookRepositoryInterface $bookRepository
      * 
      * @param UserRepositoryInterface $userRepository
+     * 
+     * @param CartRepositoryInterface $cartRepository
      */
     public function __construct(
         protected BookRepositoryInterface $bookRepository,
@@ -81,10 +83,6 @@ class CartService
                     $book->quantity < $quantity ||
                     $currentQuantity + $quantity > $book->quantity
                 ) {
-                    if (count($cartItems) === 1) {
-                        throw new \Exception('Số lượng sách không đủ hoặc đã vượt quá số lượng cho phép.', Response::HTTP_BAD_REQUEST);
-                    }
-
                     $bookIsNotAddedToCart[] = $book->name;
 
                     continue;
@@ -145,7 +143,7 @@ class CartService
     }
 
     /**
-     * Update the specified wish list in storage
+     * Update the specified book in cart
      * 
      * @param array $data
      * 
@@ -180,10 +178,6 @@ class CartService
                 $book = $books[$bookId];
 
                 if ($book->quantity < $quantity) {
-                    if (count($cartItems) === 1) {
-                        throw new \Exception('Số lượng sách không đủ hoặc đã vượt quá số lượng cho phép.', Response::HTTP_BAD_REQUEST);
-                    }
-
                     $bookInCartCannotUpdate[] = $book->name;
 
                     continue;
@@ -227,7 +221,7 @@ class CartService
     }
 
     /**
-     * Remove the specified wish list from storage
+     * Remove the specified book from cart
      * 
      * @param int $bookId
      * 
@@ -238,17 +232,11 @@ class CartService
         try {
             $user = auth('api')->user();
 
-            $bookInCart = $this->userRepository->getBookExitingInCart($user, $bookId);
-
-            if (!$bookInCart) {
+            if (!$this->userRepository->getBookExitingInCart($user, $bookId)) {
                 return false;
             }
 
-            if (!$this->userRepository->destroyBookInCart($user, $bookId)) {
-                return false;
-            }
-
-            return true;
+            return $this->userRepository->destroyBookInCart($user, $bookId);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
 
