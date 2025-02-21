@@ -2,6 +2,7 @@
 
 namespace App\Http\Repositories;
 
+use App\Models\Book;
 use Illuminate\Database\Eloquent\Collection;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -197,4 +198,36 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
      * @return int
     */
     public function destroyBookFromWishList(User $user, int $bookId): int;
+
+    /**
+     * Get book in cart of user
+     * 
+     * @param User $user
+     *
+     * @return Collection|null
+     * 
+    */
+    public function getAllBookInCart(User $user): ?Collection;
+
+    /**
+     * Get book exiting in cart of user
+     *
+     * @param User $user 
+     * 
+     * @param int $bookId
+     * 
+     * @return Model|null
+     */
+    public function getBookExitingInCart(User $user, int $bookId): ?Model;
+
+    /**
+     * Delete book in cart of user
+     * 
+     * @param User $user
+     * 
+     * @param int $bookId
+     * 
+     * @return int
+     */
+    public function destroyBookInCart(User $user, int $bookId): int;
 }

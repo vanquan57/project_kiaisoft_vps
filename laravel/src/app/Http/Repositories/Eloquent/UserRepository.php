@@ -3,6 +3,7 @@
 namespace App\Http\Repositories\Eloquent;
 
 use App\Http\Repositories\UserRepositoryInterface;
+use App\Models\Book;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -330,5 +331,46 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
     public function destroyBookFromWishList(User $user, int $bookId): int
     {
         return $user->wishLists()->detach($bookId);
+    }
+
+    /**
+     * Get book in cart of user
+     * 
+     * @param User $user
+     *
+     * @return Collection|null
+     * 
+    */
+    public function getAllBookInCart(User $user): ?Collection
+    {
+        return $user->books()->withPivot('quantity')->get();
+    }
+
+    /**
+     * Get book exiting in cart of user
+     *
+     * @param User $user 
+     * 
+     * @param int $bookId
+     * 
+     * @return Model|null
+     */
+    public function getBookExitingInCart(User $user, int $bookId): ?Model
+    {
+        return $user->books()->wherePivot('book_id', $bookId)->first();
+    }
+
+    /**
+     * Delete book in cart of user
+     * 
+     * @param User $user
+     * 
+     * @param int $bookId
+     * 
+     * @return int
+     */
+    public function destroyBookInCart(User $user, int $bookId): int
+    {
+        return $user->books()->detach($bookId);
     }
 }

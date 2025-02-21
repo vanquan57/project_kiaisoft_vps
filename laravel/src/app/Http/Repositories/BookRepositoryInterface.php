@@ -80,7 +80,16 @@ interface BookRepositoryInterface extends BaseRepositoryInterface
      * 
      * @param Book $book
      * 
-     * @return bool
+     * @return int
      */
-    public function updateBookViewCount(Book $book): bool;
+    public function updateBookViewCount(Book $book): int;
+
+    /**
+     * Find many book by ids
+     * 
+     * @param array $ids
+     * 
+     * @return Collection
+    */
+    public function findManyByIds(array $ids): Collection;
 }

@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\V1\User\CategoryController;
 use App\Http\Controllers\Api\V1\User\PublisherController;
 use App\Http\Controllers\Api\V1\User\BookController;
 use App\Http\Controllers\Api\V1\User\WishListController;
+use App\Http\Controllers\Api\V1\User\CartController;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'v1'], function () {
@@ -31,6 +32,10 @@ Route::group(['prefix' => 'v1'], function () {
             Route::get('wish-list', [WishListController::class, 'index']);
             Route::post('wish-list', [WishListController::class, 'store']);
             Route::delete('wish-list/{bookId}', [WishListController::class, 'destroy']);
+            Route::get('/cart', [CartController::class, 'index']);
+            Route::post('/cart', [CartController::class, 'store']);
+            Route::put('/cart', [CartController::class, 'update']);
+            Route::delete('/cart/{bookId}', [CartController::class, 'destroy']);
         });
         Route::get('/feedbacks', [FeedbackController::class, 'getFeedbacksByBookId']);
         Route::get('categories', [CategoryController::class, 'index']);
