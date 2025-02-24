@@ -87,29 +87,27 @@ class OrderService
             }
 
             $data['code'] = $orderCode;
-            $orderDetails = $data['order_details'];
-            unset($data['order_details']);
 
             $order = $this->orderRepository->store($data);
 
-            $bookIds = array_column($orderDetails, 'book_id');
+            $bookIds = array_column($data['order_details'], 'book_id');
             $books = $this->bookRepository->findManyByIds($bookIds)->keyBy('id');
 
             if (
-                !$order ||
-                !$this->checkQuantityForMultipleBooks($orderDetails, $books) ||
-                !$this->addBookToOrder($order, $orderDetails) ||
-                !$this->updateQualityAndBorrowingNumberForMultipleBooks($orderDetails, $books)
+                $order &&
+                $this->checkQuantityForMultipleBooks($data['order_details'], $books) &&
+                $this->addBookToOrder($order, $data['order_details']) &&
+                $this->updateBooksInfo($data['order_details'], $books)
             ) {
-                throw new \Exception('Có lỗi xảy ra vui lòng thử lại sau.', Response::HTTP_BAD_REQUEST);
+                DB::commit();
+
+                return [
+                    'message' => 'Tiến hành mượn sách thành thành công',
+                    'code' => Response::HTTP_CREATED,
+                ];
             }
-
-            DB::commit();
-
-            return [
-                'message' => 'Tiến hành mượn sách thành thành công',
-                'code' => Response::HTTP_CREATED,
-            ];
+            
+            throw new \Exception('Có lỗi xảy ra vui lòng thử lại sau.', Response::HTTP_BAD_REQUEST);
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error($e->getMessage());
@@ -169,15 +167,15 @@ class OrderService
             $book = $this->orderRepository->getBookInOrder($data, $id);
 
             if (
-                !$this->updateStatusBookInOrder($book, $data) ||
-                !$this->updateOrderStatus($id, $this->getOverallOrderStatus($id))
+                $this->updateStatusBookInOrder($book, $data) &&
+                $this->updateOrderStatus($id, $this->getOverallOrderStatus($id))
             ) {
-                throw new \Exception('Cập nhật trạng thái đơn mượn thất bại');
-            }
+                DB::commit();
 
-            DB::commit();
+                return true;
+            }
             
-            return true;
+            throw new \Exception('Cập nhật trạng thái đơn mượn thất bại');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error($e->getMessage());
@@ -244,11 +242,7 @@ class OrderService
             ];
         }
 
-        if (!$this->orderDetailsRepository->insert($dataOrderDetailsInsert)) {
-            return false;
-        }
-
-        return true;
+        return $this->orderDetailsRepository->insert($dataOrderDetailsInsert);
     }
 
     /**
@@ -302,7 +296,7 @@ class OrderService
      *
      * @return bool
      */
-    private function updateQualityAndBorrowingNumberForMultipleBooks(array $orderDetails, Collection $books): bool
+    private function updateBooksInfo(array $orderDetails, Collection $books): bool
     {
         $dataUpdateBooks = [];
 
@@ -321,11 +315,7 @@ class OrderService
             ];
         }
 
-        if (!$this->bookRepository->upsert($dataUpdateBooks)) {
-            return false;
-        }
-
-        return true;
+        return $this->bookRepository->upsert($dataUpdateBooks);
     }
 
     /**
@@ -353,6 +343,6 @@ class OrderService
             return $this->orderRepository->updateStatusBookInOrder($book, $data);
         }
 
-        return false;
+        return true;
     }
 }
