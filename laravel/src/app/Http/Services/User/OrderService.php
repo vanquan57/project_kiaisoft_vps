@@ -329,7 +329,20 @@ class OrderService
      */
     private function updateStatusBookInOrder(Book $book, array $data): bool
     {
-        if ($data['status'] == $book->pivot->status) {
+        if ($data['status'] === $book->pivot->status) {
+            return false;
+        }
+
+        // If book is already returned, do not update status
+        if ($book->pivot->status === OrderDetail::STATUS_RETURNED) {
+            return false;
+        }
+
+        // If book is missing, do not update status to other status except returned
+        if (
+            $book->pivot->status === OrderDetail::STATUS_MISSING &&
+            $data['status'] !== OrderDetail::STATUS_RETURNED
+        ) {
             return false;
         }
 
