@@ -329,10 +329,11 @@ class OrderService
      */
     private function updateStatusBookInOrder(Book $book, array $data): bool
     {
-        // If book is missing, update with note
-        if ($data['status'] === OrderDetail::STATUS_MISSING) {
+        // If status is the same, do nothing
+        if ($data['status'] === OrderDetail::STATUS_MISSING && $data['status'] !== $book->pivot->status) {
+            // If book is missing, update with note
             return $this->orderRepository->updateStatusBookInOrderWithNote($book, $data['note']);
-        } else if ($data['status'] === OrderDetail::STATUS_RETURNED) {
+        } else if ($data['status'] === OrderDetail::STATUS_RETURNED && $data['status'] !== $book->pivot->status) {
             return $this->orderRepository->updateStatusBookInOrder($book, $data);
         } else {
             return false;
