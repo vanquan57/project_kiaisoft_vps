@@ -22,4 +22,16 @@ class OrderDetailsRepository extends BaseRepository implements OrderDetailsRepos
     {
         return $this->model->whereIn("id", $IdsOverdueDetails)->update(["status"=> OrderDetail::STATUS_OVERDUE]);
     }
+
+    /**
+     * Insert multiple records to the cart
+     * 
+     * @param array $data
+     * 
+     * @return bool
+    */
+    public function insert(array $data): bool
+    {
+        return $this->model->insert($data);
+    }
 }

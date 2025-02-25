@@ -326,4 +326,27 @@ class BookRepository extends BaseRepository implements BookRepositoryInterface
     {
         return $this->model->whereIn('id', $ids)->get();
     }
+
+    /**
+     * Update multiple records to the cart
+     * 
+     * @param array $data
+     * 
+     * @return int
+    */
+    public function upsert(array $data): int
+    {
+        return $this->model->upsert(
+            $data,
+            [
+                'id',
+                'slug'
+            ],
+            [
+                'quantity',
+                'borrowing_number',
+                'updated_at',
+            ]
+        );
+    }
 }

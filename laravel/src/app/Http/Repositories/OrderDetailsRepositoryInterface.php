@@ -12,4 +12,13 @@ interface OrderDetailsRepositoryInterface extends BaseRepositoryInterface
      * @return bool
     */
     public function updateStatusMultipleBookOverdueInOrder(array $IdsOverdueDetails): bool;
+
+    /**
+     * Insert multiple records to the cart
+     * 
+     * @param array $data
+     * 
+     * @return bool
+    */
+    public function insert(array $data): bool;
 }
