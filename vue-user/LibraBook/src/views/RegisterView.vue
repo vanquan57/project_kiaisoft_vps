@@ -113,11 +113,11 @@
 import images from '@/assets/images';
 import { reactive, ref } from 'vue';
 import axiosInstance from '@/config/axios';
-import { ElMessageBox, ElNotification } from 'element-plus';
-import HTTP_STATUS_CODE from '@/config/statusCode';
+import { ElMessageBox } from 'element-plus';
 import IconGoogle from '@/components/icons/IconGoogle.vue';
 import { googleTokenLogin } from 'vue3-google-login';
 import { useRouter } from 'vue-router';
+import { showNotificationError } from '@/helpers/notification';
 
 const router = useRouter();
 const form = reactive({
@@ -265,18 +265,7 @@ const handleRegisterGoogle = async () => {
                 }
             }
         } catch (error) {
-            const errors = error.data.errors;
-
-            if (
-                error.status === HTTP_STATUS_CODE.HTTP_BAD_REQUEST ||
-                error.status === HTTP_STATUS_CODE.HTTP_UNAUTHORIZED
-            ) {
-                ElNotification.error({
-                    title: 'Lỗi',
-                    message: errors.error_message,
-                    duration: 2000
-                });
-            }
+            showNotificationError(error);
         }
     });
 };
@@ -294,27 +283,12 @@ const handleSubmit = async () => {
                     'auth/register',
                     form
                 );
+
                 if (response.success) {
                     router.push('/auth/login');
                 }
             } catch (error) {
-                const errors = error.data.errors;
-
-                if (
-                    error.status === HTTP_STATUS_CODE.HTTP_UNPROCESSABLE_ENTITY
-                ) {
-                    ElNotification.error({
-                        title: 'Lỗi',
-                        message: Object.values(errors)[0][0],
-                        duration: 1000
-                    });
-                } else {
-                    ElNotification.error({
-                        title: 'Lỗi',
-                        message: errors.error_message,
-                        duration: 1000
-                    });
-                }
+                showNotificationError(error);
             }
         }
     });

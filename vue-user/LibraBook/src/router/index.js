@@ -98,10 +98,10 @@ const router = createRouter({
     ]
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore();
 
-    if (to.meta.isLogin && authStore.checkTokenValidity()) {
+    if (to.meta.isLogin && await authStore.checkTokenValidity()) {
         next('/');
     } else {
         next();

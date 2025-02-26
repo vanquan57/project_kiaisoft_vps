@@ -1,4 +1,7 @@
 import { defineStore } from 'pinia';
+import axiosInstance from '@/config/axios';
+import HTTP_STATUS_CODE from '@/config/statusCode';
+
 export const useAuthStore = defineStore('auth', {
     state: () => ({}),
     getters: {},
@@ -10,7 +13,7 @@ export const useAuthStore = defineStore('auth', {
          *         *
          * @returns {boolean} - Returns true if the token is valid, false otherwise.
          */
-        checkTokenValidity(token) {
+        async checkTokenValidity() {
             try {
                 const token = localStorage.getItem('token');
 
@@ -25,7 +28,10 @@ export const useAuthStore = defineStore('auth', {
                     return false;
                 }
 
-                return true;
+                // If the token is still valid, verify its validity on the server
+                const response = await axiosInstance.get('/profile');
+
+                return response.status === HTTP_STATUS_CODE.OK && response.success;
             } catch (error) {
                 return false;
             }
