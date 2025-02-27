@@ -14,7 +14,7 @@ import ContactView from '@/views/ContactView.vue';
 import DetailsView from '@/views/DetailsView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
 import { useAuthStore } from '@/stores/auth';
-        
+
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
