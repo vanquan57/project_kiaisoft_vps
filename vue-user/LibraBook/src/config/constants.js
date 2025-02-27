@@ -1,0 +1,11 @@
+const DEFAULT_CONSTANTS = {
+    TRUE: 1,
+    FALSE: 0,
+    LIMIT_BOOK: 4,
+    LIMIT_CATEGORY: Number.MAX_SAFE_INTEGER,
+    LIMIT_NEW_BOOK: 8,
+    DEFAULT_ORDER: 'desc',
+    LIMIT_SLIDE_CATEGORY: 6
+};
+
+export default DEFAULT_CONSTANTS;

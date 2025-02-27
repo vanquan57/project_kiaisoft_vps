@@ -4,8 +4,8 @@
             <div class="top-header__container">
                 <div class="sale-banner">
                     <p class="sale-banner__text">
-                        Khuyến Mãi Đọc Sách: Giảm Giá Lên Đến 50% Cho Tất Cả Gói Thành Viên và Đăng Ký Miễn Phí!
-                        <span class="promo-link">Mua Ngay tại</span>
+                        Kiai - Trao tri thức, nhận thành công: Mượn Sách Miễn Phí, đọc sách hôm nay, thành công mai sau.
+                        <span class="promo-link">Mượn ngay tại</span>
                     </p>
                 </div>
                 <div class="language">
@@ -73,12 +73,27 @@
                         <router-link to="/wishlist">
                             <IconHeart />
                         </router-link>
+                        <span
+                            v-if="counterCartAndWishList.wishList > 0"
+                            class="action-item__counter"
+                        >
+                            {{ counterCartAndWishList.wishList }}
+                        </span>
                     </div>
+
                     <div class="action-item">
                         <router-link to="/cart">
                             <IconCart />
                         </router-link>
+                        <span
+                            v-if="counterCartAndWishList.cart > 0"
+                            class="action-item__counter"
+                        >
+                            {{ counterCartAndWishList.cart }}
+                        </span>
                     </div>
+
+
                     <div class="action-item">
                         <span
                             class="action-item__user"
@@ -155,11 +170,14 @@ import { ref, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router';
 import axiosInstance from '@/config/axios';
+import { useCounterCartAndWishList } from '@/stores/counterCartAndWishList';
 
 const router = useRouter();
 const route = useRoute();
 const isShowAction = ref(false);
 const isShowGroupAction = ref(true);
+const counterCartAndWishList = useCounterCartAndWishList();
+
 
 watchEffect(() => {
     if (

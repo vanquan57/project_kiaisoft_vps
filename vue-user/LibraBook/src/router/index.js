@@ -13,6 +13,7 @@ import AboutView from '@/views/AboutView.vue';
 import ContactView from '@/views/ContactView.vue';
 import DetailsView from '@/views/DetailsView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
+import ListBookView from '@/views/ListBookView.vue';
 import { useAuthStore } from '@/stores/auth';
 
 const router = createRouter({
@@ -95,6 +96,11 @@ const router = createRouter({
                     path: 'book/:slug',
                     name: 'book.detail',
                     component: DetailsView
+                },
+                {
+                    path: 'list-book',
+                    name: 'list-book',
+                    component: ListBookView
                 },
                 {
                     path: '/:pathMatch(.*)*',
