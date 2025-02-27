@@ -28,31 +28,43 @@
                             Điền vào biểu mẫu của chúng tôi và chúng tôi sẽ liên hệ với bạn trong 24
                             giờ.
                         </p>
-                        <p>dn.contact@kiaisoft.com</p>
-                        <p>contact@kiaisoft.com</p>
+                        <p>Emails: dn.contact@kiaisoft.com</p>
+                        <p>Emails: contact@kiaisoft.com</p>
                     </div>
                 </div>
                 <div class="contact-content__right">
                     <form class="contact-form">
                         <div class="group-form__input">
                             <div class="input-field__item">
+                                <label for="name">
+                                    <span class="name-label">Họ tên</span>
+                                    <span class="required">*</span>
+                                </label>
                                 <input
+                                    id="name"
                                     type="text"
-                                    placeholder="Họ tên"
                                     class="input-field"
                                 >
                             </div>
                             <div class="input-field__item">
+                                <label for="email">
+                                    <span class="email-label">Email</span>
+                                    <span class="required">*</span>
+                                </label>
                                 <input
+                                    id="email"
                                     type="email"
-                                    placeholder="Email"
                                     class="input-field"
                                 >
                             </div>
                             <div class="input-field__item">
+                                <label for="phone">
+                                    <span class="phone-label">Số điện thoại</span>
+                                    <span class="required">*</span>
+                                </label>
                                 <input
+                                    id="phone"
                                     type="text"
-                                    placeholder="Số điện thoại"
                                     class="input-field"
                                 >
                             </div>
@@ -85,7 +97,7 @@ import BreadcrumbComponent from '@/components/Breadcrumb/BreadcrumbComponent.vue
 
 const breadcrumbs = [
     {
-        name: 'Home',
+        name: 'Trang chủ',
         path: '/'
     },
     {

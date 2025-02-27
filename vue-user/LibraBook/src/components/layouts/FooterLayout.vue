@@ -3,7 +3,7 @@
         <div class="footer-content">
             <div class="footer-section">
                 <h3 class="footer-logo">
-                    Độc Quyền
+                    Kiai - Libra
                 </h3>
                 <h4 class="footer-subtitle">
                     Đăng Ký Nhận Thông Tin
