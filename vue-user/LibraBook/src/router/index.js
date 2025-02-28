@@ -65,7 +65,10 @@ const router = createRouter({
                 {
                     path: 'wishlist',
                     name: 'wishlist',
-                    component: WishListView
+                    component: WishListView,
+                    meta: {
+                        requireAuth: true
+                    }
                 },
                 {
                     path: 'cart',
@@ -120,6 +123,10 @@ router.beforeEach(async (to, from, next) => {
 
     if (to.meta.isLogin && await authStore.checkTokenValidity()) {
         next('/');
+    }
+
+    if (to.meta.requireAuth && !await authStore.checkTokenValidity()) {
+        next('/auth/login');
     } else {
         next();
     }

@@ -3,7 +3,6 @@
     background: $primary-color;
     color: #fafafa;
     width: 100%;
-    padding: 40px 0px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -109,7 +108,6 @@
     }
     .footer-bottom {
         margin-top: 44px;
-        padding-top: 16px;
         border-top: 1px solid rgba(255, 255, 255, 0.4);
         .copyright {
             display: flex;
@@ -117,6 +115,8 @@
             justify-content: center;
             font: 400 16px Poppins, sans-serif;
             opacity: 0.4;
+            padding-top: 16px;
+            padding-bottom: 16px;
             .copyright-icon {
                 width: 20px;
                 height: 20px;
@@ -128,6 +128,9 @@
 
 /* Mobile */
 @media (max-width: 576px) {
+    .main-footer {
+        padding-top: 40px;
+    }
     .footer-content {
         grid-template-columns: repeat(1, 1fr);
         gap: 10px;
@@ -185,6 +188,9 @@
     }
 }
 @media (min-width: 1279px) {
+    .main-footer {
+        padding-top: 80px;
+    }
     .footer-content  {
         max-width: 1170px;
         grid-template-columns: repeat(5, 1fr);
