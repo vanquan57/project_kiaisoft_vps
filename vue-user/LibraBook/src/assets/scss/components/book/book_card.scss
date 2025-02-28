@@ -35,7 +35,6 @@
             &__item {
                 width: 34px;
                 height: 34px;
-                padding: 10px;
                 border-radius: 50%;
                 background-color: white;
                 display: flex;
@@ -44,6 +43,9 @@
                 transition: all 0.3s ease;
                 &:hover {
                     background-color: $background-color-icon-action-hover-fill;
+                }
+                &.icon-wishlist {
+                    padding: 8px;
                 }
                 svg {
                     width: 24px;

@@ -11,7 +11,7 @@
             <div class="book-card__image__action">
                 <div
                     v-if="!isWishlist && !isNewBook"
-                    class="book-card__image__action__item"
+                    class="book-card__image__action__item icon-wishlist"
                     :class="{'active disabled': wishListStore.wishList.includes(book.id)}"
                     @click="!wishListStore.wishList.includes(book.id) && handleAddBookToWishlist(book.id)"
                 >
