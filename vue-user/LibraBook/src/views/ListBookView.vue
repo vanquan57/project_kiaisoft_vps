@@ -7,58 +7,77 @@
             <IconHamb />
         </button>
         <aside class="sidebar">
-            <h2>Danh mục</h2>
-
-            <div class="filter-section">
-                <h3>Thể loại</h3>
-                <div class="filter-list">
-                    <label
-                        v-for="category in categories"
-                        :key="category.id"
-                    >
-                        <input
-                            v-model="selectedCategory"
-                            type="radio"
-                            :value="category.id"
+            <div class="filter-section_container">
+                <div class="sidebar-header">
+                    <div class="sidebar-header-icon_container">
+                        <IconGrid class="sidebar-header-icon" />
+                    </div>
+                    <h3>Danh mục</h3>
+                </div>
+                <div class="filter-section">
+                    <div class="filter-list">
+                        <label
+                            v-for="category in categories"
+                            :key="category.id"
                         >
-                        <span>{{ category.name }}</span>
-                    </label>
+                            <input
+                                v-model="selectedCategory"
+                                type="radio"
+                                :value="category.id"
+                            >
+                            <span>{{ category.name }}</span>
+                        </label>
+                    </div>
                 </div>
             </div>
 
             <!-- Authors -->
-            <div class="filter-section">
-                <h3>Tác giả</h3>
-                <div class="filter-list">
-                    <label
-                        v-for="author in authors"
-                        :key="author.id"
-                    >
-                        <input
-                            v-model="selectedAuthors"
-                            type="checkbox"
-                            :value="author.id"
+            <div class="filter-section_container">
+                <div class="sidebar-header">
+                    <div class="sidebar-header-icon_container">
+                        <IconAuthor class="sidebar-header-icon" />
+                    </div>
+                    <h3>Tác giả</h3>
+                </div>
+                <div class="filter-section">
+                    <div class="filter-list">
+                        <label
+                            v-for="author in authors"
+                            :key="author.id"
                         >
-                        <span>{{ author.name }}</span>
-                    </label>
+                            <input
+                                v-model="selectedAuthors"
+                                type="checkbox"
+                                :value="author.id"
+                            >
+                            <span>{{ author.name }}</span>
+                        </label>
+                    </div>
                 </div>
             </div>
 
             <!-- Publishers -->
-            <div class="filter-section">
-                <h3>Nhà xuất bản</h3>
-                <div class="filter-list">
-                    <label
-                        v-for="publisher in publishers"
-                        :key="publisher.id"
-                    >
-                        <input
-                            v-model="selectedPublishers"
-                            type="checkbox"
-                            :value="publisher.id"
+            <div class="filter-section_container">
+                <div class="sidebar-header">
+                    <div class="sidebar-header-icon_container">
+                        <IconPublisher class="sidebar-header-icon" />
+                    </div>
+                    <h3>Nhà xuất bản</h3>
+                </div>
+                <div class="filter-section">
+                    <div class="filter-list">
+                        <label
+                            v-for="publisher in publishers"
+                            :key="publisher.id"
                         >
-                        <span>{{ publisher.name }}</span>
-                    </label>
+                            <input
+                                v-model="selectedPublishers"
+                                type="checkbox"
+                                :value="publisher.id"
+                            >
+                            <span>{{ publisher.name }}</span>
+                        </label>
+                    </div>
                 </div>
             </div>
         </aside>
@@ -66,64 +85,83 @@
             class="sidebar-mobile"
             :class="{ active: isSidebarHidden }"
         >
-            <div class="sidebar-mobile-header">
-                <h2>Danh mục</h2>
-                <button
-                    class="toggle-sidebar-mobile"
-                    @click="toggleSidebar"
-                >
-                    <IconHamb />
-                </button>
-            </div>
-
-            <div class="filter-section">
-                <h3>Thể loại</h3>
-                <div class="filter-list">
-                    <label
-                        v-for="category in categories"
-                        :key="category.id"
-                    >
-                        <input
-                            v-model="selectedCategory"
-                            type="radio"
-                            :value="category.id"
+            <div class="filter-section_container">
+                <div class="sidebar-header">
+                    <div class="sidebar-header-icon_container">
+                        <IconGrid class="sidebar-header-icon" />
+                    </div>
+                    <h3>Danh mục</h3>
+                    <div class="sidebar-mobile-header icon_close_container">
+                        <IconClose
+                            class="toggle-sidebar-mobile"
+                            @click="toggleSidebar"
+                        />
+                    </div>
+                </div>
+                <div class="filter-section">
+                    <div class="filter-list">
+                        <label
+                            v-for="category in categories"
+                            :key="category.id"
                         >
-                        <span>{{ category.name }}</span>
-                    </label>
+                            <input
+                                v-model="selectedCategory"
+                                type="radio"
+                                :value="category.id"
+                            >
+                            <span>{{ category.name }}</span>
+                        </label>
+                    </div>
                 </div>
             </div>
 
-            <div class="filter-section">
-                <h3>Tác giả</h3>
-                <div class="filter-list">
-                    <label
-                        v-for="author in authors"
-                        :key="author.id"
-                    >
-                        <input
-                            v-model="selectedAuthors"
-                            type="checkbox"
-                            :value="author.id"
+            <!-- Authors -->
+            <div class="filter-section_container">
+                <div class="sidebar-header">
+                    <div class="sidebar-header-icon_container">
+                        <IconAuthor class="sidebar-header-icon" />
+                    </div>
+                    <h3>Tác giả</h3>
+                </div>
+                <div class="filter-section">
+                    <div class="filter-list">
+                        <label
+                            v-for="author in authors"
+                            :key="author.id"
                         >
-                        <span>{{ author.name }}</span>
-                    </label>
+                            <input
+                                v-model="selectedAuthors"
+                                type="checkbox"
+                                :value="author.id"
+                            >
+                            <span>{{ author.name }}</span>
+                        </label>
+                    </div>
                 </div>
             </div>
 
-            <div class="filter-section">
-                <h3>Nhà xuất bản</h3>
-                <div class="filter-list">
-                    <label
-                        v-for="publisher in publishers"
-                        :key="publisher.id"
-                    >
-                        <input
-                            v-model="selectedPublishers"
-                            type="checkbox"
-                            :value="publisher.id"
+            <!-- Publishers -->
+            <div class="filter-section_container">
+                <div class="sidebar-header">
+                    <div class="sidebar-header-icon_container">
+                        <IconPublisher class="sidebar-header-icon" />
+                    </div>
+                    <h3>Nhà xuất bản</h3>
+                </div>
+                <div class="filter-section">
+                    <div class="filter-list">
+                        <label
+                            v-for="publisher in publishers"
+                            :key="publisher.id"
                         >
-                        <span>{{ publisher.name }}</span>
-                    </label>
+                            <input
+                                v-model="selectedPublishers"
+                                type="checkbox"
+                                :value="publisher.id"
+                            >
+                            <span>{{ publisher.name }}</span>
+                        </label>
+                    </div>
                 </div>
             </div>
         </aside>
@@ -190,6 +228,10 @@ import DEFAULT_CONSTANTS from '@/config/constants';
 import { useWishListStore } from '@/stores/wishList';
 import { useCounterCartAndWishList } from '@/stores/counterCartAndWishList';
 import { showNotificationSuccess, showNotificationError } from '@/helpers/notification';
+import IconGrid from '@/components/icons/IconGrid.vue';
+import IconAuthor from '@/components/icons/IconAuthor.vue';
+import IconPublisher from '@/components/icons/IconPublisher.vue';
+import IconClose from '@/components/icons/IconClose.vue';
 
 const router = useRouter();
 const route = useRoute();
