@@ -140,9 +140,14 @@
                 height: 190px;
             }
         }
-    }
-    .category {
-        display: none;
+        &__info {
+            &__name {
+                max-width: 180px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+        }
     }
     .sidebar-carousel {
         grid-template-columns: 1fr;
