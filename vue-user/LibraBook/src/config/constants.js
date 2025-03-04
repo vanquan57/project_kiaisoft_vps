@@ -12,7 +12,9 @@ const DEFAULT_CONSTANTS = {
     MOST_BORROWED: 'most-borrowed',
     MOST_VIEWED: 'most-viewed',
     MOST_LOVED: 'most_loved',
-    MOST_NEW_RELEASED: 'most-new-released'
+    MOST_NEW_RELEASED: 'most-new-released',
+    TYPE_HARD_COVER: 1,
+    TYPE_SOFT_COVER: 2
 };
 
 export default DEFAULT_CONSTANTS;
