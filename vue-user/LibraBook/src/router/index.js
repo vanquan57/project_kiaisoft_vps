@@ -81,7 +81,10 @@ const router = createRouter({
                 {
                     path: 'checkout',
                     name: 'checkout',
-                    component: CheckoutOrderView
+                    component: CheckoutOrderView,
+                    meta: {
+                        requireAuth: true
+                    }
                 },
                 {
                     path: 'account',
