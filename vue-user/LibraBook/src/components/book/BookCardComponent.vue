@@ -73,7 +73,7 @@
 import IconStar from '@/components/icons/IconStar.vue';
 import IconQuickView from '@/components/icons/IconQuickView.vue';
 import IconDelete from '@/components/icons/IconDelete.vue';
-import IconWishlist from '@/components/icons/IconWishlist.vue';
+import IconWishlist from '@/components/icons/IconWishList.vue';
 import IconCart from '@/components/icons/IconCart.vue';
 import { useWishListStore } from '@/stores/wishList';
 

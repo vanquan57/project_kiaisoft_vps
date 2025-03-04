@@ -15,6 +15,9 @@ import DetailsView from '@/views/DetailsView.vue';
 import NotFoundView from '@/views/NotFoundView.vue';
 import ListBookView from '@/views/ListBookView.vue';
 import { useAuthStore } from '@/stores/auth';
+import ChangePasswordView from '@/views/ChangePasswordView.vue';
+import OrdersView from '@/views/OrdersView.vue';
+import LayoutAccount from '@/components/layouts/LayoutAccount.vue';
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -87,9 +90,29 @@ const router = createRouter({
                     }
                 },
                 {
-                    path: 'account',
-                    name: 'account',
-                    component: AccountView
+                    path: 'my-account',
+                    name: 'my-account',
+                    component: LayoutAccount,
+                    meta: {
+                        requireAuth: true
+                    },
+                    children: [
+                        {
+                            path: '',
+                            name: 'account',
+                            component: AccountView
+                        },
+                        {
+                            path: 'change-password',
+                            name: 'change-password',
+                            component: ChangePasswordView
+                        },
+                        {
+                            path: 'orders',
+                            name: 'orders',
+                            component: OrdersView
+                        }
+                    ]
                 },
                 {
                     path: 'contact',

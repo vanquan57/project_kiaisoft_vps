@@ -2,7 +2,7 @@ import googlePlay from '@/assets/images/googlePlay.png';
 import appStore from '@/assets/images/appStore.png';
 import qrCode from '@/assets/images/qrCode.png';
 import heroImage from '@/assets/images/heroImage.png';
-import logoKiaiSoft from '@/assets/images/logoKiaiSoft.jpg';
+import logoKiaiSoft from '@/assets/images/logoKiaisoft.jpg';
 import slide1 from '@/assets/images/slide1.jpg';
 import slide2 from '@/assets/images/slide2.jpg';
 import slide3 from '@/assets/images/slide3.jpg';
