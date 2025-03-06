@@ -12,6 +12,7 @@ use App\Http\Requests\User\ResetPasswordRequest;
 use App\Http\Services\User\UserService;
 use App\Models\User;
 use Google_Client;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -52,6 +53,18 @@ class AuthController extends Controller
             );
         }
 
+        $user = auth('api')->user();
+
+        if (!$user->hasVerifiedEmail()) {
+            event(new Registered($user));
+
+            return responseErrorAPI(
+                Response::HTTP_BAD_REQUEST,
+                ERROR_BAD_REQUEST,
+                'Tài khoản của bạn chưa được xác thực email. Vui lòng kiểm tra email của bạn.'
+            );
+        }
+
         return responseOkAPI($this->respondWithToken($token));
     }
 
@@ -79,6 +92,32 @@ class AuthController extends Controller
                 'message' => $result['message']
             ],
             $result['code']
+        );
+    }
+
+    /**
+     * The method verification email.
+     * 
+     *  @param Request $request
+     * 
+     * @return JsonResponse
+    */
+    public function verifyEmail(Request $request)
+    {
+        $result = $this->userService->verifyEmail($request);
+
+        if ($result['code'] !== Response::HTTP_OK) {
+            return responseErrorAPI(
+                $result['code'],
+                $result['error_code'],
+                $result['error']
+            );
+        }
+
+        return responseOkAPI(
+            [
+                'message' => $result['message']
+            ]
         );
     }
 

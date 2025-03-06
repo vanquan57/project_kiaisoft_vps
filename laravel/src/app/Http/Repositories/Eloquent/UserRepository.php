@@ -43,24 +43,23 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
             $query->orderBy($data['column'], $data['order']);
         }
 
+        if(!empty($data['status'])) {
+            $query->where('status', $data['status']);
+        }
+
         return $query->paginate($data['limit']);
     }
 
     /**
-     * Check account is registered and active
+     * Get account is registered and active
      * 
-     * @param string $code
-     * 
-     * @param string $email
-     * 
-     * @return bool
+     * @return Collection|null
      */
-    public function checkAccountRegisteredAndActive(string $code, string $email)
+    public function getAccountRegisteredAndActive() : ?Collection
     {
-        return $this->model->where('email', $email)
-            ->where('code', $code)
+        return $this->model
             ->where('status', User::STATUS_ACTIVE)
-            ->exists();
+            ->get(['code', 'email']);
     }
 
     /**
@@ -169,6 +168,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
             'name'=> $data['name'],
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
+            ... $data
         ]);
     }
 
@@ -188,6 +188,7 @@ class UserRepository extends BaseRepository implements UserRepositoryInterface
             'email' => $userGoogle->user['email'],
             'name' => $userGoogle->user['name'],
             'google_id' => $userGoogle->user['sub'],
+            'status' => User::STATUS_ACTIVE,
         ]);
     }
 

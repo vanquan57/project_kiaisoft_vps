@@ -19,6 +19,9 @@ Route::group(['prefix' => 'v1'], function () {
             Route::post('/login', [AuthController::class, 'login']);
             Route::post('/logout', [AuthController::class, 'logout']);
             Route::post('/register', [AuthController::class, 'register']);
+            Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])
+                ->middleware(['signed'])
+                ->name('verification.verify');
             Route::post('/google/callback', [AuthController::class, 'loginGoogle']);
             Route::post('/google/callback/register', [AuthController::class, 'registerGoogle']);
             Route::post('/verify-email', [AuthController::class, 'sendEmail']);

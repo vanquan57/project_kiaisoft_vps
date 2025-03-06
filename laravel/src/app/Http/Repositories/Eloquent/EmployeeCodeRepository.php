@@ -45,19 +45,19 @@ class EmployeeCodeRepository extends BaseRepository implements EmployeeCodeRepos
      *
      * @param array $data
      *
-     * @return Model|null
+     * @return int
      */
-    public function updateOrCreate(array $data): ?Model
+    public function upsert(array $data): int
     {
-        return $this->model->updateOrCreate(
+        return $this->model->upsert(
+            $data,
             [
-                'code' => $data['code'],
-                'email' => $data['email'],
+                'code',
+                'email',
             ],
             [
-                'code' => $data['code'],
-                'email' => $data['email'],
-                'name' => $data['name'],
+                'name',
+                'updated_at',
             ]
         );
     }
