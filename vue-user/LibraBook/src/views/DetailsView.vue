@@ -59,11 +59,8 @@
                     </div>
                     <div class="book__info__categories">
                         <h3>Thể loại:</h3>
-                        <p
-                            v-for="category in book.categories"
-                            :key="category"
-                        >
-                            {{ category.name }},
+                        <p>
+                            {{ computedCategoryName }}
                         </p>
                     </div>
                     <p
@@ -93,8 +90,8 @@
                     </button>
                     <button
                         class="book__group-action__wishlist"
-                        :class="{'active disabled': wishListStore.wishList.includes(book.id)}"
-                        @click="!wishListStore.wishList.includes(book.id) && handleAddBookToWishlist(book.id)"
+                        :class="{'active': wishListStore.wishList.includes(book.id)}"
+                        @click="toggleWishlist(book.id)"
                     >
                         <IconHeart />
                     </button>
@@ -202,17 +199,11 @@
 
                 <button
                     class="submit__button"
-                    :disabled="!isLoggedIn || !feedbackContent.trim()"
+                    :disabled="!feedbackContent.trim()"
                     @click="submitFeedback"
                 >
                     Gửi đánh giá
                 </button>
-                <p
-                    v-if="!isLoggedIn"
-                    class="warning"
-                >
-                    Bạn cần đăng nhập để đánh giá.
-                </p>
             </div>
             <div class="book__feedback__list">
                 <div
@@ -268,6 +259,7 @@
                     @quick-view="handleQuickView"
                     @add-book-to-cart="handleAddBookToCart"
                     @add-book-to-wishlist="handleAddBookToWishlist"
+                    @remove-book-from-wishlist="handleRemoveBookFromWishlist"
                 />
             </div>
         </section>
@@ -281,7 +273,7 @@ import IconStar from '@/components/icons/IconStar.vue';
 import IconDeliveryDetail from '@/components/icons/IconDeliveryDetail.vue';
 import IconReturn from '@/components/icons/IconReturn.vue';
 import axiosInstance from '@/config/axios';
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import IconHeart from '@/components/icons/IconHeart.vue';
 import { useAuthStore } from '@/stores/auth';
@@ -322,7 +314,6 @@ const errorFeedback = ref({
     content: '',
     star: ''
 });
-const isLoggedIn = ref(false);
 const coverType = {
     [DEFAULT_CONSTANTS.TYPE_SOFT_COVER]: 'Bìa mềm',
     [DEFAULT_CONSTANTS.TYPE_HARD_COVER]: 'Bìa cứng'
@@ -347,10 +338,10 @@ const urlImage = (url) => {
 onMounted(async () => {
     await getBook(slug);
     await getFeedbacks();
-    isLoggedIn.value = await authStore.checkTokenValidity();
     await getListBookSameCategory();
     await getWishList();
     await getCart();
+    window.addEventListener('scroll', handleScroll);
 });
 
 /**
@@ -363,7 +354,17 @@ const getWishList = async () => {
         const response = await axiosInstance.get('/wish-list');
 
         if (response.success) {
-            counterCartAndWishList.setWishList(response.data.length);
+            const booksInWishList = response.data;
+
+            if (booksInWishList) {
+                booksInWishList.forEach((book) => {
+                    wishListStore.addToWishList(book.id);
+                });
+
+                counterCartAndWishList.setWishList(booksInWishList.length);
+            } else {
+                counterCartAndWishList.setWishList(0);
+            }
         }
     } catch (error) {}
 };
@@ -589,6 +590,35 @@ const handleAddBookToWishlist = async (id) => {
 };
 
 /**
+ * Handle remove book from wishlist
+ *
+ * @param {number} bookId - The book id
+ *
+ * @returns {Promise<void>}
+*/
+const handleRemoveBookFromWishlist = async (bookId) => {
+    if (!await authStore.checkTokenValidity()) {
+        router.push({ name: 'auth-login' });
+
+        return;
+    }
+
+    try {
+        const response = await axiosInstance.delete(`/wish-list/${bookId}`);
+
+        if (response.success) {
+            wishListStore.removeFromWishList(bookId);
+
+            await getWishList();
+
+            showNotificationSuccess(response.data.message);
+        }
+    } catch (error) {
+        showNotificationError(error);
+    }
+};
+
+/**
  * The method handle show details book
  *
  * @param {number} id - The id
@@ -667,6 +697,30 @@ const submitFeedback = async () => {
                 showNotificationError(error);
             }
         }
+    }
+};
+
+/**
+ * The method computed category name
+ *
+ * @returns {string}
+*/
+const computedCategoryName = computed(() => {
+    return book.value.categories?.map(category => category.name).join(', ');
+});
+
+/**
+ * The method handle toggle wishlist
+ *
+ * @param {number} bookId - The book id
+ *
+ * @returns {void}
+ */
+const toggleWishlist = async (bookId) => {
+    if (wishListStore.wishList.includes(bookId)) {
+        await handleRemoveBookFromWishlist(bookId);
+    } else {
+        await handleAddBookToWishlist(bookId);
     }
 };
 </script>

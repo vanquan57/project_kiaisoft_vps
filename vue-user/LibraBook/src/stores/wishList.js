@@ -10,6 +10,9 @@ export const useWishListStore = defineStore('wishList', {
         },
         removeFromWishList(bookId) {
             this.wishList = this.wishList.filter((id) => id !== bookId);
+        },
+        clearWishList() {
+            this.wishList = [];
         }
     }
 });

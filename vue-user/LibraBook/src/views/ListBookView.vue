@@ -189,6 +189,7 @@
                     @quick-view="handleQuickView"
                     @add-book-to-cart="handleAddBookToCart"
                     @add-book-to-wishlist="handleAddBookToWishlist"
+                    @remove-book-from-wishlist="handleRemoveBookFromWishlist"
                 />
             </div>
 
@@ -383,6 +384,7 @@ onMounted(async () => {
         delete dataSearch.value.most_borrowed;
         delete dataSearch.value.most_viewed;
         delete dataSearch.value.most_loved;
+        activeFilter.value = '';
         dataSearch.value.latest = DEFAULT_CONSTANTS.TRUE;
         dataSearch.value.order = DEFAULT_CONSTANTS.DEFAULT_ORDER;
     }
@@ -509,6 +511,10 @@ watch(selectedPublishers, async () => {
 watch(searchQuery, async () => {
     if (searchQuery.value) {
         dataSearch.value.name = searchQuery.value;
+        activeFilter.value = '';
+        delete dataSearch.value.most_borrowed;
+        delete dataSearch.value.most_viewed;
+        delete dataSearch.value.most_loved;
 
         await getBooks(1, dataSearch.value);
     }
@@ -605,11 +611,15 @@ const getWishList = async () => {
         if (response.success) {
             const booksInWishList = response.data;
 
-            booksInWishList.forEach((book) => {
-                wishListStore.addToWishList(book.id);
-            });
+            if (booksInWishList) {
+                booksInWishList.forEach((book) => {
+                    wishListStore.addToWishList(book.id);
+                });
 
-            counterCartAndWishList.setWishList(booksInWishList.length);
+                counterCartAndWishList.setWishList(booksInWishList.length);
+            } else {
+                counterCartAndWishList.setWishList(0);
+            }
         }
     } catch (error) {}
 };
@@ -718,6 +728,35 @@ const handleAddBookToWishlist = async (id) => {
 };
 
 /**
+ * Handle remove book from wishlist
+ *
+ * @param {number} bookId - The book id
+ *
+ * @returns {Promise<void>}
+*/
+const handleRemoveBookFromWishlist = async (bookId) => {
+    if (!await authStore.checkTokenValidity()) {
+        router.push({ name: 'auth-login' });
+
+        return;
+    }
+
+    try {
+        const response = await axiosInstance.delete(`/wish-list/${bookId}`);
+
+        if (response.success) {
+            wishListStore.removeFromWishList(bookId);
+
+            await getWishList();
+
+            showNotificationSuccess(response.data.message);
+        }
+    } catch (error) {
+        showNotificationError(error);
+    }
+};
+
+/**
  * The method handle show details book
  *
  * @param {number} id - The id
@@ -752,6 +791,11 @@ watchEffect(async () => {
 
     if (route.query.search) {
         searchQuery.value = route.query.search;
+    } else {
+        searchQuery.value = '';
+        delete dataSearch.value.name;
+
+        await getBooks(1, dataSearch.value);
     }
 });
 </script>

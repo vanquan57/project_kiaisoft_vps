@@ -11,65 +11,22 @@
             <div class="account-container__left">
                 <div class="account-container__left-sidebar desktop-sidebar">
                     <ul class="account-container__left-sidebar__list">
-                        <li class="account-container__left-sidebar__list__item">
-                            <span
-                                class="account-container__left-sidebar__list__item__title"
-                            >
-                                Quản lý tài khoản
+                        <li
+                            v-for="(item, index) in menuItems"
+                            :key="index"
+                            class="account-container__left-sidebar__list__item"
+                        >
+                            <span class="account-container__left-sidebar__list__item__title">
+                                {{ item.title }}
                             </span>
-                            <ul
-                                class="account-container__left-sidebar__list__item__list"
-                            >
+                            <ul class="account-container__left-sidebar__list__item__list">
                                 <li
+                                    v-for="(subItem, subIndex) in item.children"
+                                    :key="subIndex"
                                     class="account-container__left-sidebar__list__item__list__item"
                                 >
-                                    <router-link to="/my-account">
-                                        Tài khoản của tôi
-                                    </router-link>
-                                </li>
-                                <li
-                                    class="account-container__left-sidebar__list__item__list__item"
-                                >
-                                    <router-link to="/my-account/change-password">
-                                        Thay đổi mật khẩu
-                                    </router-link>
-                                </li>
-                            </ul>
-                        </li>
-
-                        <li class="account-container__left-sidebar__list__item">
-                            <span
-                                class="account-container__left-sidebar__list__item__title"
-                            >
-                                Quản lý đơn mượn
-                            </span>
-                            <ul
-                                class="account-container__left-sidebar__list__item__list"
-                            >
-                                <li
-                                    class="account-container__left-sidebar__list__item__list__item"
-                                >
-                                    <router-link to="/my-account/orders">
-                                        Đơn mượn của tôi
-                                    </router-link>
-                                </li>
-                            </ul>
-                        </li>
-
-                        <li class="account-container__left-sidebar__list__item">
-                            <span
-                                class="account-container__left-sidebar__list__item__title"
-                            >
-                                Danh sách yêu thích
-                            </span>
-                            <ul
-                                class="account-container__left-sidebar__list__item__list"
-                            >
-                                <li
-                                    class="account-container__left-sidebar__list__item__list__item"
-                                >
-                                    <router-link to="/wishlist">
-                                        Sách yêu thích
+                                    <router-link :to="subItem.link">
+                                        {{ subItem.name }}
                                     </router-link>
                                 </li>
                             </ul>
@@ -118,12 +75,12 @@ import BreadcrumbComponent from '@/components/Breadcrumb/BreadcrumbComponent.vue
 import axiosInstance from '@/config/axios';
 import { onMounted, ref, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
+
 const route = useRoute();
 const breadcrumbs = ref([
     { name: 'Trang chủ', path: '/' },
     { name: 'Tài khoản của tôi', path: '/my-account' }
 ]);
-
 const user = ref(null);
 onMounted(() => {
     getUser();

@@ -31,7 +31,7 @@
                         class="btn btn-move-all-to-cart"
                         @click="
                             handleRedirectToListBook({
-                                isNewBook: true,
+                                isMostNewReleased: true,
                             })
                         "
                     >

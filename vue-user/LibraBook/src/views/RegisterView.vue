@@ -79,12 +79,14 @@
                     </el-form-item>
                     <div class="form-group-actions">
                         <div class="form-group-actions_item">
-                            <button
+                            <el-button
                                 class="btn btn-register"
                                 type="submit"
+                                :loading="isLoading"
+                                @click="handleSubmit"
                             >
                                 Tạo tài khoản
-                            </button>
+                            </el-button>
                         </div>
                         <div class="form-group-actions_item">
                             <button
@@ -117,7 +119,7 @@ import { ElMessageBox } from 'element-plus';
 import IconGoogle from '@/components/icons/IconGoogle.vue';
 import { googleTokenLogin } from 'vue3-google-login';
 import { useRouter } from 'vue-router';
-import { showNotificationError } from '@/helpers/notification';
+import { showNotificationError, showNotificationSuccess } from '@/helpers/notification';
 
 const router = useRouter();
 const form = reactive({
@@ -128,7 +130,7 @@ const form = reactive({
     confirm_password: ''
 });
 const registerForm = ref(null);
-
+const isLoading = ref(false);
 const rules = {
     code: [
         {
@@ -144,7 +146,7 @@ const rules = {
         {
             validator: (rule, value, callback) => {
                 if (value && !value.match(/^K\d{5}$/)) {
-                    callback(new Error('Bạn không phải nhân viên của KiaiSoft ?'));
+                    callback(new Error('Bạn không phải nhân viên của KiaiSoft?'));
                 } else {
                     callback();
                 }
@@ -183,7 +185,7 @@ const rules = {
         {
             validator: (rule, value, callback) => {
                 if (value && !value.includes('kiaisoft')) {
-                    callback(new Error('Bạn không phải nhân viên của KiaiSoft ?'));
+                    callback(new Error('Bạn không phải nhân viên của KiaiSoft?'));
                 } else {
                     callback();
                 }
@@ -278,6 +280,8 @@ const handleRegisterGoogle = async () => {
 const handleSubmit = async () => {
     await registerForm.value.validate(async (valid) => {
         if (valid) {
+            isLoading.value = true;
+
             try {
                 const response = await axiosInstance.post(
                     'auth/register',
@@ -285,9 +289,13 @@ const handleSubmit = async () => {
                 );
 
                 if (response.success) {
+                    isLoading.value = false;
+                    showNotificationSuccess(response.data.message);
+
                     router.push('/auth/login');
                 }
             } catch (error) {
+                isLoading.value = false;
                 showNotificationError(error);
             }
         }

@@ -225,7 +225,7 @@
                     cursor: pointer;
                     transition: all 0.3s ease;
                     &.active {
-                    background-color: $background-color-icon-action-hover-fill;
+                    background-color: $primary-color;
                     }
                     &.disabled {
                         cursor: not-allowed;
@@ -235,7 +235,7 @@
                         height: 20px;
                     }
                     &:hover {
-                        background-color: $background-color-icon-action-hover-fill;
+                        background-color: $primary-color;
                     }
                 }
             }
@@ -416,7 +416,7 @@
                 cursor: pointer;
                 transition: background-color 0.3s;
                 &:hover {
-                    background-color: #0056b3;
+                    background-color: $color-red;
                 }
                 &:disabled {
                     background-color: #ccc;

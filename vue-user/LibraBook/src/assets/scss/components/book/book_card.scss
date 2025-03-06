@@ -42,7 +42,7 @@
                 justify-content: center;
                 transition: all 0.3s ease;
                 &:hover {
-                    background-color: $background-color-icon-action-hover-fill;
+                    background-color: $primary-color;
                 }
                 &.icon-wishlist {
                     padding: 8px;
@@ -52,7 +52,7 @@
                     height: 24px;
                 }
                 &.active {
-                    background-color: $background-color-icon-action-hover-fill;
+                    background-color: $primary-color;
                 }
                 &.disabled {
                     cursor: not-allowed;

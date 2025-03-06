@@ -12,8 +12,8 @@
                 <div
                     v-if="!isWishlist && !isNewBook"
                     class="book-card__image__action__item icon-wishlist"
-                    :class="{'active disabled': wishListStore.wishList.includes(book.id)}"
-                    @click="!wishListStore.wishList.includes(book.id) && handleAddBookToWishlist(book.id)"
+                    :class="{'active': wishListStore.wishList.includes(book.id)}"
+                    @click="handleToggleBookWishlist(book.id)"
                 >
                     <IconWishlist />
                 </div>
@@ -107,8 +107,12 @@ const handleAddBookToCart = (id) => {
     emit('addBookToCart', id);
 };
 
-const handleAddBookToWishlist = (id) => {
-    emit('addBookToWishlist', id);
+const handleToggleBookWishlist = (id) => {
+    if (wishListStore.wishList.includes(id)) {
+        emit('removeBookFromWishlist', id);
+    } else {
+        emit('addBookToWishlist', id);
+    }
 };
 
 const handleRemoveBookFromWishlist = (id) => {

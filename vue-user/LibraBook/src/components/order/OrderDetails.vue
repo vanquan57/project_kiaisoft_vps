@@ -42,7 +42,7 @@
                                     class=""
                                 >
                                     <el-select
-                                        v-model="book.pivot.status"
+                                        :model-value="book.pivot.status"
                                         placeholder="Cập nhật"
                                         class="status-select"
                                         @change="handleUpdateStatus(book.pivot.order_id, book.pivot.book_id, $event)"
@@ -139,7 +139,9 @@ const handleUpdateStatus = async (orderId, bookId, e) => {
                     cancelButtonText: 'Hủy',
                     inputPlaceholder: 'Nhập lý do mất sách',
                     inputValidator: (value) =>
-                        !!value || 'Lý do không được để trống'
+                        !!value || 'Lý do không được để trống',
+                    inputPattern: /^.{1,255}$/,
+                    inputErrorMessage: 'Lý do không được vượt quá 255 ký tự'
                 }
             );
             emit('updateStatusOrderDetails', orderId, bookId, e, note);

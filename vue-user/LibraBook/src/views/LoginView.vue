@@ -66,11 +66,15 @@
                             </button>
                         </div>
                         <div class="login-actions">
-                            <button type="submit">
+                            <el-button
+                                type="submit"
+                                :loading="isLoading"
+                                @click="handleSubmit"
+                            >
                                 Đăng nhập
-                            </button>
+                            </el-button>
                             <router-link to="/auth/verify-email">
-                                Quên mật khẩu ?
+                                Quên mật khẩu?
                             </router-link>
                         </div>
                     </div>
@@ -97,7 +101,7 @@ const form = reactive({
 });
 const loginForm = ref(null);
 const errorMessage = ref('');
-
+const isLoading = ref(false);
 const rules = {
     email: [
         {
@@ -113,7 +117,7 @@ const rules = {
         {
             validator: (rule, value, callback) => {
                 if (value && !value.includes('kiaisoft')) {
-                    callback(new Error('Bạn không phải là nhân viên của KiaiSoft ?'));
+                    callback(new Error('Bạn không phải là nhân viên của KiaiSoft?'));
                 } else {
                     callback();
                 }
@@ -168,14 +172,18 @@ const handleLoginGoogle = async (response) => {
 const handleSubmit = async () => {
     await loginForm.value.validate(async (valid) => {
         if (valid) {
+            isLoading.value = true;
+
             try {
                 const response = await axiosInstance.post('/auth/login', form);
 
                 if (response.success) {
+                    isLoading.value = false;
                     localStorage.setItem('token', response.data.access_token);
                     router.push('/');
                 }
             } catch (error) {
+                isLoading.value = false;
                 const errors = error.data.errors;
 
                 if (error.status === HTTP_STATUS_CODE.HTTP_UNPROCESSABLE_ENTITY ) {
