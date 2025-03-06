@@ -5,8 +5,10 @@ namespace App\Http\Services\User;
 use App\Http\Repositories\EmployeeCodeRepositoryInterface;
 use App\Http\Repositories\UserRepositoryInterface;
 use App\Models\User;
+use Illuminate\Auth\Events\Verified;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
@@ -14,6 +16,9 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class UserService
 {
@@ -41,12 +46,16 @@ class UserService
      */
     public function register(array $data): array
     {
+        DB::beginTransaction();
+        
         try {
             if ($user = $this->userRepository->getRegisteredAccount($data['code'], $data['email'])) {
                 if(!empty($user->google_id) && empty($user->password)) {
                     if(!$this->userRepository->updateInfoWhenMappingAccountGoogle($user, $data)) {
                         throw new \Exception('Có lỗi xảy ra vui lòng thử lại sau.', Response::HTTP_INTERNAL_SERVER_ERROR);
                     }
+
+                    DB::commit();
 
                     return [
                         'message' => 'Đăng ký tài khoản thành công',
@@ -66,14 +75,19 @@ class UserService
                 $data['status'] = User::STATUS_ACTIVE;
             }
 
-            if($this->userRepository->store($data)) {
+            if($user = $this->userRepository->store($data)) {
+                event(new Registered($user));
+                
+                DB::commit();
+
                 return [
-                    'message' => 'Đăng ký tài khoản thành công',
+                    'message' => 'Đăng ký tài khoản thành công. Vui lòng kiểm tra email để xác thực tài khoản',
                     'code' => Response::HTTP_CREATED,
                 ];
             }
         } catch (\Exception $e) {
             Log::error($e->getMessage());
+            DB::rollBack();
 
             return [
                 'error' => $e->getMessage(),
@@ -81,7 +95,47 @@ class UserService
                         Response::HTTP_BAD_REQUEST => ERROR_BAD_REQUEST,
                         default => ERROR_CODE_INTERNAL_SERVER_ERROR
                 },
-                'code' => $e->getCode(),
+                'code' => $e->getCode() ?? ERROR_CODE_INTERNAL_SERVER_ERROR,
+            ];
+        }
+    }
+
+    /**
+     * The method verification email.
+     * 
+     *  @param Request $request
+     * 
+     * @return array
+     */
+    public function verifyEmail(Request $request): array
+    {
+        try {
+            $user = $this->userRepository->find($request->route('id'));
+
+            if (!$user) {
+                throw new \Exception('Tài khoản không tồn tại', Response::HTTP_NOT_FOUND);
+            }
+
+            if (!$user->hasVerifiedEmail() && $user->markEmailAsVerified()) {
+                event(new Verified($user));
+
+                return [
+                    'message' => 'Xác thực email thành công',
+                    'code' => Response::HTTP_OK
+                ];
+            }
+
+            throw new \Exception('Xác thực email không thành công', Response::HTTP_BAD_REQUEST);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+
+            return [
+                'error' => $e->getMessage(),
+                'error_code' => match ($e->getCode()) {
+                    Response::HTTP_BAD_REQUEST => ERROR_BAD_REQUEST,
+                    default => ERROR_CODE_INTERNAL_SERVER_ERROR
+                },
+                'code' => $e->getCode() ?? ERROR_CODE_INTERNAL_SERVER_ERROR,
             ];
         }
     }
@@ -141,7 +195,11 @@ class UserService
                     return null;
                 }
 
-                return $this->userRepository->registerGoogle($data['code'], $userGoogle);
+                $user = $this->userRepository->registerGoogle($data['code'], $userGoogle);
+
+                if ($user && $user->markEmailAsVerified()) {
+                    return $user;
+                }
             }
 
             // Check if user registered with google account and mapping with google id

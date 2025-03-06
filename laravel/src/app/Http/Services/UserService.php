@@ -5,6 +5,7 @@ namespace App\Http\Services;
 use App\Http\Repositories\EmployeeCodeRepositoryInterface;
 use App\Http\Repositories\UserRepositoryInterface;
 use App\Models\User;
+use Illuminate\Http\Response;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -38,6 +39,7 @@ class UserService
                 'limit' => $dataSearch['limit'] ?? config('constants.DEFAULT_LIMIT'),
                 'column' => $dataSearch['column'] ?? null,
                 'order' => $dataSearch['type'] ?? null,
+                'status' => $dataSearch['status'] ?? null,
             ];
 
             return $this->userRepository->getAllByPagination($data);
@@ -135,67 +137,106 @@ class UserService
      *
      * @param array $data
      *
-     * @return bool
+     * @return array
      */
-    public function storeEmployeeCode(array $data): bool
+    public function storeEmployeeCode(array $data): array
     {
         try {
             DB::beginTransaction();
 
-            if (isset($data['file']) && $data['file']->isValid()) {
-                $file = $data['file'];
-                $handle = fopen($file->getRealPath(), 'r');
-                $row = 0;
-                $employeeCodes = [];
-
-                while (($line = fgetcsv($handle, 1000, ',')) !== false) {
-                    $row++;
-
-                    if ($row === 1) {
-                        continue;
-                    }
-
-                    if(empty($line[0]) || empty($line[1]) || empty($line[2])) {
-                        continue;
-                    }
-
-                    if(count($line) > 3 || count($line) < 3){
-                        return false;
-                    }
-                    // Check if code is not Kxxxxx or kiaisoft then skip
-                    if (!preg_match('/^K\d{5}$/', $line[0]) && !str_contains($line[0], config('constants.FORMAT_EMAIL_EMPLOYEE'))) {
-                        return false;
-                    }
-                    // Check if account is registered and active then skip
-                    if($this->userRepository->checkAccountRegisteredAndActive($line[0], $line[1])){
-                        continue;
-                    }
-
-                    $employeeCodes[] = [
-                        'code' => $line[0],
-                        'email' => $line[1],
-                        'name' => $line[2],
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ];
-                }
-                
-                if (!empty($employeeCodes)) {
-                    foreach ($employeeCodes as $employee) {
-                        $this->employeeCodeRepository->updateOrCreate($employee);
-                    }
-                    DB::commit();
-                    
-                    return true;
-                }
-
-                return false;
+            if (!isset($data['file']) || !$data['file']->isValid()) {
+                throw new \Exception('File không hợp lệ.', Response::HTTP_BAD_REQUEST);
             }
+
+            $file = $data['file'];
+            $handle = fopen($file->getRealPath(), 'r');
+            $row = 0;
+            $employeeCodes = [];
+            $errors = [];
+
+            $existingAccounts = $this->userRepository->getAccountRegisteredAndActive()
+                ->mapWithKeys(fn($acc) => [$acc->code => $acc->email, $acc->email => $acc->code]);
+
+            while (($line = fgetcsv($handle, 1000, ',')) !== false) {
+                $row++;
+
+                if ($row === 1) {
+                    continue;
+                }
+
+                if (empty($line[0]) || empty($line[1]) || empty($line[2])) {
+                    $errors[] = [
+                        'row' => $row,
+                        'message' => 'Dữ liệu ở các trường không đủ.',
+                    ];
+
+                    continue;
+                }
+
+                if (count($line) !== 3) {
+                    $errors[] = [
+                        'row' => $row,
+                        'message' => 'Dòng dữ liệu không đúng định dạng.',
+                    ];
+
+                    continue;
+                }
+
+                [$code, $email, $name] = $line;
+
+                // Check if code is not Kxxxxx or kiaisoft then skip
+                if (!preg_match('/^K\d{5}$/', $code) || !str_contains($email, config('constants.FORMAT_EMAIL_EMPLOYEE'))) {
+                    $errors[] = [
+                        'row' => $row,
+                        'message' => 'Email hoặc mã nhân viên không đúng định dạng.',
+                    ];
+
+                    continue;
+                }
+
+                // Check if account is registered and active then skip
+                if (isset($existingAccounts[$code]) || isset($existingAccounts[$email])) {
+                    continue;
+                }
+
+                $employeeCodes[] = [
+                    'code' => $code,
+                    'email' => $email,
+                    'name' => $name,
+                    'updated_at' => now(),
+                ];
+            }
+
+            if (!empty($errors)) {
+                return [
+                    'error' => $errors,
+                    'error_code' => ERROR_BAD_REQUEST,
+                    'code' => Response::HTTP_BAD_REQUEST,
+                ];
+            }
+
+            if (!empty($employeeCodes) && $this->employeeCodeRepository->upsert($employeeCodes)) {
+                DB::commit();
+
+                return [
+                    'message' => 'Thêm mới thông tin nhân viên thành công.',
+                    'code' => Response::HTTP_OK,
+                ];
+            }
+
+            throw new \Exception('Có lỗi xảy ra vui lòng thử lại sau.', Response::HTTP_BAD_REQUEST);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
             DB::rollBack();
 
-            return false;
+            return [
+                'error' => $e->getMessage(),
+                'error_code' => match ($e->getCode()) {
+                    Response::HTTP_BAD_REQUEST => ERROR_BAD_REQUEST,
+                    default => ERROR_CODE_INTERNAL_SERVER_ERROR
+                },
+                'code' => $e->getCode() ?? Response::HTTP_INTERNAL_SERVER_ERROR,
+            ];
         }
     }
 }

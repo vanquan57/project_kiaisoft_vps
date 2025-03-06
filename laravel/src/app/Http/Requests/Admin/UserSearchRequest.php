@@ -30,6 +30,7 @@ class UserSearchRequest extends FormRequest
             'column' => 'nullable|string|in:' . implode(',', $columns),
             'order' => 'nullable|string|in:asc,desc',
             'limit' => 'nullable|integer|min:1',
+            'status' => 'nullable|integer|in:' . implode(',', User::GROUP_STATUS),
         ];
     }
 
@@ -45,6 +46,8 @@ class UserSearchRequest extends FormRequest
             'key_word.max' => 'Từ khóa tìm kiếm không được vượt quá 255 ký tự.',
             'limit.integer' => 'Giới hạn phải là một số nguyên.',
             'limit.min' => 'Giới hạn phải lớn hơn 0.',
+            'status.integer' => 'Trạng thái phải là một số nguyên.',
+            'status.in' => 'Trạng thái không hợp lệ.',
         ];
     }
 }

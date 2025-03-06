@@ -50,16 +50,19 @@ class EmployeeCodeController extends Controller
      */
     public function store(CreateEmployeeCodeRequest $request): JsonResponse
     {
-        if (!$this->userService->storeEmployeeCode($request->validated())) {
+        $result = $this->userService->storeEmployeeCode($request->validated());
+
+        if ($result['code'] !== Response::HTTP_OK) {
             return responseErrorAPI(
-                Response::HTTP_BAD_REQUEST,
-                ERROR_BAD_REQUEST,
-                'Dữ liệu không hợp lệ, vui lòng kiểm tra lại'
+                $result['code'],
+                $result['error_code'],
+                is_string($result['error']) ? $result['error'] : '',
+                $result['error']
             );
         }
-        
+
         return responseOkAPI([
-            'message' => 'Thêm thông tin nhân viên thành công'
-        ]);
+            'message' => $result['message']
+        ], $result['code']);
     }
 }

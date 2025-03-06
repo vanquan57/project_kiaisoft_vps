@@ -22,18 +22,11 @@ interface UserRepositoryInterface extends BaseRepositoryInterface
     ): LengthAwarePaginator;
 
     /**
-     * Check account is registered and active
+     * Get account is registered and active
      * 
-     * @param string $code
-     * 
-     * @param string $email
-     * 
-     * @return bool
+     * @return Collection|null
      */
-    public function checkAccountRegisteredAndActive(
-        string $code,
-        string $email,
-    );
+    public function getAccountRegisteredAndActive(): ?Collection;
 
     /**
      * Get top user most orders

@@ -223,7 +223,7 @@ class OrderRepository extends BaseRepository implements OrderRepositoryInterface
      */
     public function countOrders(): int
     {
-        return $this->model->count();
+        return $this->model->orderByDesc('id')->value('id');
     }
 
     /**

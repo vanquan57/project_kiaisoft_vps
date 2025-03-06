@@ -32,7 +32,7 @@ interface EmployeeCodeRepositoryInterface extends BaseRepositoryInterface
      *
      * @return array $data
      * 
-     * @return Model|null
+     * @return int
      */
-    public function updateOrCreate(array $data): ?Model;
+    public function upsert(array $data): int;
 }
