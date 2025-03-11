@@ -79,7 +79,7 @@ const rules = {
         {
             validator: (_, value, callback) => {
                 if (!value.includes('kiaisoft')) {
-                    callback(new Error('Bạn không phải nhân viên của Kiaisoft ?'));
+                    callback(new Error('Bạn không phải nhân viên của Kiaisoft?'));
                 } else {
                     callback();
                 }

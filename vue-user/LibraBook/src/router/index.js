@@ -18,6 +18,7 @@ import { useAuthStore } from '@/stores/auth';
 import ChangePasswordView from '@/views/ChangePasswordView.vue';
 import OrdersView from '@/views/OrdersView.vue';
 import LayoutAccount from '@/components/layouts/LayoutAccount.vue';
+import VerifyEmailRegister from '@/views/VerifyEmailRegister.vue';
 
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -47,6 +48,11 @@ const router = createRouter({
                     meta: {
                         isLogin: true
                     }
+                },
+                {
+                    path: 'auth/email/verify/:id/:hash',
+                    name: 'auth-verify-email-register',
+                    component: VerifyEmailRegister
                 },
                 {
                     path: 'auth/verify-email',
@@ -144,7 +150,14 @@ const router = createRouter({
                 }
             ]
         }
-    ]
+    ],
+    scrollBehavior(to, from, savedPosition) {
+        if (to.name === 'list-book') {
+            return false;
+        }
+
+        return { top: 0, behavior: 'auto' };
+    }
 });
 
 router.beforeEach(async (to, from, next) => {

@@ -139,7 +139,7 @@
                                     &:hover {
                                         color: $primary-color;
                                     }
-                                    &.router-link-active {
+                                    &.router-link-exact-active {
                                         color: $primary-color;
                                     }
                                 }

@@ -59,6 +59,7 @@
                                     @quick-view="handleQuickView"
                                     @add-book-to-cart="handleAddBookToCart"
                                     @add-book-to-wishlist="handleAddBookToWishlist"
+                                    @remove-book-from-wishlist="handleRemoveBookFromWishlist"
                                 />
                             </div>
                         </div>
@@ -150,6 +151,7 @@
                     @quick-view="handleQuickView"
                     @add-book-to-cart="handleAddBookToCart"
                     @add-book-to-wishlist="handleAddBookToWishlist"
+                    @remove-book-from-wishlist="handleRemoveBookFromWishlist"
                 />
             </div>
             <div class="btn-container">
@@ -214,6 +216,7 @@
                                 @quick-view="handleQuickView"
                                 @add-book-to-cart="handleAddBookToCart"
                                 @add-book-to-wishlist="handleAddBookToWishlist"
+                                @remove-book-from-wishlist="handleRemoveBookFromWishlist"
                             />
                         </div>
                     </div>
@@ -299,7 +302,7 @@
 import images from '@/assets/images';
 import CarouselItem from '@/components/carousel/CarouselComponent.vue';
 import axiosInstance from '@/config/axios';
-import { onMounted, ref, onUnmounted, computed } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import IconArrowLeft from '@/components/icons/IconArrowLeft.vue';
 import IconArrowRight from '@/components/icons/IconArrowRight.vue';
 import BookCardComponent from '@/components/book/BookCardComponent.vue';
@@ -530,6 +533,35 @@ const handleAddBookToWishlist = async (id) => {
 };
 
 /**
+ * Handle remove book from wishlist
+ *
+ * @param {number} bookId - The book id
+ *
+ * @returns {Promise<void>}
+*/
+const handleRemoveBookFromWishlist = async (bookId) => {
+    if (!await authStore.checkTokenValidity()) {
+        router.push({ name: 'auth-login' });
+
+        return;
+    }
+
+    try {
+        const response = await axiosInstance.delete(`/wish-list/${bookId}`);
+
+        if (response.success) {
+            wishListStore.removeFromWishList(bookId);
+
+            await getWishList();
+
+            showNotificationSuccess(response.data.message);
+        }
+    } catch (error) {
+        showNotificationError(error);
+    }
+};
+
+/**
  * Get wish list
  *
  * @returns {Promise<void>}
@@ -541,11 +573,15 @@ const getWishList = async () => {
         if (response.success) {
             const booksInWishList = response.data;
 
-            booksInWishList.forEach((book) => {
-                wishListStore.addToWishList(book.id);
-            });
+            if (booksInWishList) {
+                booksInWishList.forEach((book) => {
+                    wishListStore.addToWishList(book.id);
+                });
 
-            counterCartAndWishList.setWishList(booksInWishList.length);
+                counterCartAndWishList.setWishList(booksInWishList.length);
+            } else {
+                counterCartAndWishList.setWishList(0);
+            }
         }
     } catch (error) {}
 };
@@ -709,17 +745,6 @@ const scrollToTop = () => {
 const handleScroll = () => {
     showScrollTop.value = window.scrollY > 500;
 };
-
-/**
- * Unmounted
- *
- * @returns {Promise<void>}
-*/
-onUnmounted(() => {
-    window.scrollTo({
-        top: 0
-    });
-});
 
 /**
  * Chunked books most borrowed

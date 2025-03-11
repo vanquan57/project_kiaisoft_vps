@@ -89,6 +89,9 @@
             }
         }
         .return-date-column {
+            @media (max-width: 768px) {
+                position: relative;
+            }
             input {
                 height: 44px;
                 border: 1px solid $primary-color;
@@ -103,6 +106,14 @@
                 color: red;
                 font-size: 12px;
                 margin-top: 5px;
+                @media (max-width: 768px) {
+                    position: absolute;
+                    bottom: -25px;
+                    left: 0;
+                    text-align: center;
+                    width: 100%;
+                    padding-left: 10px;
+                }
             }
         }
         .action-column {

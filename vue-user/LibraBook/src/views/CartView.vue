@@ -77,7 +77,7 @@
                 <h1>Tổng giỏ mượn</h1>
                 <div class="cart-footer-checkout-total">
                     <p>Tổng</p>
-                    <p>{{ cart.length }}</p>
+                    <p>{{ totalQuantity }}</p>
                 </div>
                 <div class="cart-footer-checkout-button">
                     <router-link to="/checkout">
@@ -92,7 +92,7 @@
 <script setup>
 import BreadcrumbComponent from '@/components/Breadcrumb/BreadcrumbComponent.vue';
 import axiosInstance from '@/config/axios';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import IconRemoveCart from '@/components/icons/IconRemoveCart.vue';
 import { useCounterCartAndWishList } from '@/stores/counterCartAndWishList';
 import { showNotificationError, showNotificationSuccess } from '@/helpers/notification';
@@ -288,6 +288,11 @@ function validateReturnDate(id, returnDate) {
 function validateQuantity(id, quantity) {
     cart.value.find((item) => item.id === id).borrowQuantity = quantity;
 }
+
+const totalQuantity = computed(() => {
+    return cart.value?.reduce((total, item) => total + item.pivot.quantity, 0);
+});
+
 </script>
 
 <style lang="scss" scoped>

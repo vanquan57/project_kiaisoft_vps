@@ -172,6 +172,7 @@ import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router';
 import axiosInstance from '@/config/axios';
 import { useCounterCartAndWishList } from '@/stores/counterCartAndWishList';
+import { useWishListStore } from '@/stores/wishList';
 
 const router = useRouter();
 const route = useRoute();
@@ -179,6 +180,7 @@ const isShowAction = ref(false);
 const isShowGroupAction = ref(true);
 const counterCartAndWishList = useCounterCartAndWishList();
 const searchQuery = ref('');
+const wishListStore = useWishListStore();
 
 watchEffect(() => {
     if (
@@ -200,6 +202,9 @@ const logout = async () => {
         if (response.success) {
             localStorage.removeItem('token');
             router.push('/auth/login');
+            counterCartAndWishList.setCart(0);
+            counterCartAndWishList.setWishList(0);
+            wishListStore.clearWishList();
         }
     } catch (error) {
     }
@@ -211,14 +216,14 @@ const handleSearch = () => {
 
     if (query) {
         currentQuery.set('search', query);
-
-        router.push({
-            path: '/list-book',
-            query: Object.fromEntries(currentQuery)
-        });
     } else {
-        router.replace('/list-book');
+        currentQuery.delete('search');
     }
+
+    router.push({
+        path: '/list-book',
+        query: Object.fromEntries(currentQuery)
+    });
 };
 </script>
 
