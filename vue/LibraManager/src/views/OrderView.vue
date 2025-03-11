@@ -40,7 +40,7 @@
 </template>
 
 <script setup>
-import BreadcrumbComponent from '@/components/breadcrumb/BreadcrumbComponent.vue';
+import BreadcrumbComponent from '@/components/Breadcrumb/BreadcrumbComponent.vue';
 import SearchComponent from '@/components/search/SearchComponent.vue';
 import ListOrders from '@/components/order/ListOrders.vue';
 import { onMounted, ref, watch } from 'vue';

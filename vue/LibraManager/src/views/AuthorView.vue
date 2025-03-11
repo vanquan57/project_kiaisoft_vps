@@ -85,7 +85,7 @@
 </template>
 
 <script setup>
-import BreadcrumbComponent from '@/components/breadcrumb/BreadcrumbComponent.vue';
+import BreadcrumbComponent from '@/components/Breadcrumb/BreadcrumbComponent.vue';
 import SearchForm from '@/components/search/SearchComponent.vue';
 import ListAuthor from '@/components/author/ListAuthor.vue';
 import { ref, onMounted, watchEffect } from 'vue';

@@ -38,7 +38,7 @@
 </template>
 
 <script setup>
-import BreadcrumbComponent from '@/components/breadcrumb/BreadcrumbComponent.vue';
+import BreadcrumbComponent from '@/components/Breadcrumb/BreadcrumbComponent.vue';
 import SearchForm from '@/components/search/SearchComponent.vue';
 import ListFeedback from '@/components/feedback/ListFeedback.vue';
 import { ref, onMounted } from 'vue';

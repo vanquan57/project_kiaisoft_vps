@@ -99,7 +99,7 @@
 </template>
 
 <script setup>
-import BreadcrumbComponent from '@/components/breadcrumb/BreadcrumbComponent.vue';
+import BreadcrumbComponent from '@/components/Breadcrumb/BreadcrumbComponent.vue';
 import SearchComponent from '@/components/search/SearchComponent.vue';
 import ListBooks from '@/components/book/ListBooks.vue';
 import { onMounted, ref, watch, watchEffect } from 'vue';

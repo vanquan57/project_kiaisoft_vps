@@ -109,7 +109,7 @@
 </template>
 
 <script setup>
-import BreadcrumbComponent from '@/components/breadcrumb/BreadcrumbComponent.vue';
+import BreadcrumbComponent from '@/components/Breadcrumb/BreadcrumbComponent.vue';
 import SearchComponent from '@/components/search/SearchComponent.vue';
 import ListUsers from '@/components/user/ListUsers.vue';
 import ListFormation from '@/components/user/ListFormation.vue';
