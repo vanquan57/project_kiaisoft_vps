@@ -49,6 +49,7 @@ import HTTP_STATUS_CODE from '@/config/statusCode';
 import { useRouter } from 'vue-router';
 import { ElMessage, ElNotification } from 'element-plus';
 import DEFAULT_CONSTANTS from '@/config/constants';
+import { showNotificationSuccess, showNotificationError } from '@/helpers/notification';
 
 const router = useRouter();
 const route = useRoute();
@@ -81,26 +82,38 @@ const dataPagination = ref({
     currentPage: 1
 });
 const tableData = ref([]);
+const dataSearch = ref({
+    key_word: null,
+    start_date: null,
+    end_date: null,
+    status: null
+});
 
 /**
  * Get feedbacks
  *
  * @returns {Promise<void>}
  */
-const getFeedbacks = async (page = 1, order = null, column = null) => {
+const getFeedbacks = async (page = 1, order = null, column = null, dataSearch = {}) => {
     try {
         const response = await axiosInstance.get('/feedback', {
             params: {
                 page,
                 limit: dataPagination.value.limit,
                 column: column ?? DEFAULT_CONSTANTS.COLUMN,
-                order: order ?? DEFAULT_CONSTANTS.ORDER
+                order: order ?? DEFAULT_CONSTANTS.ORDER,
+                ...dataSearch
             }
         });
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-            tableData.value = response.data.data;
-            dataPagination.value.total = response.data.total;
-            dataPagination.value.currentPage = response.data.current_page;
+
+        if (response.success) {
+            if (!response.data) {
+                tableData.value = [];
+            } else {
+                tableData.value = response.data.data;
+                dataPagination.value.total = response.data.total;
+                dataPagination.value.currentPage = response.data.current_page;
+            }
         }
     } catch (error) {
     }
@@ -112,7 +125,7 @@ const getFeedbacks = async (page = 1, order = null, column = null) => {
  * @returns {Promise<void>}
  */
 onMounted(async () => {
-    await getFeedbacks(dataPagination.value.currentPage);
+    await getFeedbacks(dataPagination.value.currentPage, 'asc', 'status');
 });
 
 /**
@@ -137,26 +150,19 @@ const handleSearch = async (search) => {
         queryParams.end_date = search.endDate;
     }
 
-    queryParams.order = 'desc';
-    queryParams.column = 'status';
+    queryParams.order = DEFAULT_CONSTANTS.FEEDBACK_ORDER;
+    queryParams.column = DEFAULT_CONSTANTS.FEEDBACK_COLUMN;
 
     if (Object.keys(queryParams).length > 0) {
         router.push({
             path: route.path,
             query: queryParams
         });
-        try {
-            const response = await axiosInstance.get('/feedback', {
-                params: queryParams
-            });
-            if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-                tableData.value = response.data.data;
-                dataPagination.value.total = response.data.total;
-                dataPagination.value.currentPage = response.data.current_page;
-            }
-        } catch (error) {
-            tableData.value = [];
-        }
+        dataSearch.value = queryParams;
+
+        await getFeedbacks(dataPagination.value.currentPage, null, null, dataSearch.value);
+    } else {
+        await getFeedbacks();
     }
 };
 
@@ -169,7 +175,7 @@ const handleSearch = async (search) => {
  */
 const handlePageChange = (page) => {
     dataPagination.value.currentPage = page;
-    getFeedbacks(page, 'asc', 'status');
+    getFeedbacks(page, 'asc', 'status', dataSearch.value);
 };
 
 /**
@@ -183,19 +189,13 @@ const handleOptionDelete = async (id) => {
     try {
         const response = await axiosInstance.delete(`/feedback/${id}`);
 
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-            ElNotification.success({
-                title: 'Thành công',
-                message: 'Xóa phản hồi thành công'
-            });
+        if (response.success) {
+            showNotificationSuccess(response.data.message);
 
             tableData.value = tableData.value.filter((item) => item.id !== id);
         }
     } catch (error) {
-        ElNotification.error({
-            title: 'Thất bại',
-            message: 'Có lỗi xảy ra khi xóa phản hồi'
-        });
+        showNotificationError(error);
     }
 };
 
@@ -212,11 +212,8 @@ const handleOptionUpdate = async (id, newStatus) => {
             status: newStatus
         });
 
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-            ElNotification.success({
-                title: 'Thành công',
-                message: 'Cập nhật trạng thái thành công'
-            });
+        if (response.success) {
+            showNotificationSuccess(response.data.message);
 
             tableData.value = tableData.value.map((item) => {
                 if (item.id === id) {
@@ -226,10 +223,7 @@ const handleOptionUpdate = async (id, newStatus) => {
             });
         }
     } catch (error) {
-        ElNotification.error({
-            title: 'Thất bại',
-            message: 'Có lỗi xảy ra khi cập nhật trạng thái'
-        });
+        showNotificationError(error);
     }
 };
 </script>

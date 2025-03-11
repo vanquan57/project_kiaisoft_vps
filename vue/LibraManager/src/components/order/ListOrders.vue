@@ -30,7 +30,7 @@
             <el-table-column
                 prop="email"
                 label="Email"
-                width="200"
+                min-width="200"
             />
             <el-table-column
                 prop="order_details_count"

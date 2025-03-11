@@ -32,7 +32,7 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
     response => {
-        return response;
+        return response.data;
     },
     error => {
         if (error.response.status === HTTP_STATUS_CODE.HTTP_UNAUTHORIZED && error.response.config.url !== '/auth/login') {

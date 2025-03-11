@@ -562,7 +562,7 @@ watch(
         if (newVal) {
             const response = await axiosInstance.get(`/book/${newVal}`);
 
-            if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+            if (response.success) {
                 const book = response.data;
                 bookForm.value.name = book.name;
                 bookForm.value.author_id = book.author_id;

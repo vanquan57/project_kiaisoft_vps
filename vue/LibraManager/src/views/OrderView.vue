@@ -54,11 +54,18 @@ import STATUS_CODE_ORDER from '@/config/statusOrder';
 import { ElMessage } from 'element-plus';
 import OrderDetails from '@/components/order/OrderDetails.vue';
 import DEFAULT_CONSTANTS from '@/config/constants';
+import { showNotificationSuccess, showNotificationError } from '@/helpers/notification';
+
 const router = useRouter();
 const route = useRoute();
 const tableData = ref([]);
 const orderDetails = ref({});
-
+const dataSearch = ref({
+    key_word: null,
+    start_date: null,
+    end_date: null,
+    status: null
+});
 const dataPagination = ref({
     limit: 10,
     total: 0,
@@ -105,20 +112,25 @@ onMounted(async () => {
  *
  * @returns {Promise<void>}
  */
-const getOrders = async (page = 1, column = null, order = null) => {
+const getOrders = async (page = 1, column = null, order = null, dataSearch = {}) => {
     try {
         const response = await axiosInstance.get('/order', {
             params: {
+                ...dataSearch,
                 limit: dataPagination.value.limit,
                 page: page,
                 column: column ?? DEFAULT_CONSTANTS.COLUMN,
                 order: order ?? DEFAULT_CONSTANTS.ORDER
             }
         });
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-            tableData.value = response.data.data;
-            dataPagination.value.total = response.data.total;
-            dataPagination.value.currentPage = response.data.current_page;
+        if (response.success) {
+            if (!response.data) {
+                tableData.value = [];
+            } else {
+                tableData.value = response.data.data;
+                dataPagination.value.total = response.data.total;
+                dataPagination.value.currentPage = response.data.current_page;
+            }
         }
     } catch (error) {}
 };
@@ -154,13 +166,9 @@ const handleSearch = async (search) => {
             path: route.path,
             query: queryParams
         });
+        dataSearch.value = queryParams;
 
-        const response = await axiosInstance.get('/order', {
-            params: queryParams
-        });
-        tableData.value = response.data.data;
-        dataPagination.value.total = response.data.total;
-        dataPagination.value.currentPage = response.data.current_page;
+        await getOrders(1, null, null, dataSearch.value);
     } else {
         await getOrders();
     }
@@ -175,7 +183,7 @@ const handleSearch = async (search) => {
  */
 const handlePageChange = (page) => {
     dataPagination.value.currentPage = page;
-    getOrders(page);
+    getOrders(page, null, null, dataSearch.value);
 };
 
 /**
@@ -188,15 +196,12 @@ const handlePageChange = (page) => {
 const handleViewDetails = async (idOrder) => {
     try {
         const response = await axiosInstance.get(`/order/${idOrder}`);
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+
+        if (response.success) {
             orderDetails.value = response.data;
         }
     } catch (error) {
-        ElNotification.error({
-            title: 'Lỗi',
-            message: 'Vui lòng thử lại sau',
-            type: 'error'
-        });
+        showNotificationError(error);
     }
 };
 
@@ -220,21 +225,13 @@ const handleUpdateStatusOrderDetails = async (
                 status: status
             });
         }
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-            ElNotification.success({
-                title: 'Thành công',
-                message: 'Cập nhật trạng thái thành công',
-                type: 'success'
-            });
+        if (response.success) {
+            showNotificationSuccess(response.data.message);
             handleViewDetails(orderId);
-            getOrders(dataPagination.value.currentPage);
+            getOrders(dataPagination.value.currentPage, null, null, dataSearch.value);
         }
     } catch (error) {
-        ElNotification.error({
-            title: 'Lỗi',
-            message: 'Vui lòng thử lại sau',
-            type: 'error'
-        });
+        showNotificationError(error);
     }
 };
 </script>

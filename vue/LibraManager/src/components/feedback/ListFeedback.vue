@@ -15,18 +15,15 @@
             <el-table-column
                 prop="user.name"
                 label="Tên người phản hồi"
-                width="150"
                 fixed
             />
             <el-table-column
                 prop="book.name"
                 label="Tên sách"
-                width="200"
             />
             <el-table-column
                 prop="content"
                 label="Nội dung"
-                width="200"
                 align="center"
             >
                 <template #default="{ row }">

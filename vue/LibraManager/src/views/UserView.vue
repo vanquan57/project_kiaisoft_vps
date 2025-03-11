@@ -25,6 +25,7 @@
                     <SearchComponent
                         placeholder="Nhập mã nhân viên, tên người dùng, email"
                         :style-input="styleInput"
+                        :status-options-user="statusOptionsUser"
                         @search="handleSearch"
                     />
                 </div>
@@ -101,6 +102,7 @@
                         @current-page="handlePageChange"
                     />
                 </div>
+                <ErrorUserInformation :errors="errors" />
             </div>
         </div>
     </div>
@@ -115,10 +117,12 @@ import { onMounted, ref, watch, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
 import PaginationComponent from '@/components/pagination/PaginationComponent.vue';
 import axiosInstance from '@/config/axios';
-import HTTP_STATUS_CODE from '@/config/statusCode';
 import { ElNotification } from 'element-plus';
 import { useRouter } from 'vue-router';
 import DEFAULT_CONSTANTS from '@/config/constants';
+import { showNotificationError, showNotificationSuccess } from '@/helpers/notification';
+import STATUS_USER from '@/config/statusUser';
+import ErrorUserInformation from '@/components/user/ErrorUserInformation.vue';
 
 const props = defineProps({
     site: {
@@ -144,6 +148,22 @@ const dataPagination = ref({
     currentPage: 1
 });
 const loading = ref(false);
+const keyWord = ref('');
+const statusOptionsUser = ref([
+    {
+        label: 'Chờ kích hoạt',
+        value: STATUS_USER.WAITING
+    },
+    {
+        label: 'Đã kích hoạt',
+        value: STATUS_USER.ACTIVATED
+    },
+    {
+        label: 'Đã khóa',
+        value: STATUS_USER.LOCKED
+    }
+]);
+const errors = ref([]);
 
 onMounted(async () => {
     if (props.site === 'user') {
@@ -179,20 +199,26 @@ watch(
  *
  * @returns {Promise<void>}
  */
-const getUsers = async (page = 1, column = null, order = null) => {
+const getUsers = async (page = 1, column = null, order = null, keyWord = null, status = null) => {
     try {
         const response = await axiosInstance.get('/user', {
             params: {
+                key_word: keyWord,
                 limit: dataPagination.value.limit,
                 page: page,
                 column: column ?? DEFAULT_CONSTANTS.COLUMN,
-                order: order ?? DEFAULT_CONSTANTS.ORDER
+                order: order ?? DEFAULT_CONSTANTS.ORDER,
+                status
             }
         });
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-            tableData.value = response.data.data;
-            dataPagination.value.total = response.data.total;
-            dataPagination.value.currentPage = response.data.current_page;
+        if (response.success) {
+            if (!response.data) {
+                tableData.value = [];
+            } else {
+                tableData.value = response.data.data;
+                dataPagination.value.total = response.data.total;
+                dataPagination.value.currentPage = response.data.current_page;
+            }
         }
     } catch (error) {}
 };
@@ -204,7 +230,7 @@ const getInformationEmployeeCodes = async (page = 1) => {
             page: page
         }
     });
-    if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+    if (response.success) {
         tableDataInfoEmployeeCodes.value = response.data.data;
         dataPagination.value.total = response.data.total;
         dataPagination.value.currentPage = response.data.current_page;
@@ -224,7 +250,7 @@ watchEffect(() => {
  *
  * @returns {Promise<void>}
  */
-const handleSearch = async (search) => {
+const handleSearch = async ({ search, status }) => {
     const query = search === '' ? {} : { search: search.trim() };
 
     router.push({
@@ -233,15 +259,13 @@ const handleSearch = async (search) => {
     });
 
     if (search !== '') {
-        const response = await axiosInstance.get('/user', {
-            params: {
-                key_word: search.trim()
-            }
-        });
+        keyWord.value = search.trim();
 
-        tableData.value = response.data.data;
+        await getUsers(dataPagination.value.currentPage, null, null, keyWord.value, status);
     } else {
-        getUsers();
+        keyWord.value = '';
+
+        await getUsers();
     }
 };
 
@@ -256,22 +280,18 @@ const handleSearch = async (search) => {
 const handleUpdateStatus = async (id, status) => {
     try {
         const response = await axiosInstance.put(`/user/${id}`, { status });
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-            ElNotification({
-                title: 'Thành công',
-                message: 'Cập nhật trạng thái người dùng thành công',
-                type: 'success'
-            });
-            await getUsers(dataPagination.value.currentPage);
+
+        if (response.success) {
+            showNotificationSuccess(response.data.message);
+
+            if (keyWord.value !== '') {
+                await getUsers(dataPagination.value.currentPage, null, null, keyWord.value);
+            } else {
+                await getUsers(dataPagination.value.currentPage);
+            }
         }
     } catch (error) {
-        if (error.status === HTTP_STATUS_CODE.HTTP_BAD_REQUEST) {
-            ElNotification({
-                title: 'Thất bại',
-                message: 'Cập nhật trạng thái người dùng thất bại',
-                type: 'error'
-            });
-        }
+        showNotificationError(error);
     }
 };
 
@@ -332,23 +352,18 @@ const submitUpload = async () => {
                 'Content-Type': 'multipart/form-data'
             }
         });
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-            ElNotification({
-                title: 'Thành công',
-                message: 'Cập nhật thông tin người dùng thành công',
-                type: 'success'
-            });
+        if (response.success) {
+            showNotificationSuccess(response.data.message);
+
             await getInformationEmployeeCodes(dataPagination.value.currentPage);
             fileUpload.value = '';
             fileName.value = '';
+            fileInput.value.value = '';
         }
     } catch (error) {
         loading.value = false;
-        ElNotification({
-            title: 'Thất bại',
-            message: 'Tải lên file thất bại',
-            type: 'error'
-        });
+
+        errors.value = error.data.data;
     }
 };
 </script>

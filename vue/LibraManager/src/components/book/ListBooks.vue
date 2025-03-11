@@ -33,19 +33,16 @@
             <el-table-column
                 prop="name"
                 label="Tên sách"
-                width="200"
                 fixed="left"
             />
             <el-table-column
                 prop="quantity"
                 label="Số lượng"
-                width="100"
                 align="center"
             />
             <el-table-column
                 prop="categories"
                 label="Danh mục"
-                width="150"
             >
                 <template #default="{ row }">
                     {{ row.categories[0].name }}
@@ -54,7 +51,6 @@
             <el-table-column
                 prop="author"
                 label="Tác giả"
-                width="150"
             >
                 <template #default="{ row }">
                     {{ row.author.name }}
@@ -63,7 +59,6 @@
             <el-table-column
                 prop="publisher"
                 label="Nhà xuất bản"
-                width="150"
             >
                 <template #default="{ row }">
                     {{ row.publisher.name }}
@@ -72,13 +67,11 @@
             <el-table-column
                 prop="views"
                 label="Lượt xem"
-                width="100"
                 align="center"
             />
             <el-table-column
                 fixed="right"
                 label="Tính năng"
-                width="150"
                 align="center"
             >
                 <template #default="{ row }">

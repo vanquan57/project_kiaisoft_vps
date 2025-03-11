@@ -76,6 +76,7 @@
                 <EditAuthor
                     :id="props.id"
                     :current-page="dataPagination.currentPage"
+                    :name="name"
                     @get-authors="getAuthors"
                 />
             </div>
@@ -97,6 +98,7 @@ import HTTP_STATUS_CODE from '@/config/statusCode';
 import { useRouter } from 'vue-router';
 import { ElNotification, ElMessageBox } from 'element-plus';
 import DEFAULT_CONSTANTS from '@/config/constants';
+import { showNotificationSuccess, showNotificationError } from '@/helpers/notification';
 
 const router = useRouter();
 const route = useRoute();
@@ -128,7 +130,7 @@ const dataPagination = ref({
     total: 0,
     currentPage: 1
 });
-
+const name = ref('');
 const tableData = ref([]);
 
 watchEffect(() => {
@@ -181,20 +183,25 @@ watchEffect(() => {
  *
  * @returns {Promise<void>}
  */
-const getAuthors = async (page = 1, column = null, order = null) => {
+const getAuthors = async (page = 1, column = null, order = null, name = null) => {
     try {
         const response = await axiosInstance.get('/author', {
             params: {
+                name: name,
                 page,
                 limit: dataPagination.value.limit,
                 column: column ?? DEFAULT_CONSTANTS.COLUMN,
                 order: order ?? DEFAULT_CONSTANTS.ORDER
             }
         });
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-            tableData.value = response.data.data;
-            dataPagination.value.total = response.data.total;
-            dataPagination.value.currentPage = response.data.current_page;
+        if (response.success) {
+            if (!response.data) {
+                tableData.value = [];
+            } else {
+                tableData.value = response.data.data;
+                dataPagination.value.total = response.data.total;
+                dataPagination.value.currentPage = response.data.current_page;
+            }
         }
     } catch (error) {}
 };
@@ -224,16 +231,10 @@ const handleSearch = async (search) => {
     });
 
     if (search !== '') {
-        const response = await axiosInstance.get('/author', {
-            params: {
-                name: search.trim()
-            }
-        });
-        tableData.value = response.data.data;
-        dataPagination.value.total = response.data.total;
-        dataPagination.value.currentPage = response.data.current_page;
-        dataPagination.value.limit = response.data.limit;
+        name.value = search.trim();
+        await getAuthors(dataPagination.value.currentPage, null, null, search.trim());
     } else {
+        name.value = '';
         await getAuthors();
     }
 };
@@ -271,22 +272,15 @@ const handleOptionDelete = async (id) => {
 
         const response = await axiosInstance.delete(`/author/${id}`);
 
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-            ElNotification.success({
-                title: 'Thành công',
-                message: 'Xóa tác giả thành công',
-                type: 'success'
-            });
+        if (response.success) {
+            showNotificationSuccess(response.data.message);
 
-            getAuthors(dataPagination.value.currentPage);
+            tableData.value = tableData.value.filter((item) => item.id !== id);
         }
     } catch (error) {
-        ElNotification.error({
-            title: 'Lỗi',
-            message: 'Tác giả có sách đang đăng ký, không thể xóa',
-            type: 'error'
-        });
+        showNotificationError(error);
     }
+
 };
 </script>
 

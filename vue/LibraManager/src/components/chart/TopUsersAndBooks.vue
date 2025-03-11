@@ -1,16 +1,21 @@
 <template>
     <div class="chart-container">
-        <Bar
-            class="chart-left"
-            :data="userChartData"
-            :options="chartOptionsUser"
-        />
-
-        <Bar
-            class="chart-right"
-            :data="bookChartData"
-            :options="chartOptions"
-        />
+        <div class="dashboard-item">
+            <h1>Top 10 người mượn sách nhiều nhất</h1>
+            <Bar
+                class="chart-left"
+                :data="userChartData"
+                :options="chartOptionsUser"
+            />
+        </div>
+        <div class="dashboard-item">
+            <h1>Top 10 sách được mượn nhiều nhất</h1>
+            <Bar
+                class="chart-right"
+                :data="bookChartData"
+                :options="chartOptions"
+            />
+        </div>
     </div>
 </template>
 

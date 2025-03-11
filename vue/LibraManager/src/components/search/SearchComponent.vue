@@ -16,6 +16,23 @@
                     :placeholder="props.placeholder"
                 />
             </el-form-item>
+            <el-form-item
+                v-if="props.statusOptionsUser.length > 0"
+                prop="status"
+            >
+                <el-select
+                    v-model="searchForm.status"
+                    :placeholder="`Chọn trạng thái`"
+                    :options="props.statusOptionsUser"
+                >
+                    <el-option
+                        v-for="item in props.statusOptionsUser"
+                        :key="item.value"
+                        :label="item.label"
+                        :value="item.value"
+                    />
+                </el-select>
+            </el-form-item>
             <el-form-item v-if="props.isSearchBook">
                 <el-select
                     v-model="searchForm.category_id"
@@ -105,6 +122,18 @@
                     Tìm kiếm
                 </el-button>
             </el-form-item>
+            <el-form-item
+                v-if="props.isReset"
+                justify="center"
+            >
+                <el-button
+                    type="primary"
+                    class="search-button"
+                    @click="handleReset"
+                >
+                    Reset
+                </el-button>
+            </el-form-item>
         </el-form>
     </div>
 </template>
@@ -147,6 +176,14 @@ const props = defineProps({
     statusOptions: {
         type: Array,
         default: () => []
+    },
+    statusOptionsUser: {
+        type: Array,
+        default: () => []
+    },
+    isReset: {
+        type: Boolean,
+        default: false
     }
 });
 const styleSearch = ref('');
@@ -166,13 +203,16 @@ const searchForm = ref({
 
 watchEffect(() => {
     if (route.path === '/book') {
-        styleSearch.value = '3fr 2fr 2fr 2fr 1fr';
+        styleSearch.value = '3fr 2fr 2fr 2fr 1fr 1fr';
         displaySearch.value = 'grid';
     } else if (route.path === '/order') {
         styleSearch.value = '3fr 2fr 2fr 2fr 1fr';
         displaySearch.value = 'grid';
     } else if (route.path === '/feedback') {
         styleSearch.value = '4fr 2fr 2fr 1fr';
+        displaySearch.value = 'grid';
+    } else if (route.path === '/user') {
+        styleSearch.value = '3fr 2fr 1fr';
         displaySearch.value = 'grid';
     } else {
         styleSearch.value = '7fr 3fr';
@@ -202,11 +242,25 @@ const handleSearch = async () => {
                 delete searchForm.value.publisher_id;
                 delete searchForm.value.status;
                 emit('search', searchForm.value);
+            } else if (route.path === '/user') {
+                delete searchForm.value.category_id;
+                delete searchForm.value.author_id;
+                delete searchForm.value.publisher_id;
+                emit('search', searchForm.value);
             } else {
                 emit('search', searchForm.value.search);
             }
         }
     });
+};
+
+const handleReset = () => {
+    searchForm.value = {
+        search: '',
+        category_id: '',
+        author_id: '',
+        publisher_id: ''
+    };
 };
 </script>
 

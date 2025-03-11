@@ -31,7 +31,7 @@ const handleLogout = async () => {
     try {
         const response = await axiosInstance.post('auth/logout');
 
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+        if (response.success) {
             localStorage.removeItem('token');
             router.push('/auth/login');
         }

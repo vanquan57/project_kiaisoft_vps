@@ -20,9 +20,29 @@
             text-transform: uppercase;
         }
     }
+    @media (max-width: 1280px) {
+        .dashboard-item__month {
+            flex: 0.6;
+        }
+        .dashboard-item__category {
+            flex: 0.4;
+        }
+    }
+    @media (min-width: 1281px) {
+        .dashboard-item__month {
+            flex: 0.75;
+        }
+        .dashboard-item__category {
+            flex: 0.25;
+        }
+    }
     .dashboard-container__month__category{
         display: flex;
         flex-direction: row;
         gap: 30px;
+    }
+    .pie-chart-container {
+        width: 100%;
+        height: 100%;
     }
 }

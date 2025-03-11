@@ -112,26 +112,29 @@ const onSubmit = () => {
         if (valid) {
             try {
                 loading.value = true;
-
                 const response = await axiosInstance.post('/auth/login', {
                     email: form.email,
                     password: form.password
                 });
 
-                if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
+                if (response.success) {
                     localStorage.setItem('token', response.data.access_token);
                     loading.value = false;
                     router.push({ name: 'home' });
                 }
             } catch (error) {
                 loading.value = false;
+                const errors = error.data.errors;
 
                 if (
                     error.status ===
-                        HTTP_STATUS_CODE.HTTP_UNPROCESSABLE_ENTITY ||
+                        HTTP_STATUS_CODE.HTTP_UNPROCESSABLE_ENTITY
+                ) {
+                    errorMessages.value = Object.values(errors)[0][0];
+                } else if (
                     error.status === HTTP_STATUS_CODE.HTTP_UNAUTHORIZED
                 ) {
-                    errorMessages.value = 'Email hoặc mật khẩu không đúng';
+                    errorMessages.value = errors.error_message;
                 }
             }
         }

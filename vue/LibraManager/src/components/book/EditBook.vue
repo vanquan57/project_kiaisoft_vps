@@ -17,6 +17,7 @@ import axiosInstance from '@/config/axios';
 import HTTP_STATUS_CODE from '@/config/statusCode';
 import { ElNotification } from 'element-plus';
 import { useRouter } from 'vue-router';
+import { showNotificationSuccess, showNotificationError } from '@/helpers/notification';
 
 const router = useRouter();
 const emit = defineEmits(['getBooks']);
@@ -40,6 +41,10 @@ const props = defineProps({
     currentPage: {
         type: Number,
         required: true
+    },
+    formSearch: {
+        type: Object,
+        default: () => {}
     }
 });
 
@@ -77,23 +82,18 @@ const handleSubmit = async (data) => {
 
     try {
         const response = await axiosInstance.post(`book/${props.id}`, formData);
-        if (response.status === HTTP_STATUS_CODE.HTTP_OK) {
-            ElNotification.success({
-                title: 'Thành công',
-                message: 'Cập nhật sách thành công',
-                type: 'success'
-            });
-            emit('getBooks', props.currentPage);
+
+        if (response.success) {
+            showNotificationSuccess(response.data.message);
+
+            emit('getBooks', props.currentPage, null, null, props.formSearch);
             router.push('/book');
         }
     } catch (error) {
-        ElNotification.error({
-            title: 'Lỗi',
-            message: 'Có lỗi xảy ra khi cập nhật sách',
-            type: 'error'
-        });
+        showNotificationError(error);
     }
 };
 </script>
+
 
 <style lang="scss" scoped></style>
